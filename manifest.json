@@ -2,7 +2,7 @@
   "name": "Sistema de Evaluación Competencial",
   "short_name": "Evaluación Criterial General",
   "description": "Evalúa actividades por criterios, exámenes y tests",
-  "start_url": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e9f0f5",
   "theme_color": "#0b4b6b",
