@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eval-cache-v2';
+const CACHE_NAME = 'eval-cache-v3';
 const urlsToCache = [
   '.',
   'index.html', // Ajusta el nombre real de tu archivo HTML
