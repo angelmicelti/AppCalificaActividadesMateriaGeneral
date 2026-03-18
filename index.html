@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>EVALUACIÓN · MATERIA DINÁMICA + INSTRUMENTOS</title>
+    <title>EVALUACIÓN · MATERIA DINÁMICA + INSTRUMENTOS (PESOS AUTO)</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#0b4b6b">
@@ -34,7 +34,13 @@
         .validation-warning { background-color: #fff3cd; border-left: 6px solid #ffc107; padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; }
         .table-custom th { background-color: #e9f0f5; color: #064663; }
         .modal-header { background: linear-gradient(145deg, #0d6efd, #0b5ed7); color: white; }
-        .penalty-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 5px; }
+		.penalty-options {
+			display: grid;
+			grid-template-columns: repeat(6, 1fr);  /* 6 columnas iguales */
+			gap: 6px;                               /* Reducimos el gap para más espacio */
+			margin-top: 5px;
+		}
+
         .penalty-option { display: flex; align-items: center; gap: 6px; padding: 8px; background-color: white; border-radius: 6px; border: 2px solid #e0edff; cursor: pointer; transition: 0.2s; }
         .penalty-option:hover { border-color: #3498db; background-color: #f0f7ff; }
         .penalty-option.selected { border-color: #2980b9; background-color: #e3f2fd; }
@@ -64,6 +70,8 @@
         .inst-matrix-cell.selected { background-color: #198754; border-color: #198754; }
         .inst-criteria-header { writing-mode: vertical-lr; transform: rotate(180deg); height: 100px; white-space: nowrap; vertical-align: middle; text-align: center; width: 30px; min-width: 30px; max-width: 30px; overflow: hidden; text-overflow: ellipsis; }
         .inst-weight-input { width: 90px; }
+        .inst-weight-readonly { background:#f0f4fa !important; cursor:not-allowed !important; color:#6c757d !important; border-color:#c8d8e4 !important; }
+        .inst-weight-auto-badge { font-size:0.6rem; padding:2px 6px; background:#6c757d; color:#fff; border-radius:10px; vertical-align:middle; margin-left:4px; }
         .inst-warning-note { color: #856404; background-color: #fff3cd; padding: 5px 12px; border-radius: 20px; display: inline-block; }
         .inst-grade-input { width: 70px; text-align: center; }
         .inst-fixed-header { position: sticky; top: 0; background: white; z-index: 10; }
@@ -74,10 +82,13 @@
         .inst-btn-file-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
         #inst_matrixTable th:first-child, #inst_matrixTable td:first-child { max-width: 180px; min-width: 120px; white-space: normal; word-break: break-word; }
         #inst_matrixTable td { width: 30px; max-width: 30px; }
+        /* Acordeón pesos */
+        #accordionPesos .accordion-button { border-radius: 16px !important; }
+        #accordionPesos .accordion-button:not(.collapsed) { border-radius: 16px 16px 0 0 !important; background:#e8f1ff; color:#0b4b6b; box-shadow:none; }
+        #accordionPesos .accordion-item { border-radius: 16px; overflow:hidden; border:1px solid #e2eaf1; background:#fafcff; }
+        #accordionPesos .accordion-button::after { filter: hue-rotate(195deg); }
         @media (max-width: 576px) { .container-custom { padding: 12px; } .section-card { padding: 12px; } .student-tag { font-size: 0.8rem; padding: 4px 10px; } .btn-group .btn { font-size: 0.8rem; padding: 0.3rem 0.5rem; } .modal-dialog { margin: 0.5rem; } .section-title { flex-wrap: wrap; } .section-title .help-icon { margin-left: 0; } }
         @media (max-width: 768px) { .d-flex.gap-2.flex-wrap { flex-direction: column; align-items: stretch; } .app-switcher { margin-top: 10px; width: 100%; } .app-switcher .btn { flex: 1; white-space: nowrap; font-size: 0.9rem; padding: 0.4rem 0.3rem; } }
-
-}
     </style>
 </head>
 <body>
@@ -133,20 +144,25 @@
         </div>
         <div id="examScreenConfig" class="screen active">
             <div class="section-card">
-                <div class="section-title"><i class="bi bi-pencil-square"></i> Identificación del examen <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre y curso del examen."></i></div>
+                <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración del examen <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre y curso del examen."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" value="Examen sin título"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" placeholder="Nombre del examen"></div>
                     <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="examCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
-                    <div class="col-md-5 d-flex flex-wrap justify-content-end gap-2">
-                        <button id="examExportConfigBtn" class="btn btn-outline-primary"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
-                        <button id="examImportConfigBtn" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
-                        <input type="file" id="examImportConfigFile" accept=".json" class="hidden">
-                        <button id="examSaveToLocalBtn" class="btn btn-outline-success"><i class="bi bi-save"></i> Guardar local</button>
-                        <button id="examLoadFromLocalBtn" class="btn btn-outline-info"><i class="bi bi-folder-symlink"></i> Cargar local</button>
-                        <button id="examResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button>
-                    </div>
+
                 </div>
             </div>
+			
+	        <div class="section-card">
+                <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="d-flex flex-wrap"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="examBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div><label for="examImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="examImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
+                    <button id="examBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
+                </div>
+                <div id="examStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="examStudentCountBadge">0</span> alumnos<div id="examStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
+                <div id="examDuplicateMessage" class="small text-danger mt-2"></div>
+            </div>
+			
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-question-circle"></i> Gestión de preguntas y criterios <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Define las preguntas, su puntuación máxima y asigna los criterios de evaluación."></i></div>
                 <div class="row g-3 align-items-end mb-4">
@@ -160,17 +176,27 @@
                 <div id="examOrphanedCriteriaWarning" class="validation-warning" style="display:none;"><span id="examOrphanedCriteriaMessage"></span></div>
                 <div class="table-responsive mt-3"><table class="table table-bordered align-middle table-custom" id="examQuestionsTable"><thead><tr><th>Pregunta</th><th>Cal. máxima</th><th>Criterios</th><th>Acciones</th></tr></thead><tbody id="examQuestionsTbody"></tbody></table></div>
                 <div class="d-flex justify-content-end mt-2"><button id="examAppendQuestionBtn" class="btn btn-success btn-sm"><i class="bi bi-plus-circle"></i> Añadir pregunta</button></div>
+				<div class="col-md-5 d-flex flex-nowrap justify-content-end gap-1 overflow-auto">
+
+				</div>
             </div>
-            <div class="section-card">
-                <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="examBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
-                    <div><label for="examImportFile" class="import-label"><i class="bi bi-file-earmark-arrow-up"></i> Importar Excel/JSON</label><input type="file" id="examImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
-                    <button id="examBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
-                </div>
-                <div id="examStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="examStudentCountBadge">0</span> alumnos<div id="examStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
-                <div id="examDuplicateMessage" class="small text-danger mt-2"></div>
-            </div>
+			
+			<div class="section-card">
+			<div class="section-title">
+				<i class="bi bi-gear-wide-connected"></i> Gestión de información
+				<i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
+			</div>
+			<div class="d-flex flex-wrap gap-2 justify-content-start">
+					<button id="examExportConfigBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+					<button id="examImportConfigBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
+					<input type="file" id="examImportConfigFile" accept=".json" class="hidden">
+					<button id="examSaveToLocalBtn" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
+					<button id="examLoadFromLocalBtn" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+					<button id="examResetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+			</div>
+		</div>
+		
+
         </div>
         <div id="examScreenGrade" class="screen">
             <div class="section-card">
@@ -215,30 +241,26 @@
         </div>
         <div id="testScreenConfig" class="screen active">
             <div class="section-card">
-                <div class="section-title"><i class="fas fa-clipboard-list"></i> Datos generales <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Título del test y curso."></i></div>
+                <div class="section-title"><i class="fas fa-clipboard-list"></i> Configuración del test <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Título del test y curso."></i></div>
                 <div class="row g-4">
-                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="testExamTitleInput" class="form-control" value="Examen tipo test"></div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del test</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Nombre del test"></div>
                     <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="testCourseInput" class="form-control" placeholder="Ejemplo 4º ESO"></div>
                 </div>
                 <div class="d-flex justify-content-end mt-2"><button id="testResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button></div>
             </div>
-            <div class="section-card">
-                <div class="section-title"><i class="fas fa-question-circle"></i> Configuración del test <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Número total de preguntas y penalización."></i></div>
-                <div class="row g-4">
-                    <div class="col-md-6"><label class="form-label fw-semibold">Nº total preguntas:</label><input type="number" id="testTotalQuestions" class="form-control" min="1" value="20"></div>
-                    <div class="col-md-6"><label class="form-label fw-semibold">Penalización:</label>
-                        <div class="penalty-options" id="testPenaltyOptions">
-                            <div class="penalty-option" data-value="0"><input type="radio" name="penalty" id="testPenalty0" value="0" checked><label for="testPenalty0">Sin penalización</label></div>
-                            <div class="penalty-option" data-value="0.2"><input type="radio" name="penalty" id="testPenalty5" value="0.2"><label for="testPenalty5">1/5</label></div>
-                            <div class="penalty-option" data-value="0.25"><input type="radio" name="penalty" id="testPenalty4" value="0.25"><label for="testPenalty4">1/4</label></div>
-                            <div class="penalty-option" data-value="0.333"><input type="radio" name="penalty" id="testPenalty3" value="0.333"><label for="testPenalty3">1/3</label></div>
-                            <div class="penalty-option" data-value="0.5"><input type="radio" name="penalty" id="testPenalty2" value="0.5"><label for="testPenalty2">1/2</label></div>
-                            <div class="penalty-option" data-value="1"><input type="radio" name="penalty" id="testPenalty1" value="1"><label for="testPenalty1">Igual</label></div>
-                        </div>
-                    </div>
+			
+			<div class="section-card">
+                <div class="section-title"><i class="fas fa-users"></i> Alumnado <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos que realizarán el test."></i></div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="d-flex flex-wrap"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="testBtnAddStudent" class="btn btn-success ms-2"><i class="fas fa-plus-circle"></i> +</button></div>
+                    <div><label for="testImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="testImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
+                    <button id="testBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
+                <div id="testStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="testStudentCountBadge">0</span> alumnos<div id="testStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
+                <div id="testDuplicateMessage" class="small text-danger mt-2"></div>
             </div>
-            <div class="section-card">
+			
+			<div class="section-card">
                 <div class="section-title"><i class="fas fa-check-double"></i> Criterios de la materia <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Todos los alumnos recibirán la misma nota en cada criterio."></i></div>
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#globalCriteriaModal" data-app="test"><i class="fas fa-tags"></i> Seleccionar criterios</button>
@@ -246,23 +268,44 @@
                 </div>
                 <div id="testNoCriteriaWarning" class="text-danger small mt-2 fw-bold" style="display:none;"><i class="fas fa-exclamation-triangle"></i> Debes seleccionar al menos un criterio.</div>
             </div>
+			
             <div class="section-card">
-                <div class="section-title"><i class="fas fa-users"></i> Alumnado <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos que realizarán el test."></i></div>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="testBtnAddStudent" class="btn btn-success ms-2"><i class="fas fa-plus-circle"></i> +</button></div>
-                    <div><label for="testImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar</label><input type="file" id="testImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
-                    <button id="testBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar</button>
+                <div class="section-title"><i class="fas fa-question-circle"></i> Diseña el test: número de preguntas y penalizaciones <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Número total de preguntas y penalización."></i></div>
+                <div class="row g-4">
+                    <div class="col-md-3"><label class="form-label fw-semibold">Número total preguntas:</label><input type="number" id="testTotalQuestions" class="form-control" min="1" value="20"></div>
+                    <div class="col-md-9"><label class="form-label fw-semibold">Penalizaciones:</label>
+                        <div class="penalty-options" id="testPenaltyOptions">
+                            <div class="penalty-option" data-value="0"><input type="radio" name="penalty" id="testPenalty0" value="0" checked><label for="testPenalty0">Sin penalización</label></div>
+                            <div class="penalty-option" data-value="0.2"><input type="radio" name="penalty" id="testPenalty5" value="0.2"><label for="testPenalty5">Fallo resta -1/5 del acierto</label></div>
+                            <div class="penalty-option" data-value="0.25"><input type="radio" name="penalty" id="testPenalty4" value="0.25"><label for="testPenalty4">Fallo resta -1/4 del acierto</label></div>
+                            <div class="penalty-option" data-value="0.333"><input type="radio" name="penalty" id="testPenalty3" value="0.333"><label for="testPenalty3">Fallo resta -1/3 del acierto</label></div>
+                            <div class="penalty-option" data-value="0.5"><input type="radio" name="penalty" id="testPenalty2" value="0.5"><label for="testPenalty2">Fallo resta -1/2 del acierto</label></div>
+                            <div class="penalty-option" data-value="1"><input type="radio" name="penalty" id="testPenalty1" value="1"><label for="testPenalty1">Fallo resta igual que acierto</label></div>
+                        </div>
+                    </div>
                 </div>
-                <div id="testStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="testStudentCountBadge">0</span> alumnos<div id="testStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
-                <div id="testDuplicateMessage" class="small text-danger mt-2"></div>
+				
             </div>
-            <div class="d-flex flex-wrap justify-content-end gap-2 mt-2">
-                <button id="testExportConfigBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-download"></i> Exportar JSON</button>
-                <button id="testImportConfigBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-upload"></i> Importar JSON</button>
-                <input type="file" id="testImportConfigFile" accept=".json" class="hidden">
-                <button id="testSaveToLocalBtn" class="btn btn-outline-success btn-sm"><i class="fas fa-save"></i> Guardar local</button>
-                <button id="testLoadFromLocalBtn" class="btn btn-outline-info btn-sm"><i class="fas fa-folder-open"></i> Cargar local</button>
-            </div>
+		
+			<div class="section-card">
+				<div class="section-title">
+					<i class="bi bi-gear-wide-connected"></i> Gestión de información
+					<i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
+				</div>
+				<div class="d-flex flex-wrap justify-content-start gap-2 mt-2">
+					<button id="testExportConfigBtn" class="btn btn-outline-primary btn-sm"><i class="fas fa-download"></i> Exportar JSON</button>
+					<button id="testImportConfigBtn" class="btn btn-outline-secondary btn-sm"><i class="fas fa-upload"></i> Importar JSON</button>
+					<input type="file" id="testImportConfigFile" accept=".json" class="hidden">
+					<button id="testSaveToLocalBtn" class="btn btn-outline-success btn-sm"><i class="fas fa-save"></i> Guardar local</button>
+					<button id="testLoadFromLocalBtn" class="btn btn-outline-info btn-sm"><i class="fas fa-folder-open"></i> Cargar local</button>
+					<button id="testResetAllBtn2" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+				</div>
+			</div>		
+		
+        </div>
+			
+
+
         </div>
         <div id="testScreenGrade" class="screen">
             <div class="section-card">
@@ -309,18 +352,22 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la actividad <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre de la actividad y curso."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" value="Actividad sin título"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" placeholder="Nombre de la actividad"></div>
                     <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="genericCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
-                    <div class="col-md-5 d-flex flex-wrap justify-content-end gap-2">
-                        <button id="genericExportConfigBtn" class="btn btn-outline-primary"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
-                        <button id="genericImportConfigBtn" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
-                        <input type="file" id="genericImportConfigFile" accept=".json" class="hidden">
-                        <button id="genericSaveToLocalBtn" class="btn btn-outline-success"><i class="bi bi-save"></i> Guardar local</button>
-                        <button id="genericLoadFromLocalBtn" class="btn btn-outline-info"><i class="bi bi-folder-symlink"></i> Cargar local</button>
-                        <button id="genericResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button>
-                    </div>
                 </div>
             </div>
+			
+			<div class="section-card">
+                <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="d-flex flex-wrap"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="genericBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div><label for="genericImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="genericImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
+                    <button id="genericBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
+                </div>
+                <div id="genericStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="genericStudentCountBadge">0</span> alumnos<div id="genericStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
+                <div id="genericDuplicateMessage" class="small text-danger mt-2"></div>
+            </div>
+			
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-check2-square"></i> Gestión de criterios <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Selecciona los criterios que se evaluarán."></i></div>
                 <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -329,16 +376,20 @@
                 </div>
                 <div id="genericOrphanedCriteriaWarning" class="validation-warning mt-3" style="display:none;"><span id="genericOrphanedCriteriaMessage"></span></div>
             </div>
-            <div class="section-card">
-                <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="genericBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
-                    <div><label for="genericImportFile" class="import-label"><i class="bi bi-file-earmark-arrow-up"></i> Importar</label><input type="file" id="genericImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
-                    <button id="genericBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar</button>
-                </div>
-                <div id="genericStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="genericStudentCountBadge">0</span> alumnos<div id="genericStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
-                <div id="genericDuplicateMessage" class="small text-danger mt-2"></div>
-            </div>
+			<div class="section-card">
+				<div class="section-title">
+					<i class="bi bi-gear-wide-connected"></i> Gestión de información
+					<i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
+				</div>
+				<div class="d-flex flex-wrap gap-2 justify-content-start">
+						<button id="genericExportConfigBtn" class="btn btn-outline-primary"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+						<button id="genericImportConfigBtn" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
+						<input type="file" id="genericImportConfigFile" accept=".json" class="hidden">
+						<button id="genericSaveToLocalBtn" class="btn btn-outline-success"><i class="bi bi-save"></i> Guardar local</button>
+						<button id="genericLoadFromLocalBtn" class="btn btn-outline-info"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+						<button id="genericResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+				</div>
+			</div>
         </div>
         <div id="genericScreenGrade" class="screen">
             <div class="section-card">
@@ -371,7 +422,7 @@
         </div>
     </div>
 
-    <!-- APP 4: INSTRUMENTOS -->
+    <!-- APP 4: INSTRUMENTOS (MODIFICADA CON PESOS AUTO) -->
     <div id="appInstrumentosContainer" class="screen">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <h3 class="fw-bold"><i class="bi bi-grid-3x3-gap-fill" style="color:#6f42c1;"></i> Evaluación por instrumentos · <span class="subject-badge-instrumentos"></span></h3>
@@ -382,42 +433,54 @@
             </div>
         </div>
         <div class="tab-content">
+            <!-- CONFIG -->
             <div class="tab-pane fade show active" id="inst_config" role="tabpanel">
                 <div class="section-card">
-                    <div class="section-title"><i class="bi bi-pencil-square"></i> Datos de la actividad</div>
+                    <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la actividad</div>
                     <div class="row g-3">
                         <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre de la actividad <span class="text-danger">*</span></label><input type="text" id="inst_actividadInput" class="form-control" placeholder="Introduce un nombre"></div>
-                        <div class="col-md-6"><label class="form-label fw-semibold">📚 Nombre de la clase <span class="text-danger">*</span></label><input type="text" id="inst_claseInput" class="form-control" placeholder="Introduce un nombre"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso <span class="text-danger">*</span></label><input type="text" id="inst_claseInput" class="form-control" placeholder="Ejemplo: 4º de ESO"></div>
                     </div>
                 </div>
                 <div class="section-card">
-                    <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado</div>
-                    <div class="d-flex flex-wrap gap-3 align-items-center mb-3">
-                        <div class="d-flex"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="inst_btnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> Añadir</button></div>
-                        <div><label for="inst_importExcel" class="import-label"><i class="bi bi-file-earmark-arrow-up"></i> Importar Excel/JSON</label><input type="file" id="inst_importExcel" accept=".xlsx,.xls,.json" class="hidden"></div>
-                        <button id="inst_btnClearStudents" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Limpiar</button>
-                    </div>
-                    <div id="inst_studentTags" class="d-flex flex-wrap bg-white p-3 rounded-3 border"></div>
-                    <div id="inst_duplicateMessage" class="small text-danger mt-2"></div>
-                    <div class="mt-2 text-muted">Total: <span id="inst_studentCount">0</span> alumnos</div>
-                </div>
+					<div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
+						<div class="d-flex flex-wrap gap-3 align-items-center">
+							<div class="d-flex flex-wrap"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="inst_btnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+							<div><label for="inst_importExcel" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="inst_importExcel" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
+							<button id="inst_btnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
+						</div>
+						<div id="inst_studentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="inst_studentCountBadge">0</span> alumnos<div id="inst_studentTags" class="mt-2 d-flex flex-wrap"></div></div>
+						<div id="inst_duplicateMessage" class="small text-danger mt-2"></div>
+					</div>
                 <div class="section-card">
                     <div class="section-title"><i class="bi bi-tools"></i> Instrumentos de evaluación</div>
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-md-3"><label class="form-label fw-semibold">Número de instrumentos</label><input type="number" id="inst_numInstrumentos" class="form-control" min="1" value="3"></div>
-                        <div class="col-md-9 text-end"><span class="fw-bold me-3">Total pesos: <span id="inst_totalPesos">0.0</span>%</span><span id="inst_pesosWarning" class="inst-warning-note" style="display:none;"><i class="bi bi-exclamation-triangle"></i> No suman 100%</span></div>
+                        <div class="col-md-9 text-end"><span class="fw-bold me-3">Total pesos: <span id="inst_totalPesos">100.0</span>%</span><span id="inst_pesosWarning" class="inst-warning-note" style="display:none;"><i class="bi bi-exclamation-triangle"></i> No suman 100%</span></div>
                     </div>
                     <table class="table table-sm table-bordered" id="inst_instrumentsTable"><thead><tr><th>#</th><th>Nombre del instrumento</th><th>Peso (%)</th></tr></thead><tbody id="inst_instrumentsBody"></tbody></table>
-                    <div class="inst-btn-file-group mt-3">
-                        <button id="inst_exportConfigJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
-                        <button id="inst_importConfigJsonBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
-                        <input type="file" id="inst_importConfigFile" accept=".json" class="hidden">
-                        <button id="inst_saveConfigLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
-                        <button id="inst_loadConfigLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
-                    </div>
+                    <p class="text-muted small">El último instrumento se calcula automáticamente para que la suma sea siempre 100%.</p>
+
                 </div>
+				
+				<div class="section-card">
+    <div class="section-title">
+        <i class="bi bi-gear-wide-connected"></i> Gestión de información
+        <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
+    </div>
+    <div class="d-flex flex-wrap gap-2 justify-content-start">
+		<button id="inst_exportConfigJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+		<button id="inst_importConfigJsonBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
+		<input type="file" id="inst_importConfigFile" accept=".json" class="hidden">
+		<button id="inst_saveConfigLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
+		<button id="inst_loadConfigLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+		<button id="inst_resetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+    </div>
+</div>
+				
                 <div class="d-flex justify-content-end"><button id="inst_irRelacionBtn" class="btn btn-primary btn-lg" disabled><i class="bi bi-arrow-right"></i> Ir a Relación</button></div>
             </div>
+            <!-- RELACIÓN -->
             <div class="tab-pane fade" id="inst_relacion" role="tabpanel">
                 <div class="section-card">
                     <div class="section-title"><i class="bi bi-diagram-3"></i> Matriz de relación</div>
@@ -434,11 +497,23 @@
                     <div class="d-flex justify-content-end"><button id="inst_irEvalBtn" class="btn btn-primary btn-lg" disabled><i class="bi bi-arrow-right"></i> Ir a Evaluación</button></div>
                 </div>
             </div>
+            <!-- EVALUACIÓN -->
             <div class="tab-pane fade" id="inst_eval" role="tabpanel">
-                <div class="section-card">
-                    <div class="section-title"><i class="bi bi-pencil-square"></i> Pesos de instrumentos</div>
-                    <div id="inst_evalWeightsContainer" class="d-flex flex-wrap gap-3 mb-4"></div>
-                    <div id="inst_evalPesosWarning" class="inst-warning-note" style="display:none;">Los pesos no suman 100%.</div>
+                <div class="accordion mb-3" id="accordionPesos">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingPesos">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePesos" aria-expanded="false" aria-controls="collapsePesos">
+                                <i class="bi bi-sliders me-2" style="color:#0d6efd;"></i> Pesos de los instrumentos
+                                <span class="badge bg-success ms-2" id="inst_evalPesosBadge" style="font-size:0.72rem;">100%</span>
+                            </button>
+                        </h2>
+                        <div id="collapsePesos" class="accordion-collapse collapse" aria-labelledby="headingPesos">
+                            <div class="accordion-body pb-3">
+                                <p class="text-muted small mb-3"><i class="bi bi-info-circle"></i> El último instrumento se calcula automáticamente para que la suma sea siempre 100%.</p>
+                                <div id="inst_evalWeightsContainer" class="d-flex flex-wrap gap-3"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="section-card">
                     <div class="section-title"><i class="bi bi-table"></i> Calificaciones</div>
@@ -501,7 +576,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // =============================================================================
-// UTILIDADES COMUNES
+// UTILIDADES COMUNES (sin cambios)
 // =============================================================================
 const uuid = () => Date.now() + '-' + Math.random().toString(36);
 const sanitizeFilename = str => str.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_áéíóúÁÉÍÓÚñÑüÜ\-]/g,'');
@@ -509,32 +584,24 @@ const capitalizeFirst = str => str ? str.charAt(0).toUpperCase() + str.slice(1) 
 const capitalizeBasename = name => name.split('_').map(capitalizeFirst).join('_');
 const makeBaseName = (prefix, name, course) => capitalizeBasename(sanitizeFilename(`${prefix}_${name}_${course}`).replace(/_+/g,'_'));
 
-
 function setBodyColor(app) {
     const colors = {
-        'exam': '#e8f1ff',        // color de la tarjeta Examen
-        'test': '#e8f5ee',        // color de la tarjeta Test
-        'generic': '#fff4e5',     // color de la tarjeta Genérica
-        'instrumentos': '#f0eafa', // color de la tarjeta Instrumentos
-        'home': '#e9f0f5'         // color original del body (gris)
+        'exam': '#e8f1ff', 'test': '#e8f5ee', 'generic': '#fff4e5', 'instrumentos': '#f0eafa', 'home': '#e9f0f5'
     };
     document.body.style.backgroundColor = colors[app] || '#e9f0f5';
 }
 
-/** Descarga un objeto como archivo JSON */
 function downloadJSON(data, filename) {
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:'application/json'}));
     const a = Object.assign(document.createElement('a'), {href: url, download: filename});
     a.click(); URL.revokeObjectURL(url);
 }
 
-/** Muestra un mensaje temporal en un elemento */
 function showMessage(id, html, ms = 3000) {
     const el = document.getElementById(id);
     if (el) { el.innerHTML = html; setTimeout(() => el.innerHTML = '', ms); }
 }
 
-/** Ordena alumnos alfabéticamente y sincroniza sus puntuaciones */
 function sortStudents(state, scoresField = 'scores') {
     const idx = state.students.map((_,i)=>i).sort((a,b)=> state.students[a].fullName.localeCompare(state.students[b].fullName,'es',{sensitivity:'base'}));
     state.students = idx.map(i => state.students[i]);
@@ -550,7 +617,6 @@ function showDuplicateMessage(id, text) {
     if (el) el.innerHTML = text ? `<i class="bi bi-exclamation-triangle-fill"></i> ${text}` : '';
 }
 
-/** Renderiza etiquetas de alumnos con botones de editar/eliminar */
 function renderStudentTags(state, tagsId, countId, onChange) {
     const tagsDiv = document.getElementById(tagsId);
     const countSpan = document.getElementById(countId);
@@ -565,14 +631,17 @@ function renderStudentTags(state, tagsId, countId, onChange) {
             <i class="bi bi-x-circle-fill text-danger" style="cursor:pointer;" data-stuidx="${idx}" data-action="delete"></i>`;
         tagsDiv.appendChild(span);
     });
-    tagsDiv.querySelectorAll('i[data-action="delete"]').forEach(icon => icon.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const i = parseInt(this.dataset.stuidx);
+tagsDiv.querySelectorAll('i[data-action="delete"]').forEach(icon => icon.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const i = parseInt(this.dataset.stuidx);
+    const studentName = state.students[i]?.fullName || 'este alumno';
+    if (confirm(`¿Estás seguro de que deseas eliminar a ${studentName}?`)) {
         state.students.splice(i, 1);
         if (state.scores) state.scores.splice(i, 1);
         if (state.studentScores) state.studentScores.splice(i, 1);
         if (onChange) onChange();
-    }));
+    }
+}));
     tagsDiv.querySelectorAll('i[data-action="edit"]').forEach(icon => icon.addEventListener('click', function(e) {
         e.stopPropagation();
         const i = parseInt(this.dataset.stuidx);
@@ -585,7 +654,6 @@ function renderStudentTags(state, tagsId, countId, onChange) {
     }));
 }
 
-/** Importa alumnos desde Excel/JSON/CSV */
 function importStudentsFromFile(file, state, scoresField, afterImport) {
     const ext = file.name.split('.').pop().toLowerCase();
     const reader = new FileReader();
@@ -624,11 +692,10 @@ function importStudentsFromFile(file, state, scoresField, afterImport) {
 }
 
 // =============================================================================
-// MATERIA (criterios de competencias)
+// MATERIA (criterios de competencias) - sin cambios
 // =============================================================================
 const competenceColors = ['#0d6efd','#198754','#fd7e14','#6f42c1','#d63384','#20c997','#0dcaf0','#ffc107','#dc3545','#6610f2'];
 let subjectInfo = { name:'', course:'', criteriaCodes:[], criteriaDescriptions:{} };
-
 const getCriteriaDescription = code => subjectInfo.criteriaDescriptions[code] || 'Descripción no disponible';
 
 function groupCriteriaByCompetence(codes) {
@@ -642,7 +709,6 @@ function groupCriteriaByCompetence(codes) {
     return groups;
 }
 
-/** Rellena el modal compartido de criterios para la app indicada */
 function populateCriteriaModal(app) {
     const TITLES = { exam:'Criterios de la materia - Examen por preguntas', test:'Criterios de la materia - Tipo test', generic:'Criterios de la materia - Evaluación genérica' };
     document.getElementById('globalCriteriaModalTitle').textContent = TITLES[app] || 'Criterios';
@@ -667,7 +733,6 @@ function populateCriteriaModal(app) {
         });
         container.appendChild(div);
     });
-    // Marcar checkboxes seleccionados una vez construido todo el DOM
     container.querySelectorAll('.global-criteria-chk').forEach(chk => {
         chk.checked = state.globalCriteria.includes(chk.value);
     });
@@ -709,35 +774,33 @@ function loadSubjectFromJSON(file) {
 // ESTADOS DE LAS APLICACIONES
 // =============================================================================
 const examState = {
-    examName:"Examen sin título", course:"Tecnología",
+    examName:"", course:"",
     students:[], questions:[{id:1, maxScore:10, criteriaCodes:[]}],
     globalCriteria:[], scores:[],
     duplicateMessageId:'examDuplicateMessage'
 };
 const testState = {
-    examName:"Examen tipo test", course:"Tecnología",
+    examName:"", course:"",
     totalQuestions:20, penaltyFactor:0,
     globalCriteria:[], students:[], studentScores:[],
     duplicateMessageId:'testDuplicateMessage'
 };
 const genericState = {
-    examName:"Actividad sin título", course:"Tecnología",
+    examName:"", course:"",
     students:[], globalCriteria:[], scores:[],
     duplicateMessageId:'genericDuplicateMessage'
 };
-// Mapa para acceder a los estados por clave de app
 const appStates = { exam: examState, test: testState, generic: genericState };
 
 let instrumentCriteria = [];
 const instrumentState = { actividad:"", clase:"", students:[], instruments:[], matrix:[], evalScores:[], evalWeights:[] };
 
 // =============================================================================
-// BADGES DE CRITERIOS (genérico para exam, test, generic)
+// BADGES DE CRITERIOS
 // =============================================================================
 function renderGlobalBadges(app) {
     const state = appStates[app];
     const badgeContainerId = { exam:'examSelectedCriteriaBadges', test:'testSelectedCriteriaBadges', generic:'genericSelectedCriteriaBadges' }[app];
-    const warnId = { exam:'examOrphanedCriteriaWarning', test:'testNoCriteriaWarning', generic:'genericOrphanedCriteriaWarning' }[app];
     const container = document.getElementById(badgeContainerId);
     if (!container) return;
     container.innerHTML = '';
@@ -756,7 +819,7 @@ function renderGlobalBadges(app) {
 function renderAllBadges() { ['exam','test','generic'].forEach(renderGlobalBadges); }
 
 // =============================================================================
-// NORMALIZACIÓN DE PUNTUACIONES
+// NORMALIZACIÓN DE PUNTUACIONES (sin cambios)
 // =============================================================================
 function normalizeScores(state, n) {
     state.scores = state.scores.map(row => {
@@ -768,7 +831,6 @@ function normalizeScores(state, n) {
     while (state.scores.length < state.students.length) state.scores.push(new Array(n).fill(0));
     if (state.scores.length > state.students.length) state.scores = state.scores.slice(0, state.students.length);
 }
-
 function normalizeExamScores() {
     normalizeScores(examState, examState.questions.length);
     examState.scores.forEach((row, sIdx) => row && row.forEach((score, qIdx) => {
@@ -781,10 +843,6 @@ function normalizeGenericScores() {
     normalizeScores(genericState, genericState.globalCriteria.length);
     genericState.scores.forEach(row => row && row.forEach((s,i,a) => { if(s>10) a[i]=10; else if(s<0) a[i]=0; }));
 }
-
-// =============================================================================
-// RENDERIZADO DE TABLAS DE CALIFICACIÓN (genérico)
-// =============================================================================
 function renderSimpleGradeTable(state, tableId, tbodyId) {
     const thead = document.querySelector(`#${tableId} thead`);
     const tbody = document.getElementById(tbodyId);
@@ -792,7 +850,6 @@ function renderSimpleGradeTable(state, tableId, tbodyId) {
     if (!state.students.length || !state.globalCriteria.length) {
         thead.innerHTML=''; tbody.innerHTML='<tr><td class="text-center p-4">Se requieren alumnos y criterios.</td></tr>'; return;
     }
-    // Normalizar puntuaciones: ajustar longitud de filas y clampar 0–10
     normalizeScores(state, state.globalCriteria.length);
     state.scores.forEach(row => row && row.forEach((s,i,a) => { if(s>10) a[i]=10; else if(s<0) a[i]=0; }));
     thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map(c => `<th>${c}.<br><small>(0-10)</small></th>`).join('') + '</tr>';
@@ -816,7 +873,6 @@ function renderSimpleGradeTable(state, tableId, tbodyId) {
     }));
 }
 
-/** Genera filas de resultados para exam, test, generic */
 function buildResultsData(app, includeGrade) {
     if (app === 'exam') {
         return examState.students.map((student, sIdx) => {
@@ -841,7 +897,7 @@ function buildResultsData(app, includeGrade) {
         return testState.students.map((student, sIdx) => {
             const sc = testState.studentScores[sIdx]||{correct:0,wrong:0,unanswered:0};
             const grade = computeTestGrade(sc.correct, sc.wrong);
-            const row = { Alumno: student.fullName, Aciertos: sc.correct, Fallos: sc.wrong, 'NS/NC': sc.unanswered };
+            const row = { Alumno: student.fullName};
             testState.globalCriteria.forEach(c => row[c+'.'] = grade);
             if (includeGrade) row['Calificación'] = grade;
             return row;
@@ -861,7 +917,6 @@ function buildResultsData(app, includeGrade) {
     return [];
 }
 
-/** Renderiza tabla de resultados para exam, test, generic */
 function renderResultsTable(app) {
     const cfg = {
         exam:    { tableId:'examResultsTable', tbodyId:'examResultsTbody', spanId:'examResultsExamNameSpan', checkId:'examShowGlobalGrade', label: s => `Examen: ${s.examName}`, state: examState },
@@ -916,7 +971,7 @@ function renderResultsTable(app) {
 }
 
 // =============================================================================
-// EXPORTACIÓN GENÉRICA (JSON, Excel, PDF)
+// EXPORTACIÓN GENÉRICA
 // =============================================================================
 let _pendingExport = { app:'', fmt:'' };
 
@@ -951,7 +1006,7 @@ function exportResults(app, fmt, includeGrade) {
 }
 
 // =============================================================================
-// FUNCIONES ESPECÍFICAS: EXAMEN POR PREGUNTAS
+// EXAMEN POR PREGUNTAS (funciones completas, igual que en el original)
 // =============================================================================
 function validateExamCriteria() {
     const warning = document.getElementById('examOrphanedCriteriaWarning');
@@ -1114,7 +1169,7 @@ function importExamScores(file) {
 
 function resetExamState() {
     if (!confirm('¿Reiniciar todos los datos del examen?')) return;
-    Object.assign(examState, { examName:'Examen sin título', course:'Tecnología', students:[], questions:[{id:1,maxScore:10,criteriaCodes:[]}], globalCriteria:[], scores:[] });
+    Object.assign(examState, { examName:'Examen sin título', course:'', students:[], questions:[{id:1,maxScore:10,criteriaCodes:[]}], globalCriteria:[], scores:[] });
     document.getElementById('examNameInput').value = examState.examName;
     document.getElementById('examCourseInput').value = examState.course;
     document.getElementById('examInputNumQuestions').value = 1;
@@ -1124,7 +1179,7 @@ function resetExamState() {
 }
 
 // =============================================================================
-// FUNCIONES ESPECÍFICAS: TIPO TEST
+// TIPO TEST (funciones completas)
 // =============================================================================
 function computeTestGrade(correct, wrong) {
     if (testState.totalQuestions <= 0) return 0;
@@ -1214,7 +1269,7 @@ function importTestConfig(file) {
         try {
             const cfg = JSON.parse(e.target.result);
             if (!cfg.totalQuestions||!Array.isArray(cfg.globalCriteria)) throw new Error('Formato inválido');
-            Object.assign(testState, { examName:cfg.examName||'Examen tipo test', course:cfg.course||'Tecnología', totalQuestions:cfg.totalQuestions, penaltyFactor:cfg.penaltyFactor||0, globalCriteria:cfg.globalCriteria, students:(cfg.students||[]).map(s=>({id:uuid(),fullName:s.fullName})), studentScores:cfg.studentScores||[] });
+            Object.assign(testState, { examName:cfg.examName||'Examen tipo test', course:cfg.course||'Curso', totalQuestions:cfg.totalQuestions, penaltyFactor:cfg.penaltyFactor||0, globalCriteria:cfg.globalCriteria, students:(cfg.students||[]).map(s=>({id:uuid(),fullName:s.fullName})), studentScores:cfg.studentScores||[] });
             if (!testState.studentScores.length) testState.studentScores = testState.students.map(()=>({correct:0,wrong:0,unanswered:testState.totalQuestions}));
             document.getElementById('testExamTitleInput').value = testState.examName;
             document.getElementById('testCourseInput').value = testState.course;
@@ -1267,7 +1322,7 @@ function recoverTestScores() {
 
 function resetTestState() {
     if (!confirm('¿Reiniciar todos los datos del test?')) return;
-    Object.assign(testState, { examName:'Examen tipo test', course:'Tecnología', totalQuestions:20, penaltyFactor:0, globalCriteria:[], students:[], studentScores:[] });
+    Object.assign(testState, { examName:'Examen tipo test', course:'', totalQuestions:20, penaltyFactor:0, globalCriteria:[], students:[], studentScores:[] });
     document.getElementById('testExamTitleInput').value = testState.examName;
     document.getElementById('testCourseInput').value = testState.course;
     document.getElementById('testTotalQuestions').value = 20;
@@ -1279,7 +1334,7 @@ function resetTestState() {
 }
 
 // =============================================================================
-// FUNCIONES ESPECÍFICAS: GENÉRICA
+// GENÉRICA (funciones completas)
 // =============================================================================
 function validateGenericCriteria() {
     const warn = document.getElementById('genericOrphanedCriteriaWarning');
@@ -1362,7 +1417,7 @@ function recoverGenericScores() {
 
 function resetGenericState() {
     if (!confirm('¿Reiniciar todos los datos de la actividad genérica?')) return;
-    Object.assign(genericState, { examName:'Actividad sin título', course:'Tecnología', globalCriteria:[], students:[], scores:[] });
+    Object.assign(genericState, { examName:'Actividad sin título', course:'', globalCriteria:[], students:[], scores:[] });
     document.getElementById('genericExamNameInput').value = genericState.examName;
     document.getElementById('genericCourseInput').value = genericState.course;
     renderGlobalBadges('generic'); renderGenericStudentTags();
@@ -1371,46 +1426,84 @@ function resetGenericState() {
 }
 
 // =============================================================================
-// FUNCIONES DE INSTRUMENTOS
+// FUNCIONES DE INSTRUMENTOS (MODIFICADAS CON PESOS AUTO)
 // =============================================================================
 function inst_isDuplicate(name) { return instrumentState.students.some(s => s.fullName.trim().toLowerCase()===name.trim().toLowerCase()); }
 function inst_sortStudents() { instrumentState.students.sort((a,b)=>a.fullName.localeCompare(b.fullName,'es',{sensitivity:'base'})); }
 
+// --- Nuevas funciones para pesos automáticos ---
+function inst_distributeWeightsEqual() {
+    const n = instrumentState.instruments.length;
+    if (n === 0) return;
+    if (n === 1) { instrumentState.instruments[0].weight = 100; return; }
+    const base = Math.floor(100 / n * 100) / 100;
+    for (let i = 0; i < n - 1; i++) instrumentState.instruments[i].weight = base;
+    instrumentState.instruments[n - 1].weight = Math.round((100 - base * (n - 1)) * 100) / 100;
+    instrumentState.evalWeights = instrumentState.instruments.map(i => i.weight);
+}
+
+function inst_recalcLastWeight() {
+    const n = instrumentState.instruments.length;
+    if (n === 0) return;
+    const sumOthers = instrumentState.instruments.slice(0, n - 1).reduce((a, b) => a + b.weight, 0);
+    const last = Math.round((100 - sumOthers) * 100) / 100;
+    instrumentState.instruments[n - 1].weight = last;
+    instrumentState.evalWeights = instrumentState.instruments.map(i => i.weight);
+}
+
+function inst_maxWeightForEditable() {
+    return 100 - (instrumentState.instruments.length - 1) * 1;
+}
+
+function inst_syncPesosBadge() {
+    const badge = document.getElementById('inst_evalPesosBadge');
+    if (badge) badge.textContent = '100%';
+    const totalSpan = document.getElementById('inst_totalPesos');
+    if (totalSpan) totalSpan.textContent = '100.0';
+}
+
 function inst_renderStudentTags() {
     const container = document.getElementById('inst_studentTags');
-    const countSpan = document.getElementById('inst_studentCount');
+    const countSpan = document.getElementById('inst_studentCountBadge');
     if (!container) return;
     container.innerHTML = '';
     countSpan.textContent = instrumentState.students.length;
     instrumentState.students.forEach((student, idx) => {
-        const span = document.createElement('span'); span.className='student-tag';
+        const span = document.createElement('span'); span.className = 'student-tag';
         span.innerHTML = `${student.fullName}
-            <i class="bi bi-pencil-fill text-primary" data-idx="${idx}" data-action="edit"></i>
-            <i class="bi bi-x-circle-fill text-danger" data-idx="${idx}" data-action="delete"></i>`;
+            <i class="bi bi-pencil-fill text-primary" style="cursor:pointer; margin-left:5px;" data-stuidx="${idx}" data-action="edit"></i>
+            <i class="bi bi-x-circle-fill text-danger" style="cursor:pointer;" data-stuidx="${idx}" data-action="delete"></i>`;
         container.appendChild(span);
     });
     container.querySelectorAll('i[data-action="delete"]').forEach(icon => icon.addEventListener('click', function(e) {
         e.stopPropagation();
-        const i = parseInt(this.dataset.idx);
-        instrumentState.students.splice(i,1); instrumentState.evalScores.splice(i,1);
-        inst_renderStudentTags(); inst_updateConfigButtonState();
+        const i = parseInt(this.dataset.stuidx);
+        instrumentState.students.splice(i, 1);
+        instrumentState.evalScores.splice(i, 1);
+        inst_renderStudentTags();
+        inst_updateConfigButtonState();
         if (document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation();
     }));
     container.querySelectorAll('i[data-action="edit"]').forEach(icon => icon.addEventListener('click', function(e) {
         e.stopPropagation();
-        const i = parseInt(this.dataset.idx); const old = instrumentState.students[i].fullName;
+        const i = parseInt(this.dataset.stuidx);
+        const old = instrumentState.students[i].fullName;
         const nw = prompt('Editar nombre:', old);
-        if (nw && nw.trim() && nw.trim()!==old) {
-            if (inst_isDuplicate(nw.trim())) { document.getElementById('inst_duplicateMessage').innerHTML=`<i class="bi bi-exclamation-triangle-fill"></i> El alumno "${nw}" ya existe.`; return; }
+        if (nw && nw.trim() && nw.trim() !== old) {
+            if (inst_isDuplicate(nw.trim())) {
+                document.getElementById('inst_duplicateMessage').innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> El alumno "${nw}" ya existe.`;
+                return;
+            }
             instrumentState.students[i].fullName = nw.trim();
-            inst_sortStudents(); inst_renderStudentTags(); inst_updateConfigButtonState();
+            inst_sortStudents();
+            inst_renderStudentTags();
+            inst_updateConfigButtonState();
         }
     }));
     inst_updateConfigButtonState();
 }
 
 function inst_importStudentsFromFile(file) {
-    // Reutiliza lógica común de importación adaptando el callback
     const ext = file.name.split('.').pop().toLowerCase();
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -1445,29 +1538,41 @@ function inst_importStudentsFromFile(file) {
 function inst_renderInstrumentsTable() {
     const tbody = document.getElementById('inst_instrumentsBody'); if (!tbody) return;
     tbody.innerHTML = '';
+    const n = instrumentState.instruments.length;
+    const maxEditable = inst_maxWeightForEditable();
     instrumentState.instruments.forEach((inst, idx) => {
+        const isLast = (idx === n - 1);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${idx+1}</td><td><input type="text" class="form-control form-control-sm" data-idx="${idx}" data-field="name" value="${inst.name.replace(/"/g,'&quot;')}"></td><td><input type="number" step="0.1" min="0" class="form-control form-control-sm inst-weight-input" data-idx="${idx}" data-field="weight" value="${inst.weight}"></td>`;
+        const nameCell = `<input type="text" class="form-control form-control-sm" data-idx="${idx}" data-field="name" value="${inst.name.replace(/"/g,'&quot;')}">`;
+        let weightCell;
+        if (isLast) {
+            weightCell = `<div class="d-flex align-items-center gap-1">
+                <input type="number" step="0.01" class="form-control form-control-sm inst-weight-input inst-weight-readonly" data-idx="${idx}" data-field="weight" value="${inst.weight.toFixed(2)}" readonly tabindex="-1">
+                <span class="inst-weight-auto-badge">auto</span>
+            </div>`;
+        } else {
+            weightCell = `<input type="number" step="0.01" min="1" max="${maxEditable}" class="form-control form-control-sm inst-weight-input" data-idx="${idx}" data-field="weight" value="${inst.weight.toFixed(2)}">`;
+        }
+        tr.innerHTML = `<td>${idx+1}</td><td>${nameCell}</td><td>${weightCell}</td>`;
         tbody.appendChild(tr);
     });
-    inst_updateTotalWeight();
+    inst_syncPesosBadge();
+    inst_updateConfigButtonState();
 }
 
 function inst_updateTotalWeight() {
-    const total = instrumentState.instruments.reduce((a,b)=>a+b.weight,0);
-    document.getElementById('inst_totalPesos').textContent = total.toFixed(1);
+    inst_syncPesosBadge();
     inst_updateConfigButtonState();
 }
 
 function inst_canGoToRelacion() {
-    return instrumentState.actividad.trim()!=='' && instrumentState.clase.trim()!=='' && instrumentState.students.length>0 && Math.abs(instrumentState.instruments.reduce((a,b)=>a+b.weight,0)-100)<=0.01;
+    return instrumentState.actividad.trim()!=='' && instrumentState.clase.trim()!=='' && instrumentState.students.length>0 && instrumentState.instruments.length>0;
 }
 
 function inst_updateConfigButtonState() {
-    const irBtn = document.getElementById('inst_irRelacionBtn');
-    const warn = document.getElementById('inst_pesosWarning');
-    const total = instrumentState.instruments.reduce((a,b)=>a+b.weight,0);
-    warn.style.display = Math.abs(total-100)>0.01 ? 'inline-block' : 'none';
+    const irBtn = document.getElementById('inst_irRelacionBtn'), warn = document.getElementById('inst_pesosWarning');
+    if (!irBtn) return;
+    if (warn) warn.style.display = 'none';
     irBtn.disabled = !inst_canGoToRelacion();
 }
 
@@ -1475,10 +1580,7 @@ function inst_setNumInstruments(n) {
     n = Math.max(1,n);
     while(instrumentState.instruments.length<n) instrumentState.instruments.push({name:`Instrumento ${instrumentState.instruments.length+1}`,weight:0});
     while(instrumentState.instruments.length>n) instrumentState.instruments.pop();
-    if (instrumentState.instruments.every(i=>i.weight===0)) {
-        const eq = 100/n;
-        instrumentState.instruments.forEach((_,i)=>instrumentState.instruments[i].weight=Math.round(eq*100)/100);
-    }
+    inst_distributeWeightsEqual();
     const newMatrix=[];
     for(let i=0;i<n;i++) newMatrix.push(i<instrumentState.matrix.length?[...instrumentState.matrix[i]]:new Array(instrumentCriteria.length).fill(false));
     instrumentState.matrix=newMatrix;
@@ -1538,7 +1640,7 @@ function inst_computeCriteriaForStudent(sIdx) {
             if(instrumentState.matrix[i]&&instrumentState.matrix[i][cIdx]){scores[u]+=sc*w; wSum[u]+=w;}
         });
     });
-    return scores.map((s,u)=>{ const r=wSum[u]>0?Math.round(s/wSum[u]*100)/100:0; return r; });
+    return scores.map((s,u)=>wSum[u]>0?Math.round(s/wSum[u]*100)/100:0);
 }
 
 function inst_updateCriteriaRow(sIdx, showGrade) {
@@ -1562,15 +1664,28 @@ function inst_updateAllCriteria() {
 function inst_renderEvaluation() {
     if(!instrumentState.students.length||!instrumentState.instruments.length) return;
     const usedCriteria=inst_getUsedCriteria();
+    const n = instrumentState.instruments.length;
+    const maxEditable = inst_maxWeightForEditable();
+
     const weightsDiv=document.getElementById('inst_evalWeightsContainer'); weightsDiv.innerHTML='';
     instrumentState.instruments.forEach((inst,i)=>{
-        const div=document.createElement('div'); div.className='input-group input-group-sm'; div.style.cssText='min-width:260px;flex:1 0 auto;';
-        div.innerHTML=`<span class="input-group-text">${inst.name}</span><input type="number" step="0.1" min="0" class="form-control inst-eval-weight-input" data-i="${i}" value="${instrumentState.evalWeights[i]||inst.weight}">`;
+        const isLast = (i === n - 1);
+        const div=document.createElement('div'); div.className='input-group input-group-sm'; div.style.cssText='min-width:220px;flex:1 0 auto;';
+        if (isLast) {
+            div.innerHTML=`<span class="input-group-text">${inst.name}</span>
+                <input type="number" step="0.01" class="form-control inst-eval-weight-input inst-weight-readonly" data-i="${i}" value="${(instrumentState.evalWeights[i]||inst.weight).toFixed(2)}" readonly tabindex="-1">
+                <span class="input-group-text" style="background:#e8f5e9; color:#198754; font-size:0.72rem;">auto</span>`;
+        } else {
+            div.innerHTML=`<span class="input-group-text">${inst.name}</span>
+                <input type="number" step="0.01" min="1" max="${maxEditable}" class="form-control inst-eval-weight-input" data-i="${i}" value="${(instrumentState.evalWeights[i]||inst.weight).toFixed(2)}">
+                <span class="input-group-text text-muted" style="font-size:0.75rem;">%</span>`;
+        }
         weightsDiv.appendChild(div);
     });
+    inst_syncPesosBadge();
+
     const showGrade=document.getElementById('inst_showGradeColumn').checked;
-    const thead=document.getElementById('inst_evalThead');
-    thead.innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((_,i)=>`<th>I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th>${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
+    document.getElementById('inst_evalThead').innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((_,i)=>`<th>I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th>${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
     instrumentState.students.forEach((student,sIdx)=>{
         const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${student.fullName}</strong></td>`;
@@ -1592,11 +1707,23 @@ function inst_renderEvaluation() {
         if(showGrade){ const td=document.createElement('td'); td.classList.add('grade-cell'); td.dataset.student=sIdx; td.textContent='0.00'; tr.appendChild(td); }
         tbody.appendChild(tr);
     });
-    document.querySelectorAll('.inst-eval-weight-input').forEach(inp=>inp.addEventListener('input',function(){
-        const i=parseInt(this.dataset.i); let val=Math.max(0,parseFloat(this.value)||0);
-        instrumentState.evalWeights[i]=val; instrumentState.instruments[i].weight=val;
-        inst_renderInstrumentsTable(); inst_updateAllCriteria();
-        document.getElementById('inst_evalPesosWarning').style.display=Math.abs(instrumentState.evalWeights.reduce((a,b)=>a+b,0)-100)>0.01?'inline-block':'none';
+
+    document.querySelectorAll('.inst-eval-weight-input:not(.inst-weight-readonly)').forEach(inp=>inp.addEventListener('input',function(){
+        const i=parseInt(this.dataset.i);
+        const nI=instrumentState.instruments.length;
+        const minWI=1, maxWI=inst_maxWeightForEditable();
+        let val=parseFloat(this.value);
+        if(isNaN(val)||val<minWI){val=minWI; this.value=val;}
+        if(val>maxWI){val=maxWI; this.value=val;}
+        instrumentState.evalWeights[i]=val;
+        instrumentState.instruments[i].weight=val;
+        inst_recalcLastWeight();
+        const lastInpEval=document.querySelector(`.inst-eval-weight-input[data-i="${nI-1}"]`);
+        if(lastInpEval) lastInpEval.value=instrumentState.evalWeights[nI-1].toFixed(2);
+        const lastInpCfg=document.querySelector(`#inst_instrumentsBody input[data-idx="${nI-1}"][data-field="weight"]`);
+        if(lastInpCfg) lastInpCfg.value=instrumentState.instruments[nI-1].weight.toFixed(2);
+        inst_syncPesosBadge();
+        inst_updateAllCriteria();
     }));
     inst_updateAllCriteria();
 }
@@ -1658,6 +1785,7 @@ function inst_importEvalJson(file) {
             if((data.students.length!==instrumentState.students.length||data.instruments.length!==instrumentState.instruments.length)&&!confirm('Dimensiones no coinciden. ¿Continuar?')) return;
             instrumentState.evalScores=data.evalScores; instrumentState.evalWeights=data.evalWeights||instrumentState.instruments.map(i=>i.weight); instrumentState.matrix=data.matrix||instrumentState.matrix;
             data.instruments.forEach((inst,i)=>{ if(instrumentState.instruments[i]) instrumentState.instruments[i].weight=inst.weight; });
+            inst_recalcLastWeight();
             inst_renderInstrumentsTable(); inst_renderMatrix(); inst_renderEvaluation(); inst_updateConfigButtonState();
             alert('✅ Calificaciones importadas.');
         }catch(err){alert('Error: '+err.message);}
@@ -1675,7 +1803,8 @@ function inst_importConfig(file) {
     reader.onload=function(e){
         try{
             const data=JSON.parse(e.target.result);
-            Object.assign(instrumentState,{actividad:data.actividad||'',clase:data.clase||'',students:(data.students||[]).map(n=>({id:uuid(),fullName:n})),instruments:(data.instruments||[]).map(i=>({name:i.name,weight:i.weight}))});
+            Object.assign(instrumentState,{actividad:data.actividad||'',clase:data.clase||'',students:(data.students||[]).map(n=>({id:uuid(),fullName:n})),instruments:(data.instruments||[]).map(i=>({name:i.name,weight:parseFloat(i.weight)||0}))});
+            inst_recalcLastWeight();
             instrumentState.matrix=instrumentState.instruments.map(()=>new Array(instrumentCriteria.length).fill(false));
             instrumentState.evalScores=instrumentState.students.map(()=>new Array(instrumentState.instruments.length).fill(0));
             instrumentState.evalWeights=instrumentState.instruments.map(i=>i.weight);
@@ -1700,7 +1829,8 @@ function inst_localOp(action, key, buildData, onLoad) {
 function inst_saveConfigLocal() { inst_localOp('save','inst_config_backup',()=>({actividad:instrumentState.actividad,clase:instrumentState.clase,students:instrumentState.students.map(s=>s.fullName),instruments:instrumentState.instruments}),null); }
 function inst_loadConfigLocal() {
     inst_localOp('load','inst_config_backup',null,data=>{
-        Object.assign(instrumentState,{actividad:data.actividad||'',clase:data.clase||'',students:(data.students||[]).map(n=>({id:uuid(),fullName:n})),instruments:(data.instruments||[]).map(i=>({name:i.name,weight:i.weight}))});
+        Object.assign(instrumentState,{actividad:data.actividad||'',clase:data.clase||'',students:(data.students||[]).map(n=>({id:uuid(),fullName:n})),instruments:(data.instruments||[]).map(i=>({name:i.name,weight:parseFloat(i.weight)||0}))});
+        inst_recalcLastWeight();
         instrumentState.matrix=instrumentState.instruments.map(()=>new Array(instrumentCriteria.length).fill(false));
         instrumentState.evalScores=instrumentState.students.map(()=>new Array(instrumentState.instruments.length).fill(0));
         instrumentState.evalWeights=instrumentState.instruments.map(i=>i.weight);
@@ -1734,6 +1864,7 @@ function inst_loadEvalLocal() {
         if((data.students.length!==instrumentState.students.length||data.instruments.length!==instrumentState.instruments.length)&&!confirm('Dimensiones no coinciden. ¿Cargar de todos modos?')) return;
         instrumentState.evalScores=data.evalScores; instrumentState.evalWeights=data.evalWeights; instrumentState.matrix=data.matrix;
         data.instruments.forEach((inst,i)=>{if(instrumentState.instruments[i]) instrumentState.instruments[i].weight=inst.weight;});
+        inst_recalcLastWeight();
         inst_renderInstrumentsTable(); inst_renderMatrix(); inst_renderEvaluation(); inst_updateConfigButtonState();
         alert('✅ Calificaciones cargadas.');
     });
@@ -1744,6 +1875,55 @@ function inst_loadMatrixLocal() {
     inst_localOp('load','inst_matrix_backup',null,data=>{
         instrumentState.matrix=data.matrix; inst_renderMatrix(); inst_updateIrEvalButton(); alert('✅ Matriz cargada.');
     });
+}
+
+
+function resetInstrumentosState() {
+    if (!confirm('¿Estás seguro de que deseas reiniciar todos los datos de instrumentos?')) return;
+
+    // Limpiar campos principales
+    instrumentState.actividad = '';
+    instrumentState.clase = '';
+    instrumentState.students = [];
+    instrumentState.instruments = [
+        { name: 'Instrumento 1', weight: 33.33 },
+        { name: 'Instrumento 2', weight: 33.33 },
+        { name: 'Instrumento 3', weight: 33.34 }
+    ];
+    // Ajustar pesos para que sumen 100 (opcional, pero ya lo hacen)
+    inst_recalcLastWeight();
+
+    // Reiniciar matriz de relación (todos falsos)
+    instrumentState.matrix = instrumentState.instruments.map(() => new Array(instrumentCriteria.length).fill(false));
+
+    // Vaciar puntuaciones y pesos de evaluación
+    instrumentState.evalScores = [];
+    instrumentState.evalWeights = instrumentState.instruments.map(i => i.weight);
+
+    // Actualizar campos de la interfaz
+    document.getElementById('inst_actividadInput').value = '';
+    document.getElementById('inst_claseInput').value = '';
+    document.getElementById('inst_numInstrumentos').value = instrumentState.instruments.length;
+
+    // Refrescar tablas y estados
+    inst_renderInstrumentsTable();
+    inst_renderStudentTags();
+    inst_updateConfigButtonState();
+
+    // Si estamos en las pestañas de Relación o Evaluación, limpiar también
+    if (document.getElementById('inst_relacion').classList.contains('active')) {
+        inst_renderMatrix();
+    }
+    if (document.getElementById('inst_eval').classList.contains('active')) {
+        inst_renderEvaluation();
+    }
+
+    // Eliminar posibles backups locales (opcional)
+    // localStorage.removeItem('inst_config_backup');
+    // localStorage.removeItem('inst_matrix_backup');
+    // localStorage.removeItem('inst_eval_backup');
+
+    alert('✅ Datos de instrumentos reiniciados.');
 }
 
 // =============================================================================
@@ -1759,14 +1939,14 @@ function showHome() {
 	document.getElementById('homeScreen').classList.add('active');
 	currentApp='home';
     setBodyColor('home');
-	}
+}
 	
 function showApp(appId) {
     hideAllApps();
     document.getElementById(appId).classList.add('active');
     const map = {'appExamContainer':'exam','appTestContainer':'test','appGenericContainer':'generic','appInstrumentosContainer':'instrumentos'};
     currentApp = map[appId] || 'home';
-    setBodyColor(currentApp);   // <-- AÑADE ESTA LÍNEA
+    setBodyColor(currentApp);
     if (appId === 'appInstrumentosContainer') showInstrumentosScreen('inst_config');
 }
 
@@ -1845,7 +2025,7 @@ window.onload = function() {
         bootstrap.Modal.getInstance(document.getElementById('sharedExportModal')).hide();
     });
 
-    // ========== EXAMEN ==========
+    // ========== EXAMEN (event listeners) ==========
     document.getElementById('examNavConfig').addEventListener('click', ()=>showAppScreen('exam','config'));
     document.getElementById('examNavGrade').addEventListener('click', function() {
         if(!examState.students.length){ alert('No hay alumnos.'); return; }
@@ -1875,7 +2055,14 @@ window.onload = function() {
         if(isStudentDuplicate(examState,name)){ showDuplicateMessage('examDuplicateMessage',`El alumno "${name}" ya existe.`); input.value=''; return; }
         examState.students.push({id:uuid(),fullName:name}); normalizeExamScores(); sortStudents(examState,'scores'); renderExamStudentTags(); input.value=''; showDuplicateMessage('examDuplicateMessage','');
     });
-    document.getElementById('examBtnClearStudents').addEventListener('click', ()=>{ examState.students=[]; examState.scores=[]; renderExamStudentTags(); });
+document.getElementById('examBtnClearStudents').addEventListener('click', function() {
+    if (confirm('¿Estás seguro de que deseas eliminar a todos los alumnos?')) {
+        examState.students = [];
+        examState.scores = [];
+        renderExamStudentTags();
+    }
+});
+
     document.getElementById('examImportFile').addEventListener('change', function() {
         if(this.files.length) importStudentsFromFile(this.files[0],examState,'scores',()=>{ renderExamStudentTags(); if(document.getElementById('examScreenGrade').classList.contains('active')) renderExamGradeTable(); });
         this.value='';
@@ -1913,6 +2100,8 @@ window.onload = function() {
         }catch(e){alert('Error: '+e.message);}
     });
     document.getElementById('examResetAllBtn').addEventListener('click', resetExamState);
+	document.getElementById('testResetAllBtn2').addEventListener('click', resetTestState);
+	document.getElementById('inst_resetAllBtn').addEventListener('click', resetInstrumentosState);
     document.getElementById('examShowGlobalGrade').addEventListener('change', ()=>renderResultsTable('exam'));
 
     // ========== TEST ==========
@@ -1945,7 +2134,14 @@ window.onload = function() {
         testState.students.push({id:uuid(),fullName:name}); testState.studentScores.push({correct:0,wrong:0,unanswered:testState.totalQuestions});
         sortStudents(testState,'studentScores'); renderTestStudentTags(); input.value=''; showDuplicateMessage('testDuplicateMessage','');
     });
-    document.getElementById('testBtnClearStudents').addEventListener('click', ()=>{ testState.students=[]; testState.studentScores=[]; renderTestStudentTags(); });
+document.getElementById('testBtnClearStudents').addEventListener('click', function() {
+    if (confirm('¿Estás seguro de que deseas eliminar a todos los alumnos?')) {
+        testState.students = [];
+        testState.studentScores = [];
+        renderTestStudentTags();
+    }
+});
+
     document.getElementById('testImportFile').addEventListener('change', function() {
         if(this.files.length) importStudentsFromFile(this.files[0],testState,'studentScores',()=>{ renderTestStudentTags(); if(document.getElementById('testScreenGrade').classList.contains('active')) renderTestGradeTable(); });
         this.value='';
@@ -2000,7 +2196,13 @@ window.onload = function() {
         if(isStudentDuplicate(genericState,name)){ showDuplicateMessage('genericDuplicateMessage',`El alumno "${name}" ya existe.`); input.value=''; return; }
         genericState.students.push({id:uuid(),fullName:name}); normalizeGenericScores(); sortStudents(genericState,'scores'); renderGenericStudentTags(); input.value=''; showDuplicateMessage('genericDuplicateMessage','');
     });
-    document.getElementById('genericBtnClearStudents').addEventListener('click', ()=>{ genericState.students=[]; genericState.scores=[]; renderGenericStudentTags(); });
+document.getElementById('genericBtnClearStudents').addEventListener('click', function() {
+    if (confirm('¿Estás seguro de que deseas eliminar a todos los alumnos?')) {
+        genericState.students = [];
+        genericState.scores = [];
+        renderGenericStudentTags();
+    }
+});
     document.getElementById('genericImportFile').addEventListener('change', function() {
         if(this.files.length) importStudentsFromFile(this.files[0],genericState,'scores',()=>{ renderGenericStudentTags(); if(document.getElementById('genericScreenGrade').classList.contains('active')) renderGenericGradeTable(); });
         this.value='';
@@ -2045,7 +2247,22 @@ window.onload = function() {
     });
     document.getElementById('inst_instrumentsBody').addEventListener('input', function(e) {
         if(e.target.matches('input[data-field="name"]')){ instrumentState.instruments[e.target.dataset.idx].name=e.target.value; }
-        if(e.target.matches('input[data-field="weight"]')){ let v=parseFloat(e.target.value)||0; if(v<0)v=0; instrumentState.instruments[e.target.dataset.idx].weight=v; inst_updateTotalWeight(); instrumentState.evalWeights=instrumentState.instruments.map(i=>i.weight); if(document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation(); }
+        if(e.target.matches('input[data-field="weight"]:not(.inst-weight-readonly)')){
+            const idx=parseInt(e.target.dataset.idx);
+            const nI=instrumentState.instruments.length;
+            if(idx===nI-1) return; // último es readonly
+            const minW=1, maxW=inst_maxWeightForEditable();
+            let v=parseFloat(e.target.value);
+            if(isNaN(v)||v<minW){v=minW; e.target.value=v;}
+            if(v>maxW){v=maxW; e.target.value=v;}
+            instrumentState.instruments[idx].weight=v;
+            inst_recalcLastWeight();
+            const lastInp=document.querySelector(`#inst_instrumentsBody input[data-idx="${nI-1}"][data-field="weight"]`);
+            if(lastInp) lastInp.value=instrumentState.instruments[nI-1].weight.toFixed(2);
+            inst_syncPesosBadge();
+            instrumentState.evalWeights=instrumentState.instruments.map(i=>i.weight);
+            if(document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation();
+        }
     });
     document.getElementById('inst_btnAddStudent').addEventListener('click', function() {
         const input=document.getElementById('inst_studentNameInput'), name=input.value.trim(); if(!name) return;
@@ -2056,7 +2273,7 @@ window.onload = function() {
         inst_updateConfigButtonState();
     });
     document.getElementById('inst_btnClearStudents').addEventListener('click', function() {
-        if(confirm('¿Eliminar todos los alumnos?')){ instrumentState.students=[]; instrumentState.evalScores=[]; inst_renderStudentTags(); if(document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation(); inst_updateConfigButtonState(); }
+        if(confirm('¿Estás seguro de que deseas eliminar a todos los alumnos?')){ instrumentState.students=[]; instrumentState.evalScores=[]; inst_renderStudentTags(); if(document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation(); inst_updateConfigButtonState(); }
     });
     document.getElementById('inst_importExcel').addEventListener('change', function() { if(this.files.length) inst_importStudentsFromFile(this.files[0]); this.value=''; });
     document.getElementById('inst_irRelacionBtn').addEventListener('click', function() { if(this.disabled){ alert('Completa todos los campos obligatorios.'); return; } inst_renderMatrix(); showInstrumentosScreen('inst_relacion'); });
@@ -2097,8 +2314,19 @@ window.onload = function() {
     renderTestStudentTags();
     renderGenericStudentTags();
     showHome();
-	setBodyColor('home');
+    setBodyColor('home');
 };
+
+// =========================================================================
+    //   REGISTRO DEL SERVICE WORKER PARA PWA
+    // =========================================================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registrado correctamente:', reg.scope))
+                .catch(err => console.error('Error al registrar el Service Worker:', err));
+        });
+    }
 </script>
 </body>
 </html>
