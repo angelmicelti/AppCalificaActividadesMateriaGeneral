@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>EVALUACIÓN · MATERIA DINÁMICA INTEGRAL</title>
+    <title>EVALUACIÓN · MATERIA DINÁMICA + INSTRUMENTOS</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#0b4b6b">
@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { background-color: #e9f0f5; font-family: 'Segoe UI', Roboto, sans-serif; padding: 10px; margin: 0; }
-        .container-custom { max-width: 1400px; margin: 0 auto; background: white; border-radius: 28px; box-shadow: 0 25px 45px -12px rgba(2,48,71,0.2); padding: 24px 28px; }
+        .container-custom { max-width: 1400px; margin: 0 auto; background: transparent; border-radius: 28px; box-shadow: 0 25px 45px -12px rgba(2,48,71,0.2); padding: 24px 28px; }
         .screen { display: none; }
         .screen.active { display: block; }
         .section-card { background-color: #fafcff; border-radius: 20px; padding: 20px 22px; margin-bottom: 24px; border: 1px solid #e2eaf1; box-shadow: 0 4px 12px rgba(0,49,78,0.03); transition: 0.2s; }
@@ -76,6 +76,8 @@
         #inst_matrixTable td { width: 30px; max-width: 30px; }
         @media (max-width: 576px) { .container-custom { padding: 12px; } .section-card { padding: 12px; } .student-tag { font-size: 0.8rem; padding: 4px 10px; } .btn-group .btn { font-size: 0.8rem; padding: 0.3rem 0.5rem; } .modal-dialog { margin: 0.5rem; } .section-title { flex-wrap: wrap; } .section-title .help-icon { margin-left: 0; } }
         @media (max-width: 768px) { .d-flex.gap-2.flex-wrap { flex-direction: column; align-items: stretch; } .app-switcher { margin-top: 10px; width: 100%; } .app-switcher .btn { flex: 1; white-space: nowrap; font-size: 0.9rem; padding: 0.4rem 0.3rem; } }
+
+}
     </style>
 </head>
 <body>
@@ -93,10 +95,10 @@
             <input type="file" id="importSubjectFile" accept=".json" class="hidden">
             <div class="app-switcher btn-group" role="group">
                 <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
-                <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Por preguntas</button>
-                <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Tipo test</button>
-                <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Tarea genérica</button>
-                <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Instrumentos</button>
+                <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen desarrollo</button>
+                <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen tipo Test</button>
+                <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Tarea por Criterios</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Tarea por Instrumentos</button>
             </div>
         </div>
     </div>
@@ -507,6 +509,18 @@ const capitalizeFirst = str => str ? str.charAt(0).toUpperCase() + str.slice(1) 
 const capitalizeBasename = name => name.split('_').map(capitalizeFirst).join('_');
 const makeBaseName = (prefix, name, course) => capitalizeBasename(sanitizeFilename(`${prefix}_${name}_${course}`).replace(/_+/g,'_'));
 
+
+function setBodyColor(app) {
+    const colors = {
+        'exam': '#e8f1ff',        // color de la tarjeta Examen
+        'test': '#e8f5ee',        // color de la tarjeta Test
+        'generic': '#fff4e5',     // color de la tarjeta Genérica
+        'instrumentos': '#f0eafa', // color de la tarjeta Instrumentos
+        'home': '#e9f0f5'         // color original del body (gris)
+    };
+    document.body.style.backgroundColor = colors[app] || '#e9f0f5';
+}
+
 /** Descarga un objeto como archivo JSON */
 function downloadJSON(data, filename) {
     const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:'application/json'}));
@@ -781,7 +795,7 @@ function renderSimpleGradeTable(state, tableId, tbodyId) {
     // Normalizar puntuaciones: ajustar longitud de filas y clampar 0–10
     normalizeScores(state, state.globalCriteria.length);
     state.scores.forEach(row => row && row.forEach((s,i,a) => { if(s>10) a[i]=10; else if(s<0) a[i]=0; }));
-    thead.innerHTML = '<tr><th>Alumno</th>' + state.globalCriteria.map(c => `<th>${c}.<br><small>(0-10)</small></th>`).join('') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map(c => `<th>${c}.<br><small>(0-10)</small></th>`).join('') + '</tr>';
     tbody.innerHTML = '';
     state.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
@@ -859,14 +873,14 @@ function renderResultsTable(app) {
     const tbody = document.getElementById(tbodyId);
     document.getElementById(spanId).textContent = label(state);
     if (!state.globalCriteria.length || !state.students.length) {
-        thead.innerHTML='<tr><th>Alumno</th><th>Sin criterios o alumnos</th></tr>';
+        thead.innerHTML='<tr><th>ALUMNADO</th><th>Sin criterios o alumnos</th></tr>';
         tbody.innerHTML='<tr><td colspan="2" class="text-center">Agregue criterios y alumnos.</td></tr>'; return;
     }
     if (app === 'exam') normalizeExamScores();
     if (app === 'generic') normalizeGenericScores();
     const showGlobal = document.getElementById(checkId).checked;
     const criteria = state.globalCriteria;
-    thead.innerHTML = '<tr><th>Alumno</th>' + criteria.map(c=>`<th>${c}.</th>`).join('') + (showGlobal ? '<th>Calificación</th>' : '') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + criteria.map(c=>`<th>${c}.</th>`).join('') + (showGlobal ? '<th>Calificación</th>' : '') + '</tr>';
     tbody.innerHTML = '';
     const rows = buildResultsData(app, showGlobal);
     const gradeColor = v => `hsl(${v * 12}, 80%, 70%)`;
@@ -1027,7 +1041,7 @@ function renderExamGradeTable() {
         thead.innerHTML=''; tbody.innerHTML='<tr><td class="text-center p-4">Se requieren alumnos y preguntas.</td></tr>'; return;
     }
     normalizeExamScores();
-    thead.innerHTML = '<tr><th>Alumno</th>' + examState.questions.map(q=>`<th>P${q.id}<br><small>max ${q.maxScore}</small></th>`).join('') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + examState.questions.map(q=>`<th>P${q.id}<br><small>max ${q.maxScore}</small></th>`).join('') + '</tr>';
     tbody.innerHTML = '';
     examState.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
@@ -1122,7 +1136,7 @@ function renderTestGradeTable() {
     const thead = document.querySelector('#testGradeTable thead'), tbody = document.getElementById('testGradeTbody');
     if (!thead||!tbody) return;
     if (!testState.students.length) { thead.innerHTML=''; tbody.innerHTML='<tr><td colspan="4" class="text-center p-4">Añade alumnos en Configuración.</td></tr>'; return; }
-    thead.innerHTML = '<tr><th>Alumno</th><th>Aciertos</th><th>Fallos</th><th>NS/NC</th>' + testState.globalCriteria.map(c=>`<th>${c}.</th>`).join('') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th><th>Aciertos</th><th>Fallos</th><th>NS/NC</th>' + testState.globalCriteria.map(c=>`<th>${c}.</th>`).join('') + '</tr>';
     tbody.innerHTML = '';
     testState.students.forEach((student, sIdx) => {
         if (!testState.studentScores[sIdx]) testState.studentScores[sIdx] = {studentId:student.id, correct:0, wrong:0, unanswered:testState.totalQuestions};
@@ -1556,7 +1570,7 @@ function inst_renderEvaluation() {
     });
     const showGrade=document.getElementById('inst_showGradeColumn').checked;
     const thead=document.getElementById('inst_evalThead');
-    thead.innerHTML='<tr><th>Alumno</th>'+instrumentState.instruments.map((_,i)=>`<th>I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th>${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
+    thead.innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((_,i)=>`<th>I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th>${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
     instrumentState.students.forEach((student,sIdx)=>{
         const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${student.fullName}</strong></td>`;
@@ -1740,12 +1754,20 @@ let currentApp = 'home';
 function hideAllApps() {
     ['homeScreen','appExamContainer','appTestContainer','appGenericContainer','appInstrumentosContainer'].forEach(id => document.getElementById(id).classList.remove('active'));
 }
-function showHome() { hideAllApps(); document.getElementById('homeScreen').classList.add('active'); currentApp='home'; }
+function showHome() { 
+	hideAllApps(); 
+	document.getElementById('homeScreen').classList.add('active');
+	currentApp='home';
+    setBodyColor('home');
+	}
+	
 function showApp(appId) {
-    hideAllApps(); document.getElementById(appId).classList.add('active');
+    hideAllApps();
+    document.getElementById(appId).classList.add('active');
     const map = {'appExamContainer':'exam','appTestContainer':'test','appGenericContainer':'generic','appInstrumentosContainer':'instrumentos'};
     currentApp = map[appId] || 'home';
-    if (appId==='appInstrumentosContainer') showInstrumentosScreen('inst_config');
+    setBodyColor(currentApp);   // <-- AÑADE ESTA LÍNEA
+    if (appId === 'appInstrumentosContainer') showInstrumentosScreen('inst_config');
 }
 
 function showAppScreen(prefix, screen) {
@@ -2075,6 +2097,7 @@ window.onload = function() {
     renderTestStudentTags();
     renderGenericStudentTags();
     showHome();
+	setBodyColor('home');
 };
 </script>
 </body>
