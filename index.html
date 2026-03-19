@@ -811,19 +811,19 @@
                 </div>
 				
 				<div class="section-card">
-    <div class="section-title">
-        <i class="bi bi-gear-wide-connected"></i> Gestión de información
-        <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
-    </div>
-    <div class="d-flex flex-wrap gap-2 justify-content-start">
-		<button id="inst_exportConfigJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
-		<button id="inst_importConfigJsonBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
-		<input type="file" id="inst_importConfigFile" accept=".json" class="hidden">
-		<button id="inst_saveConfigLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
-		<button id="inst_loadConfigLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
-		<button id="inst_resetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
-    </div>
-</div>
+					<div class="section-title">
+						<i class="bi bi-gear-wide-connected"></i> Gestión de información
+						<i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Importar, exportar o guardar la configuración actual."></i>
+					</div>
+					<div class="d-flex flex-wrap gap-2 justify-content-start">
+						<button id="inst_exportConfigJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+						<button id="inst_importConfigJsonBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
+						<input type="file" id="inst_importConfigFile" accept=".json" class="hidden">
+						<button id="inst_saveConfigLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
+						<button id="inst_loadConfigLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+						<button id="inst_resetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+					</div>
+				</div>
 				
                 <div class="d-flex justify-content-end"><button id="inst_irRelacionBtn" class="btn btn-primary btn-lg" disabled><i class="bi bi-arrow-right"></i> Ir a Relación</button></div>
             </div>
@@ -866,14 +866,15 @@
                     <div class="section-title"><i class="bi bi-table"></i> Calificaciones</div>
                     <div class="inst-switch-container"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="inst_showGradeColumn" checked><label class="form-check-label" for="inst_showGradeColumn">Mostrar columna Calificación</label></div></div>
                     <div class="inst-btn-file-group mt-3 mb-3">
-                        <button id="inst_saveEvalLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar calificaciones</button>
-                        <button id="inst_loadEvalLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Recuperar calificaciones</button>
-                        <button id="inst_exportEvalJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+					    <button id="inst_exportEvalJson" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
                         <button id="inst_importEvalJsonBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
                         <input type="file" id="inst_importEvalFile" accept=".json" class="hidden">
+                        <button id="inst_saveEvalLocal" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar calificaciones</button>
+                        <button id="inst_loadEvalLocal" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Recuperar calificaciones</button>
                     </div>
                     <div class="table-responsive" style="max-height:500px;"><table class="table table-bordered table-striped" id="inst_evalTable"><thead class="inst-fixed-header" id="inst_evalThead"></thead><tbody id="inst_evalTbody"></tbody></table></div>
-                    <div class="d-flex flex-wrap gap-3 mt-4 justify-content-between">
+                    
+					<div class="d-flex flex-wrap gap-3 mt-4 justify-content-between">
                         <span class="fw-bold">Exportar resultados:</span>
                         <div>
                             <button class="btn btn-outline-dark app-export-btn" data-app="inst" data-fmt="json" data-bs-toggle="modal" data-bs-target="#sharedExportModal"><i class="bi bi-filetype-json"></i> JSON</button>
@@ -1944,7 +1945,7 @@ function inst_renderMatrix() {
         ? instrumentCriteria.reduce((acc,_,idx)=>{ if(instrumentState.matrix.some(r=>r[idx])) acc.push(idx); return acc; },[])
         : instrumentCriteria.map((_,idx)=>idx);
     const criteriaToShow = usedIndices.map(i=>instrumentCriteria[i]);
-    thead.innerHTML = '<tr><th>Instrumento</th>'+criteriaToShow.map(c=>`<th class="inst-criteria-header text-center" title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('')+'</tr>';
+    thead.innerHTML = '<tr><th>INSTRUMENTOS</th>'+criteriaToShow.map(c=>`<th class="inst-criteria-header text-center" title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('')+'</tr>';
     tbody.innerHTML='';
     instrumentState.instruments.forEach((inst,i)=>{
         const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${inst.name}</strong></td>`;
