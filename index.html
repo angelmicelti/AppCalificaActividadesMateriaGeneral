@@ -15,39 +15,123 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
-        body { background-color: #e9f0f5; font-family: 'Segoe UI', Roboto, sans-serif; padding: 10px; margin: 0; }
-        .container-custom { max-width: 1400px; margin: 0 auto; background: transparent; border-radius: 28px; box-shadow: 0 25px 45px -12px rgba(2,48,71,0.2); padding: 24px 28px; }
+        /* ============================================================
+           BASE & LAYOUT
+        ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            background-color: #e9f0f5;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 8px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container-custom {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 25px 45px -12px rgba(2,48,71,0.2);
+            padding: 20px 24px;
+        }
+
+        /* ============================================================
+           HEADER / NAVEGACIÓN PRINCIPAL
+        ============================================================ */
+        .main-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1rem;
+        }
+        .main-header h1 {
+            font-size: clamp(1rem, 3.5vw, 1.5rem);
+            color: #0b4b6b;
+            margin: 0;
+            line-height: 1.3;
+        }
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        /* App-switcher: scrollable horizontal en pantallas pequeñas */
+        .app-switcher {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 4px;
+            scrollbar-width: none;
+            max-width: 100%;
+        }
+        .app-switcher::-webkit-scrollbar { display: none; }
+        .app-switcher .btn {
+            white-space: nowrap;
+            flex-shrink: 0;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            padding: 0.35rem 0.7rem;
+        }
+
+        /* ============================================================
+           PANTALLAS Y TARJETAS
+        ============================================================ */
         .screen { display: none; }
         .screen.active { display: block; }
-        .section-card { background-color: #fafcff; border-radius: 20px; padding: 20px 22px; margin-bottom: 24px; border: 1px solid #e2eaf1; box-shadow: 0 4px 12px rgba(0,49,78,0.03); transition: 0.2s; }
-        .section-card:hover { box-shadow: 0 8px 18px rgba(13,110,253,0.08); border-color: #cbdbe9; }
-        .section-title { display: flex; align-items: center; gap: 10px; font-weight: 600; color: #0b4b6b; margin-bottom: 20px; border-bottom: 2px dashed #b8d1dc; padding-bottom: 10px; }
-        .section-title i { font-size: 1.6rem; color: #0d6efd; }
-        .section-title .help-icon { font-size: 1.2rem; color: #6c757d; cursor: help; margin-left: auto; }
-        .criteria-group { border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; background-color: #f8fbfe; border-left: 8px solid; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-        .group-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-        .student-tag { background: linear-gradient(145deg, #f0f4fa, #e3eaf0); padding: 6px 18px; border-radius: 40px; font-size: 0.9rem; margin: 4px; display: inline-block; border: 1px solid #c0d3df; box-shadow: 0 2px 3px rgba(0,0,0,0.02); }
-        .student-tag i { margin-left: 5px; cursor: pointer; }
-        .badge-criteria { background-color: #0d4e6e; color: white; font-size: 0.8rem; margin-right: 6px; padding: 6px 12px; border-radius: 20px; font-weight: 500; }
-        .import-label { background-color: #ecf3f7; padding: 8px 20px; border-radius: 30px; cursor: pointer; border: 1px solid #adc6d3; font-weight: 500; }
-        .hidden { display: none; }
-        .validation-warning { background-color: #fff3cd; border-left: 6px solid #ffc107; padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; }
-        .table-custom th { background-color: #e9f0f5; color: #064663; }
-        .modal-header { background: linear-gradient(145deg, #0d6efd, #0b5ed7); color: white; }
-		.penalty-options {
-			display: grid;
-			grid-template-columns: repeat(6, 1fr);  /* 6 columnas iguales */
-			gap: 6px;                               /* Reducimos el gap para más espacio */
-			margin-top: 5px;
-		}
 
-        .penalty-option { display: flex; align-items: center; gap: 6px; padding: 8px; background-color: white; border-radius: 6px; border: 2px solid #e0edff; cursor: pointer; transition: 0.2s; }
-        .penalty-option:hover { border-color: #3498db; background-color: #f0f7ff; }
-        .penalty-option.selected { border-color: #2980b9; background-color: #e3f2fd; }
-        .grade-select { width: 100%; padding: 6px 10px; border: 2px solid #d1e3ff; border-radius: 8px; background-color: white; font-size: 0.9rem; }
-        .unanswered-field { background-color: #f0f4fa; border: 2px solid #e2eaf1; border-radius: 8px; padding: 8px 10px; text-align: center; font-weight: 600; color: #0b4b6b; }
-        .home-card { transition: transform 0.2s; cursor: pointer; border: 2px solid #dee2e6; border-radius: 20px; }
-        .home-card:hover { transform: scale(1.02); border-color: #0d6efd; box-shadow: 0 10px 25px rgba(13,110,253,0.2); }
+        .section-card {
+            background-color: #fafcff;
+            border-radius: 20px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2eaf1;
+            box-shadow: 0 4px 12px rgba(0,49,78,0.03);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .section-card:hover {
+            box-shadow: 0 8px 18px rgba(13,110,253,0.08);
+            border-color: #cbdbe9;
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-weight: 600;
+            color: #0b4b6b;
+            margin-bottom: 16px;
+            border-bottom: 2px dashed #b8d1dc;
+            padding-bottom: 10px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+        .section-title i { font-size: 1.4rem; color: #0d6efd; }
+        .section-title .help-icon {
+            font-size: 1.1rem;
+            color: #6c757d;
+            cursor: help;
+            margin-left: auto;
+        }
+
+        /* ============================================================
+           HOME CARDS
+        ============================================================ */
+        .home-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            border-radius: 20px;
+        }
+        @media (hover: hover) {
+            .home-card:hover { transform: scale(1.02); border-color: #0d6efd; box-shadow: 0 10px 25px rgba(13,110,253,0.2); }
+        }
         #cardExam    { background-color: #e8f1ff; border-color: #b8d0fb; }
         #cardExam:hover    { border-color: #0d6efd; }
         #cardTest    { background-color: #e8f5ee; border-color: #b2dfc5; }
@@ -56,39 +140,301 @@
         #cardGeneric:hover { border-color: #fd7e14; }
         #cardInstrumentos { background-color: #f0eafa; border-color: #c9aff0; }
         #cardInstrumentos:hover { border-color: #6f42c1; }
+
+        /* ============================================================
+           ALUMNADO / TAGS
+        ============================================================ */
+        .student-tag {
+            background: linear-gradient(145deg, #f0f4fa, #e3eaf0);
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.88rem;
+            margin: 3px;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #c0d3df;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.02);
+        }
+        .student-tag i { margin-left: 5px; cursor: pointer; }
+
+        /* Input de alumno: flexible, no fixed width */
+        .student-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+        }
+        .student-input-group input {
+            flex: 1 1 200px;
+            min-width: 150px;
+        }
+
+        /* ============================================================
+           CRITERIOS / BADGES
+        ============================================================ */
+        .criteria-group {
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background-color: #f8fbfe;
+            border-left: 6px solid;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .group-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .badge-criteria {
+            background-color: #0d4e6e; color: white; font-size: 0.78rem;
+            margin-right: 5px; padding: 5px 10px; border-radius: 20px; font-weight: 500;
+        }
+        .import-label {
+            background-color: #ecf3f7; padding: 8px 16px; border-radius: 30px;
+            cursor: pointer; border: 1px solid #adc6d3; font-weight: 500;
+            display: inline-block; white-space: nowrap;
+            min-height: 44px; line-height: 1.8;
+        }
+
+        /* ============================================================
+           VALIDACIONES
+        ============================================================ */
+        .hidden { display: none; }
+        .validation-warning {
+            background-color: #fff3cd; border-left: 6px solid #ffc107;
+            padding: 10px 16px; border-radius: 10px; margin-bottom: 16px; font-weight: 500;
+        }
+
+        /* ============================================================
+           TABLAS
+        ============================================================ */
+        .table-custom th { background-color: #e9f0f5; color: #064663; }
+        .table-responsive { -webkit-overflow-scrolling: touch; }
+        /* Indicador de scroll horizontal en móvil */
+        .table-scroll-hint {
+            display: none;
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-align: right;
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
+           OPCIONES DE PENALIZACIÓN (TEST)
+        ============================================================ */
+        .penalty-options {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-top: 5px;
+        }
+        .penalty-option {
+            display: flex; align-items: center; gap: 5px; padding: 8px 6px;
+            background-color: white; border-radius: 6px; border: 2px solid #e0edff;
+            cursor: pointer; transition: 0.2s; font-size: 0.85rem;
+            min-height: 44px; /* touch target */
+        }
+        .penalty-option:hover { border-color: #3498db; background-color: #f0f7ff; }
+        .penalty-option.selected { border-color: #2980b9; background-color: #e3f2fd; }
+
+        /* ============================================================
+           SELECTORES Y CAMPOS
+        ============================================================ */
+        .grade-select {
+            width: 100%; padding: 6px 10px; border: 2px solid #d1e3ff;
+            border-radius: 8px; background-color: white; font-size: 0.9rem;
+        }
+        .unanswered-field {
+            background-color: #f0f4fa; border: 2px solid #e2eaf1; border-radius: 8px;
+            padding: 8px 10px; text-align: center; font-weight: 600; color: #0b4b6b;
+        }
+
+        /* ============================================================
+           BOTONES
+        ============================================================ */
         .btn-purple { background-color: #6f42c1; border-color: #6f42c1; color: #fff; }
         .btn-purple:hover { background-color: #5a34a0; border-color: #5a34a0; color: #fff; }
-        .app-switcher .btn { border-radius: 30px; margin-left: 6px; }
-        /* INTRO */
-        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 30%, #2e7d32, #1b5e20, #0a3f0a, #0f2f0f); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; font-family: 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 20px; transition: opacity 1s ease; opacity: 1; pointer-events: all; }
+        /* Touch targets mínimos */
+        .btn { min-height: 38px; }
+
+        /* ============================================================
+           MODAL
+        ============================================================ */
+        .modal-header { background: linear-gradient(145deg, #0d6efd, #0b5ed7); color: white; }
+        .modal-header .btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* ============================================================
+           INTRO
+        ============================================================ */
+        #intro-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 30%, #2e7d32, #1b5e20, #0a3f0a, #0f2f0f);
+            color: white; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 9999; font-family: 'Segoe UI', Roboto, sans-serif;
+            text-align: center; padding: 20px; transition: opacity 1s ease; opacity: 1; pointer-events: all;
+        }
         #intro-overlay.fade-out { opacity: 0; pointer-events: none; }
-        .intro-title { font-size: clamp(2rem, 8vw, 4.5rem); font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,0.4); background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
-        .intro-subtitle { font-size: clamp(1rem, 3vw, 1.8rem); font-weight: 300; color: #f1f8e9; text-shadow: 1px 1px 4px #1b5e20; position: absolute; bottom: 40px; right: 40px; font-style: italic; }
+        .intro-title {
+            font-size: clamp(1.6rem, 7vw, 4.5rem); font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 20px;
+        }
+        .intro-subtitle {
+            font-size: clamp(0.85rem, 3vw, 1.6rem); font-weight: 300; color: #f1f8e9;
+            text-shadow: 1px 1px 4px #1b5e20;
+            position: absolute; bottom: 24px; right: 24px; font-style: italic;
+        }
         .intro-subtitle::before { content: "✦"; color: #a5d6a7; margin-right: 8px; }
-        /* Instrumentos */
-        .inst-matrix-cell { width: 32px; height: 32px; border: 2px solid #dee2e6; display: inline-block; margin: 2px; cursor: pointer; background-color: white; border-radius: 6px; }
+
+        /* ============================================================
+           INSTRUMENTOS
+        ============================================================ */
+        .inst-matrix-cell {
+            width: 32px; height: 32px; border: 2px solid #dee2e6; display: inline-block;
+            margin: 2px; cursor: pointer; background-color: white; border-radius: 6px;
+            min-width: 32px; /* no se comprima */
+        }
         .inst-matrix-cell.selected { background-color: #198754; border-color: #198754; }
-        .inst-criteria-header { writing-mode: vertical-lr; transform: rotate(180deg); height: 100px; white-space: nowrap; vertical-align: middle; text-align: center; width: 30px; min-width: 30px; max-width: 30px; overflow: hidden; text-overflow: ellipsis; }
-        .inst-weight-input { width: 90px; }
+        .inst-criteria-header {
+            writing-mode: vertical-lr; transform: rotate(180deg); height: 100px;
+            white-space: nowrap; vertical-align: middle; text-align: center;
+            width: 30px; min-width: 30px; max-width: 30px; overflow: hidden; text-overflow: ellipsis;
+        }
+        .inst-weight-input { width: 80px; min-width: 60px; }
         .inst-weight-readonly { background:#f0f4fa !important; cursor:not-allowed !important; color:#6c757d !important; border-color:#c8d8e4 !important; }
         .inst-weight-auto-badge { font-size:0.6rem; padding:2px 6px; background:#6c757d; color:#fff; border-radius:10px; vertical-align:middle; margin-left:4px; }
         .inst-warning-note { color: #856404; background-color: #fff3cd; padding: 5px 12px; border-radius: 20px; display: inline-block; }
-        .inst-grade-input { width: 70px; text-align: center; }
+        .inst-grade-input { width: 70px; min-width: 55px; text-align: center; }
         .inst-fixed-header { position: sticky; top: 0; background: white; z-index: 10; }
         #inst_evalTable td, #inst_evalTable th { vertical-align: middle; text-align: center; }
         #inst_evalTable td:first-child, #inst_evalTable th:first-child { text-align: left !important; }
-        .inst-switch-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .inst-switch-container { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
         .inst-modal-small { max-width: 400px; }
         .inst-btn-file-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
         #inst_matrixTable th:first-child, #inst_matrixTable td:first-child { max-width: 180px; min-width: 120px; white-space: normal; word-break: break-word; }
         #inst_matrixTable td { width: 30px; max-width: 30px; }
-        /* Acordeón pesos */
+
+        /* ============================================================
+           ACORDEÓN PESOS
+        ============================================================ */
         #accordionPesos .accordion-button { border-radius: 16px !important; }
         #accordionPesos .accordion-button:not(.collapsed) { border-radius: 16px 16px 0 0 !important; background:#e8f1ff; color:#0b4b6b; box-shadow:none; }
         #accordionPesos .accordion-item { border-radius: 16px; overflow:hidden; border:1px solid #e2eaf1; background:#fafcff; }
         #accordionPesos .accordion-button::after { filter: hue-rotate(195deg); }
-        @media (max-width: 576px) { .container-custom { padding: 12px; } .section-card { padding: 12px; } .student-tag { font-size: 0.8rem; padding: 4px 10px; } .btn-group .btn { font-size: 0.8rem; padding: 0.3rem 0.5rem; } .modal-dialog { margin: 0.5rem; } .section-title { flex-wrap: wrap; } .section-title .help-icon { margin-left: 0; } }
-        @media (max-width: 768px) { .d-flex.gap-2.flex-wrap { flex-direction: column; align-items: stretch; } .app-switcher { margin-top: 10px; width: 100%; } .app-switcher .btn { flex: 1; white-space: nowrap; font-size: 0.9rem; padding: 0.4rem 0.3rem; } }
+
+        /* ============================================================
+           SUBNAVEGACIÓN DE APPS (tabs internos)
+        ============================================================ */
+        .app-sub-nav {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 4px;
+            scrollbar-width: none;
+            margin-bottom: 1rem;
+        }
+        .app-sub-nav::-webkit-scrollbar { display: none; }
+        .app-sub-nav .btn {
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        /* ============================================================
+           MEDIA QUERIES — TABLET (≤ 768px)
+        ============================================================ */
+        @media (max-width: 768px) {
+            body { padding: 6px; }
+            .container-custom { padding: 14px 14px; border-radius: 16px; }
+            .section-card { padding: 14px 14px; border-radius: 14px; margin-bottom: 16px; }
+
+            /* Header */
+            .main-header { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; justify-content: flex-start; }
+            .app-switcher { width: 100%; }
+
+            /* Penalización: 3 cols en tablet */
+            .penalty-options { grid-template-columns: repeat(3, 1fr); }
+
+            /* Botones de grupos: envolver */
+            .btn-group { flex-wrap: wrap; }
+            .btn-group .btn { font-size: 0.8rem; padding: 0.3rem 0.55rem; }
+
+            /* Tables */
+            .table-scroll-hint { display: block; }
+
+            /* Home cards: 1 col */
+            .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+
+            .inst-weight-input { width: 70px; }
+        }
+
+        /* ============================================================
+           MEDIA QUERIES — MÓVIL (≤ 576px)
+        ============================================================ */
+        @media (max-width: 576px) {
+            body { padding: 4px; }
+            .container-custom { padding: 10px 10px; border-radius: 12px; box-shadow: none; }
+            .section-card { padding: 12px 10px; border-radius: 12px; margin-bottom: 12px; }
+
+            /* Penalización: 2 cols en móvil */
+            .penalty-options { grid-template-columns: repeat(2, 1fr); }
+
+            /* Títulos de sección */
+            .section-title { font-size: 0.85rem; gap: 6px; }
+            .section-title i { font-size: 1.2rem; }
+            .section-title .help-icon { display: none; } /* ocultar ayuda en móvil para ahorrar espacio */
+
+            /* Tags alumnos */
+            .student-tag { font-size: 0.78rem; padding: 4px 10px; }
+
+            /* Modales a pantalla casi completa */
+            .modal-dialog { margin: 0.4rem; }
+            .modal-dialog.modal-xl, .modal-dialog.modal-lg { max-width: 100%; margin: 0.4rem; }
+
+            /* Intro */
+            .intro-subtitle { position: static; margin-top: 20px; font-size: 0.9rem; right: auto; bottom: auto; }
+
+            /* Botones pequeños: texto corto */
+            .btn-sm-text-xs { font-size: 0.72rem; padding: 0.25rem 0.45rem; }
+
+            /* Tabla de instrumentos */
+            .inst-grade-input { width: 54px; font-size: 0.8rem; }
+            .inst-criteria-header { height: 80px; font-size: 0.75rem; }
+
+            /* Columnas: siempre 100% en móvil */
+            [class*="col-md-"], [class*="col-sm-"] { flex: 0 0 100%; max-width: 100%; }
+
+            /* Ajuste accordeon pesos */
+            #accordionPesos .accordion-body { padding: 10px; }
+
+            /* Ocultar texto en botones de exportar, solo icono */
+            .app-export-btn .btn-text { display: none; }
+
+            /* Mejor espaciado en flex-wrap */
+            .d-flex.flex-wrap { gap: 6px !important; }
+        }
+
+        /* ============================================================
+           PRINT
+        ============================================================ */
+        @media print {
+            #intro-overlay, .app-switcher, .btn-group, .import-label,
+            .modal, .header-actions { display: none !important; }
+            .container-custom { box-shadow: none; padding: 0; }
+            .section-card { break-inside: avoid; box-shadow: none; }
+            body { background: white; }
+        }
+
+        /* ============================================================
+           ACCESIBILIDAD: focus visible
+        ============================================================ */
+        :focus-visible { outline: 2px solid #0d6efd; outline-offset: 2px; border-radius: 4px; }
+
+        /* ============================================================
+           SCROLL SUAVE
+        ============================================================ */
+        html { scroll-behavior: smooth; }
     </style>
 </head>
 <body>
@@ -99,17 +445,17 @@
 
 <div class="container-custom">
     <!-- CABECERA -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="main-header">
         <h1 class="fw-bold" style="color: #0b4b6b;"><i class="bi bi-diagram-3 me-2" style="color: #0d6efd;"></i>EVALUACIÓN CRITERIAL · <span id="subjectNameDisplay">[sin materia]</span></h1>
-        <div class="d-flex gap-2 flex-wrap">
-            <button class="btn btn-outline-info" id="btnImportSubject"><i class="bi bi-upload"></i> Importar materia</button>
+        <div class="header-actions">
+            <button class="btn btn-outline-info btn-sm" id="btnImportSubject"><i class="bi bi-upload"></i> <span class="d-none d-sm-inline">Importar materia</span><span class="d-sm-none">Materia</span></button>
             <input type="file" id="importSubjectFile" accept=".json" class="hidden">
-            <div class="app-switcher btn-group" role="group">
+            <div class="app-switcher" role="group" aria-label="Navegación de apps">
                 <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
-                <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen desarrollo</button>
-                <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen tipo Test</button>
-                <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Tarea por Criterios</button>
-                <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Tarea por Instrumentos</button>
+                <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
+                <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
+                <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad Genérica</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Por Instrumentos</button>
             </div>
         </div>
     </div>
@@ -134,9 +480,9 @@
 
     <!-- APP 1: EXAMEN POR PREGUNTAS -->
     <div id="appExamContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold"><i class="bi bi-pencil-square" style="color:#0d6efd;"></i> Examen por preguntas · <span class="subject-badge-exam"></span></h3>
-            <div class="btn-group" role="group">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h3 class="fw-bold fs-5 mb-0"><i class="bi bi-pencil-square" style="color:#0d6efd;"></i> Examen · <span class="subject-badge-exam"></span></h3>
+            <div class="btn-group app-sub-nav" role="group">
                 <button type="button" class="btn btn-outline-primary active" id="examNavConfig">⚙️ Configuración</button>
                 <button type="button" class="btn btn-outline-primary" id="examNavGrade">📝 Calificación</button>
                 <button type="button" class="btn btn-outline-primary" id="examNavResults">📊 Resultados</button>
@@ -146,7 +492,7 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración del examen <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre y curso del examen."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" placeholder="Nombre del examen"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" placeholder="Introduce un nombreº"></div>
                     <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="examCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
 
                 </div>
@@ -155,7 +501,7 @@
 	        <div class="section-card">
                 <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="examBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div class="student-input-group"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="examBtnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
                     <div><label for="examImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="examImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                     <button id="examBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
@@ -201,7 +547,8 @@
         <div id="examScreenGrade" class="screen">
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Calificaciones por pregunta <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Introduce la nota de cada alumno en cada pregunta (0-10)."></i></div>
-                <div id="examGradeTableWrapper" class="table-responsive" style="max-height:500px; overflow-y:auto;"><table class="table table-bordered table-striped" id="examGradeTable"><thead class="sticky-top bg-white"></thead><tbody id="examGradeTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="examGradeTableWrapper" class="table-responsive" style="max-height:500px; overflow-y:auto;"><table class="table table-bordered table-striped" id="examGradeTable"><thead class="sticky-top bg-white"></thead><tbody id="examGradeTbody"></tbody></table></div>
                 <div class="mt-3 d-flex flex-wrap gap-2 justify-content-end">
                     <button id="examExportScoresBtn" class="btn btn-outline-dark"><i class="bi bi-download"></i> Exportar calificaciones</button>
                     <button id="examImportScoresBtn" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Importar calificaciones</button>
@@ -216,7 +563,8 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-bar-chart-line"></i> Resultados por alumno y criterio <span id="examResultsExamNameSpan" class="badge bg-info ms-3 fs-6"></span> <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nota criterio = (suma notas / suma máximos preguntas del criterio) * 10."></i></div>
                 <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="examShowGlobalGrade" checked><label class="form-check-label" for="examShowGlobalGrade">Mostrar columna Calificación</label></div>
-                <div id="examResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="examResultsTable"><thead class="table-secondary"></thead><tbody id="examResultsTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="examResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="examResultsTable"><thead class="table-secondary"></thead><tbody id="examResultsTbody"></tbody></table></div>
                 <div class="d-flex flex-wrap gap-3 mt-4 justify-content-between align-items-center">
                     <span class="fw-bold"><i class="bi bi-download"></i> Exportar resultados:</span>
                     <div>
@@ -231,9 +579,9 @@
 
     <!-- APP 2: TIPO TEST -->
     <div id="appTestContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold"><i class="fas fa-calculator" style="color:#198754;"></i> Examen tipo test · <span class="subject-badge-test"></span></h3>
-            <div class="btn-group">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h3 class="fw-bold fs-5 mb-0"><i class="fas fa-calculator" style="color:#198754;"></i> Tipo test · <span class="subject-badge-test"></span></h3>
+            <div class="btn-group app-sub-nav" role="group">
                 <button type="button" class="btn btn-outline-primary active" id="testNavConfig">⚙️ Configuración</button>
                 <button type="button" class="btn btn-outline-primary" id="testNavGrade">📝 Calificación</button>
                 <button type="button" class="btn btn-outline-primary" id="testNavResults">📊 Resultados</button>
@@ -243,7 +591,7 @@
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Configuración del test <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Título del test y curso."></i></div>
                 <div class="row g-4">
-                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del test</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Nombre del test"></div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del test</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Introduce un nombre"></div>
                     <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="testCourseInput" class="form-control" placeholder="Ejemplo 4º ESO"></div>
                 </div>
                 <div class="d-flex justify-content-end mt-2"><button id="testResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button></div>
@@ -252,7 +600,7 @@
 			<div class="section-card">
                 <div class="section-title"><i class="fas fa-users"></i> Alumnado <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos que realizarán el test."></i></div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="testBtnAddStudent" class="btn btn-success ms-2"><i class="fas fa-plus-circle"></i> +</button></div>
+                    <div class="student-input-group"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="testBtnAddStudent" class="btn btn-success"><i class="fas fa-plus-circle"></i> +</button></div>
                     <div><label for="testImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="testImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                     <button id="testBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
@@ -303,14 +651,11 @@
 			</div>		
 		
         </div>
-			
-
-
-        </div>
         <div id="testScreenGrade" class="screen">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-pencil-alt"></i> Calificaciones por alumno <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Selecciona aciertos y fallos. NS/NC se calcula automáticamente."></i></div>
-                <div id="testGradeTableWrapper" class="table-responsive" style="max-height:600px;"><table class="table table-bordered table-striped" id="testGradeTable"><thead class="table-secondary sticky-top"></thead><tbody id="testGradeTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="testGradeTableWrapper" class="table-responsive" style="max-height:600px;"><table class="table table-bordered table-striped" id="testGradeTable"><thead class="table-secondary sticky-top"></thead><tbody id="testGradeTbody"></tbody></table></div>
                 <div class="mt-3 d-flex flex-wrap gap-2 justify-content-end">
                     <button id="testExportScoresBtn" class="btn btn-outline-dark"><i class="bi bi-download"></i> Exportar calificaciones</button>
                     <button id="testImportScoresBtn" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Importar calificaciones</button>
@@ -325,7 +670,8 @@
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-chart-line"></i> Resultados por alumno y criterio <span id="testResultsExamNameSpan" class="badge bg-info ms-3 fs-6"></span> <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Cada criterio recibe la misma nota (la nota del test)."></i></div>
                 <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="testShowGlobalGrade" checked><label class="form-check-label" for="testShowGlobalGrade">Mostrar columna Calificación</label></div>
-                <div id="testResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="testResultsTable"><thead class="table-secondary"></thead><tbody id="testResultsTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="testResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="testResultsTable"><thead class="table-secondary"></thead><tbody id="testResultsTbody"></tbody></table></div>
                 <div class="d-flex flex-wrap gap-3 mt-4 justify-content-between align-items-center">
                     <span class="fw-bold"><i class="fas fa-download"></i> Exportar:</span>
                     <div>
@@ -340,9 +686,9 @@
 
     <!-- APP 3: GENÉRICA -->
     <div id="appGenericContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold"><i class="bi bi-check2-circle" style="color:#fd7e14;"></i> Evaluación de tarea por criterios · <span class="subject-badge-generic"></span></h3>
-            <div class="btn-group">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h3 class="fw-bold fs-5 mb-0"><i class="bi bi-check2-circle" style="color:#fd7e14;"></i> Por criterios · <span class="subject-badge-generic"></span></h3>
+            <div class="btn-group app-sub-nav" role="group">
                 <button type="button" class="btn btn-outline-primary active" id="genericNavConfig">⚙️ Configuración</button>
                 <button type="button" class="btn btn-outline-primary" id="genericNavGrade">📝 Calificación</button>
                 <button type="button" class="btn btn-outline-primary" id="genericNavResults">📊 Resultados</button>
@@ -352,7 +698,7 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la actividad <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre de la actividad y curso."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" placeholder="Nombre de la actividad"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" placeholder="Introduce un nombre"></div>
                     <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="genericCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
                 </div>
             </div>
@@ -360,7 +706,7 @@
 			<div class="section-card">
                 <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="genericBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div class="student-input-group"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="genericBtnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
                     <div><label for="genericImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="genericImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                     <button id="genericBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
@@ -394,7 +740,8 @@
         <div id="genericScreenGrade" class="screen">
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Calificaciones por criterio <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Introduce una nota (0-10) para cada alumno en cada criterio."></i></div>
-                <div id="genericGradeTableWrapper" class="table-responsive" style="max-height:500px;"><table class="table table-bordered table-striped" id="genericGradeTable"><thead class="sticky-top bg-white"></thead><tbody id="genericGradeTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="genericGradeTableWrapper" class="table-responsive" style="max-height:500px;"><table class="table table-bordered table-striped" id="genericGradeTable"><thead class="sticky-top bg-white"></thead><tbody id="genericGradeTbody"></tbody></table></div>
                 <div class="mt-3 d-flex flex-wrap gap-2 justify-content-end">
                     <button id="genericExportScoresBtn" class="btn btn-outline-dark"><i class="bi bi-download"></i> Exportar calificaciones</button>
                     <button id="genericImportScoresBtn" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Importar calificaciones</button>
@@ -409,7 +756,8 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-bar-chart-line"></i> Resultados por alumno y criterio <span id="genericResultsExamNameSpan" class="badge bg-info ms-3 fs-6"></span> <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Notas directas introducidas en la pantalla de calificación."></i></div>
                 <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="genericShowGlobalGrade" checked><label class="form-check-label" for="genericShowGlobalGrade">Mostrar columna Calificación</label></div>
-                <div id="genericResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="genericResultsTable"><thead class="table-secondary"></thead><tbody id="genericResultsTbody"></tbody></table></div>
+                <div class="table-scroll-hint"><i class="bi bi-arrows-expand-horizontal"></i> Desliza para ver más</div>
+                    <div id="genericResultsTableWrapper" class="table-responsive"><table class="table table-bordered table-hover" id="genericResultsTable"><thead class="table-secondary"></thead><tbody id="genericResultsTbody"></tbody></table></div>
                 <div class="d-flex flex-wrap gap-3 mt-4 justify-content-between align-items-center">
                     <span class="fw-bold"><i class="bi bi-download"></i> Exportar resultados:</span>
                     <div>
@@ -424,9 +772,9 @@
 
     <!-- APP 4: INSTRUMENTOS (MODIFICADA CON PESOS AUTO) -->
     <div id="appInstrumentosContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold"><i class="bi bi-grid-3x3-gap-fill" style="color:#6f42c1;"></i> Evaluación por instrumentos · <span class="subject-badge-instrumentos"></span></h3>
-            <div class="btn-group" role="group">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <h3 class="fw-bold fs-5 mb-0"><i class="bi bi-grid-3x3-gap-fill" style="color:#6f42c1;"></i> Instrumentos · <span class="subject-badge-instrumentos"></span></h3>
+            <div class="btn-group app-sub-nav" role="group">
                 <button type="button" class="btn btn-outline-primary active" id="inst_config-tab"><i class="bi bi-gear-fill"></i> Configuración</button>
                 <button type="button" class="btn btn-outline-primary" id="inst_relacion-tab"><i class="bi bi-diagram-3"></i> Relación</button>
                 <button type="button" class="btn btn-outline-primary" id="inst_eval-tab"><i class="bi bi-bar-chart-line"></i> Evaluación</button>
@@ -445,7 +793,7 @@
                 <div class="section-card">
 					<div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
 						<div class="d-flex flex-wrap gap-3 align-items-center">
-							<div class="d-flex flex-wrap"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="inst_btnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+							<div class="student-input-group"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="inst_btnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
 							<div><label for="inst_importExcel" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="inst_importExcel" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
 							<button id="inst_btnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
 						</div>
