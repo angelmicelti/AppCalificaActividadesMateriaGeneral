@@ -594,7 +594,6 @@
                     <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del test</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Introduce un nombre"></div>
                     <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="testCourseInput" class="form-control" placeholder="Ejemplo 4º ESO"></div>
                 </div>
-                <div class="d-flex justify-content-end mt-2"><button id="testResetAllBtn" class="btn btn-outline-danger"><i class="bi bi-eraser"></i> Reiniciar todo</button></div>
             </div>
 			
 			<div class="section-card">
@@ -1200,7 +1199,7 @@ function renderSimpleGradeTable(state, tableId, tbodyId) {
     }
     normalizeScores(state, state.globalCriteria.length);
     state.scores.forEach(row => row && row.forEach((s,i,a) => { if(s>10) a[i]=10; else if(s<0) a[i]=0; }));
-    thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map(c => `<th>${c}.<br><small>(0-10)</small></th>`).join('') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map(c => `<th title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.<br><small>(0-10)</small></th>`).join('') + '</tr>';
     tbody.innerHTML = '';
     state.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
@@ -1283,7 +1282,7 @@ function renderResultsTable(app) {
     if (app === 'generic') normalizeGenericScores();
     const showGlobal = document.getElementById(checkId).checked;
     const criteria = state.globalCriteria;
-    thead.innerHTML = '<tr><th>ALUMNADO</th>' + criteria.map(c=>`<th>${c}.</th>`).join('') + (showGlobal ? '<th>Calificación</th>' : '') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + criteria.map(c=>`<th title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('') + (showGlobal ? '<th>Calificación</th>' : '') + '</tr>';
     tbody.innerHTML = '';
     const rows = buildResultsData(app, showGlobal);
     const gradeColor = v => `hsl(${v * 12}, 80%, 70%)`;
@@ -1539,7 +1538,7 @@ function renderTestGradeTable() {
     const thead = document.querySelector('#testGradeTable thead'), tbody = document.getElementById('testGradeTbody');
     if (!thead||!tbody) return;
     if (!testState.students.length) { thead.innerHTML=''; tbody.innerHTML='<tr><td colspan="4" class="text-center p-4">Añade alumnos en Configuración.</td></tr>'; return; }
-    thead.innerHTML = '<tr><th>ALUMNADO</th><th>Aciertos</th><th>Fallos</th><th>NS/NC</th>' + testState.globalCriteria.map(c=>`<th>${c}.</th>`).join('') + '</tr>';
+    thead.innerHTML = '<tr><th>ALUMNADO</th><th>Aciertos</th><th>Fallos</th><th>NS/NC</th>' + testState.globalCriteria.map(c=>`<th title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('') + '</tr>';
     tbody.innerHTML = '';
     testState.students.forEach((student, sIdx) => {
         if (!testState.studentScores[sIdx]) testState.studentScores[sIdx] = {studentId:student.id, correct:0, wrong:0, unanswered:testState.totalQuestions};
@@ -1945,7 +1944,7 @@ function inst_renderMatrix() {
         ? instrumentCriteria.reduce((acc,_,idx)=>{ if(instrumentState.matrix.some(r=>r[idx])) acc.push(idx); return acc; },[])
         : instrumentCriteria.map((_,idx)=>idx);
     const criteriaToShow = usedIndices.map(i=>instrumentCriteria[i]);
-    thead.innerHTML = '<tr><th>Instrumento</th>'+criteriaToShow.map(c=>`<th class="inst-criteria-header text-center">${c}.</th>`).join('')+'</tr>';
+    thead.innerHTML = '<tr><th>Instrumento</th>'+criteriaToShow.map(c=>`<th class="inst-criteria-header text-center" title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('')+'</tr>';
     tbody.innerHTML='';
     instrumentState.instruments.forEach((inst,i)=>{
         const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${inst.name}</strong></td>`;
@@ -2033,7 +2032,7 @@ function inst_renderEvaluation() {
     inst_syncPesosBadge();
 
     const showGrade=document.getElementById('inst_showGradeColumn').checked;
-    document.getElementById('inst_evalThead').innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((_,i)=>`<th>I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th>${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
+    document.getElementById('inst_evalThead').innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((inst,i)=>`<th title="${inst.name.replace(/"/g,'&quot;')}" style="cursor:help; white-space:nowrap;">I${i+1}</th>`).join('')+usedCriteria.map(c=>`<th title="${getCriteriaDescription(c).replace(/"/g,'&quot;')}" style="cursor:help;">${c}.</th>`).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
     instrumentState.students.forEach((student,sIdx)=>{
         const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${student.fullName}</strong></td>`;
@@ -2522,7 +2521,6 @@ document.getElementById('testBtnClearStudents').addEventListener('click', functi
     document.getElementById('testImportScoresBtn').addEventListener('click', ()=>document.getElementById('testImportScoresFile').click());
     document.getElementById('testImportScoresFile').addEventListener('change', function() { if(this.files.length) importTestScores(this.files[0]); this.value=''; });
     document.getElementById('testRecoverScoresBtn').addEventListener('click', recoverTestScores);
-    document.getElementById('testResetAllBtn').addEventListener('click', resetTestState);
     document.getElementById('testShowGlobalGrade').addEventListener('change', ()=>renderResultsTable('test'));
 
     // ========== GENÉRICA ==========
