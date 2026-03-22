@@ -1,7 +1,7 @@
 {
-  "name": "Sistema de Evaluación Competencial",
+  "name": "Sistema de Evaluación Multimateria",
   "short_name": "Evaluación Criterial General",
-  "description": "Evalúa actividades por criterios, exámenes y tests",
+  "description": "Evalúa actividades por criterios, instrumentos, exámenes y tests",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e9f0f5",
