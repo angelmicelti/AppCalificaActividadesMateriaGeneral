@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>EVALUACIÓN CRITERIAL · MATERIA DINÁMICA · V7.2</title>
+    <title>EVALUACIÓN CRITERIAL · MATERIA DINÁMICA · V7.3</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#0b4b6b">
@@ -94,7 +94,7 @@
             touch-action: manipulation; }
         /* INTRO */
         #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 20% 30%, #0b4b6b, #062c3b, #031824);
+            background: radial-gradient(circle at 20% 30%, #0b4b1a, #052c10, #021808);
             color: white; display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 9999; font-family: 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 20px;
             transition: opacity 1s ease; opacity: 1; pointer-events: all; }
@@ -104,11 +104,11 @@
             background: linear-gradient(135deg, #e0f0ff, #b8d9f8, #cce5ff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text; margin-bottom: 20px; line-height: 1.2; }
-        .intro-subtitle { font-size: clamp(0.9rem, 3vw, 1.8rem); font-weight: 300; color: #d0e8ff;
+        .intro-subtitle { font-size: clamp(0.9rem, 3vw, 1.8rem); font-weight: 300; color: #c8f0d0
             text-shadow: 1px 1px 4px #031824; position: absolute;
             bottom: max(40px, env(safe-area-inset-bottom, 40px));
             right: max(40px, env(safe-area-inset-right, 40px)); font-style: italic; }
-        .intro-subtitle::before { content: "✦"; color: #7fb3d3; margin-right: 8px; }
+        .intro-subtitle::before { content: "✦"; color: #7fc49a;; margin-right: 8px; }
         /* Instrumentos */
         .inst-matrix-cell { width: 32px; height: 32px; border: 2px solid #dee2e6; display: inline-block;
             margin: 2px; cursor: pointer; background-color: white; border-radius: 6px;
@@ -207,7 +207,7 @@
 </head>
 <body>
 <div id="intro-overlay">
-    <div class="intro-title">EVALUACIÓN CRITERIAL<br>COMPETENCIAL</div>
+    <div class="intro-title">EVALUACIÓN CRITERIAL<br>MULTIMATERIA</div>
     <div class="intro-subtitle">by @angelmicelti</div>
 </div>
 
@@ -854,7 +854,7 @@ const capitalizeBasename = name => name.split('_').map(capitalizeFirst).join('_'
 const makeBaseName = (prefix, name, course) => capitalizeBasename(sanitizeFilename(`${prefix}_${name}_${course}`).replace(/_+/g,'_'));
 
 function setBodyColor(app) {
-    const colors = { 'exam':'#e8f1ff', 'test':'#e8f5ee', 'generic':'#fff4e5', 'instrumentos':'#f0eafa', 'home':'#e9f0f5' };
+    const colors = { 'exam':'#e8f1ff', 'test':'#e8f5ee', 'generic':'#fff4e5', 'instrumentos':'#f0eafa', 'home':'#FCFAFC' };
     document.body.style.backgroundColor = colors[app] || '#e9f0f5';
 }
 function downloadJSON(data, filename) {
