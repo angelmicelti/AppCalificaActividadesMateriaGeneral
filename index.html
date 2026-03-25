@@ -6,10 +6,12 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>EVALUACIÓN CRITERIAL · MULTIMATERIA · V1.0</title>
+    <title>EVALUACIÓN CRITERIAL · MULTIMATERIA · V5.0</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <meta name="theme-color" content="#0b4b6b">
+    <meta name="theme-color" content="#0b4b6b" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d1e2e" media="(prefers-color-scheme: dark)">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" type="image/png" href="icons/icon-96x96.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -169,44 +171,342 @@
         #accordionPesos .accordion-button:not(.collapsed) { border-radius: 16px 16px 0 0 !important; background:#e8f1ff; color:#0b4b6b; box-shadow:none; }
         #accordionPesos .accordion-item { border-radius: 16px; overflow:hidden; border:1px solid #e2eaf1; background:#fafcff; }
         #accordionPesos .accordion-button::after { filter: hue-rotate(195deg); }
-        /* FORM INPUTS – prevent iOS zoom */
-        input[type="text"], input[type="number"], input[type="email"], input[type="search"], select, textarea { font-size: max(16px, 0.9rem); }
-        /* RESPONSIVE */
-        @media (max-width: 992px) { .container-custom { padding: 20px 18px; } }
+        /* ═══════════════════════════════════════════════════════════
+           FORM INPUTS – prevent iOS zoom (font-size >= 16px)
+           ═══════════════════════════════════════════════════════════ */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="search"],
+        select,
+        textarea { font-size: max(16px, 0.9rem); }
+
+        /* ═══════════════════════════════════════════════════════════
+           OVERRIDE INLINE FIXED WIDTHS – fluid on all screens
+           ═══════════════════════════════════════════════════════════ */
+        /* Student name inputs (all apps) */
+        #examStudentNameInput,
+        #testStudentNameInput,
+        #genericStudentNameInput,
+        #inst_studentNameInput { width: min(260px, 100%) !important; }
+
+        /* Instrument weight input */
+        .inst-weight-input { width: min(90px, 100%); }
+
+        /* ═══════════════════════════════════════════════════════════
+           APP-SWITCHER NAVIGATION – fully responsive
+           ═══════════════════════════════════════════════════════════ */
+        .app-switcher {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 4px;
+            padding-bottom: 4px;
+        }
+        .app-switcher::-webkit-scrollbar { display: none; }
+        .app-switcher .btn {
+            border-radius: 30px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: 0;
+            touch-action: manipulation;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           HEADER – responsive stacking
+           ═══════════════════════════════════════════════════════════ */
+        .app-header-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-header-row > h1 { min-width: 0; }
+        .app-header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SUB-NAVIGATION (Configuración / Calificación / Resultados)
+           ═══════════════════════════════════════════════════════════ */
+        .subnav-group {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 4px;
+        }
+        .subnav-group::-webkit-scrollbar { display: none; }
+        .subnav-group .btn { flex-shrink: 0; white-space: nowrap; }
+
+        /* ═══════════════════════════════════════════════════════════
+           PENALTY OPTIONS – adaptive columns
+           ═══════════════════════════════════════════════════════════ */
+        .penalty-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           TABLE OVERFLOW – always horizontal scrollable
+           ═══════════════════════════════════════════════════════════ */
+        .table-responsive { -webkit-overflow-scrolling: touch; }
+        /* Minimum column widths so tables don't collapse unreadably */
+        #examGradeTable th, #examGradeTable td,
+        #testGradeTable th, #testGradeTable td,
+        #genericGradeTable th, #genericGradeTable td,
+        #inst_evalTable th, #inst_evalTable td { min-width: 70px; }
+        #examGradeTable td:first-child, #testGradeTable td:first-child,
+        #genericGradeTable td:first-child, #inst_evalTable td:first-child { min-width: 130px; }
+
+        /* ═══════════════════════════════════════════════════════════
+           ADD-STUDENT ROW – flex-wrap properly
+           ═══════════════════════════════════════════════════════════ */
+        .add-student-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .add-student-row input { flex: 1 1 180px; min-width: 140px; }
+        .add-student-row button { flex-shrink: 0; }
+
+        /* ═══════════════════════════════════════════════════════════
+           BREAKPOINT: ≤ 992px  (tablets landscape)
+           ═══════════════════════════════════════════════════════════ */
+        @media (max-width: 992px) {
+            .container-custom { padding: 20px 18px; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           BREAKPOINT: ≤ 768px  (tablets portrait / large phones)
+           ═══════════════════════════════════════════════════════════ */
         @media (max-width: 768px) {
             body { padding: 6px; }
             .container-custom { padding: 16px 14px; border-radius: 20px; }
             .section-card { padding: 16px 14px; border-radius: 16px; }
-            .section-title { flex-wrap: wrap; } .section-title .help-icon { margin-left: 0; }
-            .btn-group[role="group"] { display: flex; flex-wrap: nowrap; overflow-x: auto;
-                -webkit-overflow-scrolling: touch; scrollbar-width: none; width: 100%; gap: 4px; }
+            .section-title { flex-wrap: wrap; }
+            .section-title .help-icon { margin-left: 0; }
+
+            /* Sub-navigation btn-groups */
+            .btn-group[role="group"] {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                width: 100%;
+                gap: 4px;
+            }
             .btn-group[role="group"]::-webkit-scrollbar { display: none; }
-            .btn-group[role="group"] .btn { flex-shrink: 0; white-space: nowrap; border-radius: 8px !important; }
-            .d-flex.gap-2.flex-wrap { flex-direction: column; align-items: stretch; }
+            .btn-group[role="group"] .btn {
+                flex-shrink: 0;
+                white-space: nowrap;
+                border-radius: 8px !important;
+            }
+
+            /* App switcher */
             .app-switcher { margin-top: 10px; width: 100%; }
-            .app-switcher .btn { flex: 1; white-space: nowrap; font-size: 0.9rem; padding: 0.4rem 0.3rem; }
+            .app-switcher .btn { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
+
+            /* Button rows */
+            .btn-action-row { flex-direction: column; align-items: stretch; }
+            .btn-action-row .btn { width: 100%; justify-content: center; }
+
+            /* Penalty options: 2 columns on tablets */
+            .penalty-options { grid-template-columns: repeat(2, 1fr); }
+
+            /* Export button groups – wrap gracefully */
+            .export-btn-group { flex-wrap: wrap; gap: 6px; }
+            .export-btn-group .btn { flex: 1 1 auto; min-width: 90px; }
+
+            /* Instrument matrix table cells */
+            .inst-criteria-header { height: 80px; }
+
+            /* Results title badge – don't overflow */
+            .section-title .badge { font-size: 0.75rem !important; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           BREAKPOINT: ≤ 576px  (phones)
+           ═══════════════════════════════════════════════════════════ */
         @media (max-width: 576px) {
             body { padding: 4px; }
-            .container-custom { padding: 12px 10px; border-radius: 14px; }
-            .section-card { padding: 14px 12px; border-radius: 14px; margin-bottom: 16px; }
+            .container-custom { padding: 12px 8px; border-radius: 14px; }
+            .section-card { padding: 14px 10px; border-radius: 14px; margin-bottom: 16px; }
+
+            /* Student tags */
             .student-tag { font-size: 0.8rem; padding: 4px 10px; }
+
+            /* Button groups */
             .btn-group .btn { font-size: 0.8rem; padding: 0.3rem 0.5rem; }
-            .modal-dialog { margin: 0.5rem; }
-            .penalty-options { grid-template-columns: repeat(3, 1fr); }
+
+            /* Modal: full-width on phones */
+            .modal-dialog { margin: 0.4rem; }
+            .modal-dialog:not(.modal-fullscreen-md-down):not(.modal-fullscreen-lg-down) {
+                max-width: calc(100vw - 0.8rem);
+            }
+
+            /* Penalty: 1 column on small phones */
+            .penalty-options { grid-template-columns: 1fr 1fr; gap: 4px; }
+            .penalty-option { padding: 8px 6px; font-size: 0.85rem; }
+
+            /* Intro subtitle: static instead of absolute */
             .intro-subtitle { position: static; margin-top: 20px; font-size: 0.85rem; }
+
+            /* App-switcher: icon + short label */
+            .app-switcher .btn { font-size: 0.78rem; padding: 0.35rem 0.5rem; }
+
+            /* Header title smaller */
+            h1[style*="color: #0b4b6b"] { font-size: clamp(0.95rem, 4vw, 1.3rem) !important; }
+
+            /* Home cards: full width */
+            .home-card { border-radius: 14px; }
+            .home-card h3 { font-size: 1.15rem; }
+
+            /* Section titles */
+            .section-title { font-size: 0.95rem; gap: 6px; }
+            .section-title i { font-size: 1.3rem; }
+
+            /* Form layout: single column */
+            .row.g-3 > [class*="col-md"], .row.g-4 > [class*="col-md"] { --bs-gutter-x: 0.5rem; }
+
+            /* Score buttons wrap */
+            .mt-3.d-flex.flex-wrap.gap-2.justify-content-end {
+                justify-content: stretch !important;
+            }
+            .mt-3.d-flex.flex-wrap.gap-2.justify-content-end .btn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 130px;
+                font-size: 0.8rem;
+            }
+
+            /* Instruments matrix smaller cells */
+            .inst-matrix-cell { width: 30px; height: 30px; margin: 1px; }
+            .inst-criteria-header { height: 70px; width: 24px; min-width: 24px; max-width: 24px; }
+
+            /* Grade inputs touch-friendly */
+            .inst-grade-input { width: 60px; }
+            input.grade-text-input { width: 60px; }
+
+            /* Pond activity cards */
+            .pond-activity-card { padding: 12px; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           BREAKPOINT: ≤ 400px  (very small phones – iPhone SE, etc.)
+           ═══════════════════════════════════════════════════════════ */
+        @media (max-width: 400px) {
+            .container-custom { padding: 10px 6px; border-radius: 10px; }
+            .section-card { padding: 10px 8px; border-radius: 10px; }
+            .app-switcher .btn { font-size: 0.72rem; padding: 0.3rem 0.4rem; }
+            .penalty-options { grid-template-columns: 1fr; }
+            .penalty-option { font-size: 0.82rem; }
+            .btn-group .btn { font-size: 0.75rem; padding: 0.25rem 0.4rem; }
+            .home-card h3 { font-size: 1rem; }
+            .intro-title { font-size: clamp(1.5rem, 7vw, 2.5rem); }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           TOUCH / COARSE-POINTER DEVICES (phones & tablets)
+           ═══════════════════════════════════════════════════════════ */
         @media (hover: none) and (pointer: coarse) {
-            .btn { min-height: 42px; } .form-control { min-height: 42px; }
-            .inst-grade-input { min-height: 42px; } .grade-select { min-height: 42px; }
-            .inst-matrix-cell { width: 42px; height: 42px; margin: 3px; }
-            .penalty-option { padding: 10px 8px; } .student-tag { padding: 8px 16px; }
+            .btn { min-height: 44px; }
+            .form-control { min-height: 44px; }
+            .inst-grade-input { min-height: 44px; }
+            .grade-select { min-height: 44px; }
+            .inst-matrix-cell { width: 44px; height: 44px; margin: 3px; }
+            .penalty-option { padding: 10px 8px; min-height: 52px; }
+            .student-tag { padding: 8px 16px; }
+            .import-label { min-height: 44px; display: inline-flex; align-items: center; }
+            /* Larger tap targets for close icons on tags */
+            .student-tag i { padding: 4px; margin-left: 4px; }
+            /* home cards: no hover transform on touch */
+            .home-card:hover { transform: none; }
+            /* Accordion: larger target */
+            .accordion-button { min-height: 52px; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           LANDSCAPE PHONE (short height)
+           ═══════════════════════════════════════════════════════════ */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #intro-overlay { padding: 10px; }
+            .intro-title { font-size: clamp(1.2rem, 5vw, 2rem); margin-bottom: 10px; }
+            .intro-subtitle { position: static; margin-top: 8px; font-size: 0.78rem; }
+            .container-custom { padding: 8px 10px; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           DARK MODE (respects OS preference)
+           ═══════════════════════════════════════════════════════════ */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #111820; color: #dee2e6; }
+            .container-custom { background: #1a2230; }
+            .section-card { background-color: #1e2a3a; border-color: #2e3e52; color: #dee2e6; }
+            .section-card:hover { border-color: #4a7099; }
+            .section-title { color: #7ebde8; border-bottom-color: #2e4a60; }
+            .criteria-group { background-color: #19273a; }
+            .student-tag { background: linear-gradient(145deg, #1e2d3e, #263444); border-color: #374f66; color: #cdd9e5; }
+            .import-label { background-color: #1e2d3e; border-color: #3a5570; color: #9ec8e8; }
+            .validation-warning { background-color: #332800; border-left-color: #ffc107; color: #ffd966; }
+            .home-card { border-color: #2e4055; background-color: #1a2535 !important; }
+            #cardExam { background-color: #1a2a40 !important; border-color: #2a4a7a !important; }
+            #cardTest { background-color: #1a2e28 !important; border-color: #1e5040 !important; }
+            #cardGeneric { background-color: #2e2010 !important; border-color: #7a4010 !important; }
+            #cardInstrumentos { background-color: #221a35 !important; border-color: #5a3a90 !important; }
+            #cardPonderacion { background-color: #0d2830 !important; border-color: #1a5a6e !important; }
+            .table { color: #cdd9e5; }
+            .table-striped > tbody > tr:nth-of-type(odd) { background-color: #1c2a3a; }
+            .table-bordered { border-color: #2e3e52; }
+            .table-bordered td, .table-bordered th { border-color: #2e3e52; }
+            .table-secondary, .table-custom th { background-color: #22334a !important; color: #9ec8e8; }
+            .table-hover > tbody > tr:hover { background-color: #253545; }
+            .form-control, .form-select { background-color: #1e2d3e; border-color: #3a5570; color: #cdd9e5; }
+            .form-control:focus, .form-select:focus { background-color: #1e2d3e; color: #e8f0f8; border-color: #4a8fc5; box-shadow: 0 0 0 0.2rem rgba(74,143,197,0.25); }
+            .form-control::placeholder { color: #5a7a95; }
+            .accordion-item { background-color: #1e2a3a; border-color: #2e3e52; }
+            .accordion-button { background-color: #1e2a3a; color: #9ec8e8; }
+            .accordion-button:not(.collapsed) { background-color: #1a3555; color: #7ebde8; }
+            .accordion-button::after { filter: invert(1) hue-rotate(195deg); }
+            .pond-activity-card { background: #0d2030; border-color: #1a5060; }
+            .alert-info { background-color: #0a2535; border-color: #1a4a65; color: #8dd0f0; }
+            .alert-success { background-color: #0a2010; border-color: #1a4a20; color: #6adc8a; }
+            .bg-white { background-color: #1a2535 !important; }
+            .modal-content { background-color: #1a2535; color: #dee2e6; border-color: #2e3e52; }
+            .modal-footer, .modal-body { border-color: #2e3e52; }
+            .penalty-option { background-color: #1a2535; border-color: #2e3e52; color: #cdd9e5; }
+            .penalty-option:hover { background-color: #1a3050; border-color: #3a80b0; }
+            .penalty-option.selected { background-color: #123560; border-color: #2980b9; }
+            .unanswered-field { background-color: #1a2535; border-color: #2e3e52; color: #9ec8e8; }
+            .exam-q-name-input, .exam-q-desc-textarea,
+            .inst-desc-textarea { background-color: #1a2535; color: #cdd9e5; border-color: #3a5570; }
+            input.grade-text-input { background-color: #1e2d3e; color: #cdd9e5; }
+            .inst-weight-readonly { background: #111820 !important; color: #5a7a95 !important; }
+            .inst-warning-note { background-color: #332800; color: #ffd966; }
+            .crit-family-stripe { background-color: #1a2a40 !important; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           PRINT
+           ═══════════════════════════════════════════════════════════ */
         @media print {
-            .app-switcher, #intro-overlay, .btn:not(.badge) { display: none !important; }
-            .container-custom { box-shadow: none; padding: 0; border-radius: 0; }
+            .app-switcher, #intro-overlay, .btn:not(.badge),
+            .app-header-controls > button { display: none !important; }
+            .container-custom { box-shadow: none; padding: 0; border-radius: 0; max-width: 100%; }
             .table-responsive { overflow: visible; }
             .section-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+            body { background-color: white; padding: 0; }
+            .screen.active { display: block !important; }
         }
         /* PONDERACIÓN */
         #cardPonderacion { background-color: #e0f7fa; border-color: #9dd8e8; }
@@ -297,7 +597,7 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="examBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div class="add-student-row"><input type="text" id="examStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="examBtnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
                     <div><label for="examImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="examImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                     <button id="examBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
@@ -386,7 +686,7 @@
 			<div class="section-card">
 				<div class="section-title"><i class="fas fa-users"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos que realizarán el test."></i></div>
 				<div class="d-flex flex-wrap gap-3 align-items-center">
-					<div class="d-flex flex-wrap"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="testBtnAddStudent" class="btn btn-success ms-2"><i class="fas fa-plus-circle"></i> +</button></div>
+					<div class="add-student-row"><input type="text" id="testStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="testBtnAddStudent" class="btn btn-success"><i class="fas fa-plus-circle"></i> +</button></div>
 					<div><label for="testImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="testImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
 					<button id="testBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
 				</div>
@@ -486,7 +786,7 @@
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <div class="d-flex flex-wrap"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="genericBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div class="add-student-row"><input type="text" id="genericStudentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="genericBtnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
                     <div><label for="genericImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="genericImportFile" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                     <button id="genericBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                 </div>
@@ -571,7 +871,7 @@
                 <div class="section-card">
                     <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Lista de alumnos."></i></div>
                     <div class="d-flex flex-wrap gap-3 align-items-center">
-                        <div class="d-flex flex-wrap"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="inst_btnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                        <div class="add-student-row"><input type="text" id="inst_studentNameInput" class="form-control" placeholder="Apellidos, Nombre"><button id="inst_btnAddStudent" class="btn btn-success"><i class="bi bi-plus-circle"></i> +</button></div>
                         <div><label for="inst_importExcel" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="inst_importExcel" accept=".xlsx,.xls,.json,.csv" class="hidden"></div>
                         <button id="inst_btnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
                     </div>
