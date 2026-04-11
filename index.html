@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -1015,22 +1015,42 @@
         <h1 class="fw-bold mb-0" style="color: #0b4b6b; font-size: clamp(1.1rem,4vw,1.8rem);">
             <i class="bi bi-diagram-3 me-2" style="color: #0d6efd;"></i>EVALUACIÓN CRITERIAL · <span id="subjectNameDisplay">[sin materia]</span>
         </h1>
-        <div class="d-flex flex-wrap gap-2 align-items-center app-header-controls">
-            <button class="btn btn-outline-success btn-sm" id="btnImportSubject"><i class="bi bi-upload"></i> <span class="d-none d-sm-inline">Importar materia</span><span class="d-sm-none">Materia</span></button>
-            <input type="file" id="importSubjectFile" accept=".json" class="hidden">
-            <div class="app-switcher" role="group">
-                <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
-                <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
-                <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
-                <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad por Criterios</button>
-                <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Actividad por Instrumentos</button>
-                <button type="button" class="btn btn-outline-info" id="btnAppPonderacion"><i class="bi bi-layers-half"></i> Ponderación</button>
-            </div>
-        </div>
+        <input type="file" id="importSubjectFile" accept=".json" class="d-none">
     </div>
 
     <!-- HOME -->
     <div id="homeScreen" class="screen active">
+        <!-- Accordion for Import -->
+        <div class="accordion mb-4" id="homeImportAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImport" aria-expanded="true" aria-controls="collapseImport">
+                        <i class="bi bi-upload me-2"></i>Importar materia
+                    </button>
+                </h2>
+                <div id="collapseImport" class="accordion-collapse collapse show" data-bs-parent="#homeImportAccordion">
+                    <div class="accordion-body">
+                        <div class="d-flex flex-wrap gap-3 align-items-center mb-2">
+                            <button class="btn btn-outline-success" id="btnImportSubject"><i class="bi bi-upload"></i> Seleccionar archivo JSON</button>
+                            <button class="btn btn-outline-secondary btn-sm" id="btnDownloadExampleSubject"><i class="bi bi-file-earmark-code"></i> Descargar ejemplo de materia JSON</button>
+                        </div>
+                        <div id="homeSubjectAlert" class="alert alert-warning text-center mb-0">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Sin materia cargada.</strong> Selecciona un archivo JSON con los criterios de tu materia.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Navigation Buttons -->
+        <div class="app-switcher mb-4" role="group">
+            <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
+            <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
+            <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
+            <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad por Criterios</button>
+            <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Actividad por Instrumentos</button>
+            <button type="button" class="btn btn-outline-info" id="btnAppPonderacion"><i class="bi bi-layers-half"></i> Ponderación</button>
+        </div>
+        <!-- Home Cards -->
         <div class="text-center my-4">
             <i class="bi bi-trophy-fill" style="font-size: 4rem; color: #28a745;"></i>
             <h2 class="mt-2" style="color: #0b4b6b; font-weight: 600;">Sistema de Evaluación Criterial Multimateria</h2>
@@ -1047,18 +1067,8 @@
         <div class="row g-4 justify-content-center mt-2">
             <div class="col-md-8"><div class="card home-card p-4 text-center h-100 d-flex flex-column" id="cardPonderacion"><i class="bi bi-layers-half" style="font-size: 3rem; color: #0dcaf0;"></i><h3 class="mt-3 fw-bold">Ponderación de actividades</h3><p class="text-muted flex-grow-1">Combina los resultados de varias actividades del mismo tipo aplicando un peso porcentual a cada una y obtén la nota ponderada por criterio.</p><button class="btn btn-info mt-auto text-white"><i class="bi bi-box-arrow-in-right"></i> Usar</button></div></div>
         </div>
-        <div class="alert alert-success mt-5 text-center" id="homeSubjectAlert">
-            <i class="bi bi-info-circle"></i> <strong>Sin materia cargada.</strong> Usa el botón <strong>Importar materia</strong> de la cabecera para cargar los criterios de evaluación de tu asignatura en formato JSON.
-        </div>
-        <div class="text-center mt-2">
-            <button class="btn btn-outline-secondary btn-sm" id="btnDownloadExampleSubject">
-                <i class="bi bi-file-earmark-code"></i> Descargar ejemplo de materia JSON
-            </button>
-            <small class="d-block text-muted mt-1">Descarga una plantilla de ejemplo para crear el JSON de criterios de tu materia.</small>
-        </div>
     </div>
-
-    <!-- APP 1: EXAMEN POR PREGUNTAS -->
+<!-- APP 1: EXAMEN POR PREGUNTAS -->
     <div id="appExamContainer" class="screen">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
             <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
@@ -1722,15 +1732,15 @@ function updateSubjectDisplay() {
     if (!subjectInfo.name) {
         if (display) display.textContent = '[sin materia]';
         if (alertEl) {
-            alertEl.className = 'alert alert-warning mt-5 text-center';
-            alertEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Sin materia cargada.</strong> Usa el botón <strong>Importar materia</strong> de la cabecera para cargar los criterios de tu asignatura en formato JSON.';
+            alertEl.className = 'alert alert-warning text-center mb-0';
+            alertEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Sin materia cargada.</strong> Selecciona un archivo JSON con los criterios de tu materia.';
         }
         cards.forEach(c => { c.style.opacity = '0.35'; c.style.pointerEvents = 'none'; c.title = 'Importa una materia primero'; });
     } else {
         const label = `${subjectInfo.name}${subjectInfo.course ? subjectInfo.course : ''}`;
         if (display) display.textContent = label;
         if (alertEl) {
-            alertEl.className = 'alert alert-success mt-5 text-center';
+            alertEl.className = 'alert alert-success text-center mb-0';
             alertEl.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> Materia cargada: <strong>${label}</strong> · <strong>${subjectInfo.criteriaCodes.length}</strong> criterios disponibles.`;
         }
         cards.forEach(c => { c.style.opacity = ''; c.style.pointerEvents = ''; c.title = ''; });
@@ -1769,6 +1779,14 @@ function loadSubjectFromJSON(file) {
             updateExamConfigWarning(); updateTestConfigWarning(); updateGenericConfigWarning(); inst_updateConfigButtonState();
             updateSubjectDisplay();
             alert(`✅ Materia "${subjectInfo.name}${subjectInfo.course ? subjectInfo.course : ''}" cargada con ${codes.length} criterios.`);
+            // Collapse the import accordion after 5 seconds so user can read the criteria count
+            const collapseImport = document.getElementById('collapseImport');
+            if (collapseImport) {
+                setTimeout(() => {
+                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseImport, { toggle: false });
+                    bsCollapse.hide();
+                }, 3000);
+            }
         } catch(err) { alert('Error al procesar la materia: ' + err.message); }
     };
     reader.readAsText(file);
