@@ -418,6 +418,47 @@
             background-color: #fef2f2;
         }
 
+        input.grade-text-input.input-max-warning {
+            border-color: var(--warning) !important;
+            background-color: var(--warning-light) !important;
+            animation: shakeInput 0.4s ease;
+        }
+        @keyframes shakeInput {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-3px); }
+            40% { transform: translateX(3px); }
+            60% { transform: translateX(-2px); }
+            80% { transform: translateX(2px); }
+        }
+        .grade-max-warning-tip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            background: #92400e;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            animation: fadeInTip 0.25s ease, fadeOutTip 0.3s ease 1.8s forwards;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .grade-max-warning-tip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #92400e;
+        }
+        @keyframes fadeInTip { from { opacity: 0; transform: translateX(-50%) translateY(-4px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes fadeOutTip { from { opacity: 1; } to { opacity: 0; } }
+
         /* ===== GRADE SELECT ===== */
         .grade-select {
             width: 100%;
@@ -1018,6 +1059,16 @@
         <input type="file" id="importSubjectFile" accept=".json" class="d-none">
     </div>
 
+    <!-- Navigation Buttons (always visible) -->
+    <div class="app-switcher mb-4" role="group">
+        <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
+        <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
+        <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
+        <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad por Criterios</button>
+        <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Actividad por Instrumentos</button>
+        <button type="button" class="btn btn-outline-info" id="btnAppPonderacion"><i class="bi bi-layers-half"></i> Ponderación</button>
+    </div>
+
     <!-- HOME -->
     <div id="homeScreen" class="screen active">
         <!-- Accordion for Import -->
@@ -1040,15 +1091,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Navigation Buttons -->
-        <div class="app-switcher mb-4" role="group">
-            <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
-            <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
-            <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
-            <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad por Criterios</button>
-            <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Actividad por Instrumentos</button>
-            <button type="button" class="btn btn-outline-info" id="btnAppPonderacion"><i class="bi bi-layers-half"></i> Ponderación</button>
         </div>
         <!-- Home Cards -->
         <div class="text-center my-4">
@@ -2053,6 +2095,24 @@ function attachGradeInputLiveValidation(inp) {
     });
 }
 
+function showGradeMaxWarning(inputEl, maxVal, label) {
+    // Remove any previous tip on the same parent
+    const parentTd = inputEl.closest('td');
+    if (parentTd) parentTd.querySelectorAll('.grade-max-warning-tip').forEach(t => t.remove());
+    // Visual warning on input
+    inputEl.classList.add('input-max-warning');
+    setTimeout(() => inputEl.classList.remove('input-max-warning'), 800);
+    // Floating tooltip
+    const tip = document.createElement('div');
+    tip.className = 'grade-max-warning-tip';
+    const labelText = label ? ' de ' + label : '';
+    tip.textContent = 'Máximo permitido' + labelText + ': ' + formatGradeDisplay(maxVal);
+    inputEl.style.position = 'relative';
+    inputEl.parentElement.style.position = 'relative';
+    inputEl.parentElement.appendChild(tip);
+    setTimeout(() => tip.remove(), 2200);
+}
+
 // =============================================================================
 // ESTADOS DE LAS APLICACIONES
 // =============================================================================
@@ -2813,6 +2873,9 @@ function renderExamGradeTable() {
         inp.addEventListener('change', function() {
             const sIdx = parseInt(this.dataset.student), qIdx = parseInt(this.dataset.question);
             let val = parseGradeInput(this.value); const max=examState.questions[qIdx].maxScore;
+            if (val > max) {
+                showGradeMaxWarning(this, max, getQuestionLabel(examState.questions[qIdx]));
+            }
             val = Math.min(Math.max(val,0),max); this.value = formatGradeDisplay(val);
             if (!examState.scores[sIdx]) examState.scores[sIdx]=[];
             examState.scores[sIdx][qIdx]=val;
