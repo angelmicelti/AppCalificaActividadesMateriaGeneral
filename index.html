@@ -1842,6 +1842,42 @@ function exportSubjectToJSON() {
     }
     // Reconstruir estructura de competencias agrupando por prefijo
     const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
+    const competencias = Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(key => ({
+        competencia: key,
+        criterios: groups[key].map(code => ({
+            codigo: code + '.',
+            texto: subjectInfo.criteriaDescriptions[code] || ''
+        }))
+    }));
+    const data = { materia: subjectInfo.name, curso: subjectInfo.course, competencias };
+    downloadJSON(data, `Materia_${makeBaseName('', subjectInfo.name, subjectInfo.course)}.json`);
+}
+
+function groupCriteriaByCompetence(codes) {
+    const groups = {};
+    codes.forEach(code => {
+        // Generic grouping: take all but the last numeric segment
+        const parts = code.split('.');
+        const key = parts.length > 1 ? parts.slice(0, -1).join('.') : code;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(code);
+    });
+    return groups;
+}
+
+function populateCriteriaModal(app) {
+    const label = subjectInfo.name ? `Criterios — ${subjectInfo.name}${subjectInfo.course ? ' ' + subjectInfo.course : ''}` : 'Criterios de la materia';
+    const TITLES = { exam:`${label} — Examen por preguntas`, test:`${label} — Tipo test`, generic:`${label} — Evaluación genérica` };
+    document.getElementById('globalCriteriaModalTitle').textContent = TITLES[app] || label;
+    const state = appStates[app];
+    const container = document.getElementById('globalCriteriaGroupedContainer');
+    container.innerHTML = '';
+    if (!subjectInfo.criteriaCodes.length) {
+        container.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> No hay criterios cargados. Importa una materia primero usando el botón <strong>Importar materia</strong>.</div>';
+        document.getElementById('globalCriteriaModal').dataset.currentApp = app;
+        return;
+    }
+    const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
     Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach((key, idx) => {
         const div = document.createElement('div');
         div.className = 'criteria-group'; div.style.borderLeftColor = competenceColors[idx % competenceColors.length];
@@ -1875,25 +1911,8 @@ function exportSubjectToJSON() {
         if (selAll) selAll.checked = allChks.length > 0 && [...allChks].every(c => c.checked);
     });
     document.getElementById('globalCriteriaModal').dataset.currentApp = app;
-        return;
-    }
-    const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
-    Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach((key, idx) => {
-        const div = document.createElement('div');
-        div.className = 'criteria-group'; div.style.borderLeftColor = competenceColors[idx % competenceColors.length];
-        div.innerHTML = `<div class="group-title"><i class="bi bi-diagram-3"></i> ${key}</div><div class="row"></div>`;
-        const row = div.querySelector('.row');
-        groups[key].forEach(code => {
-            const col = document.createElement('div'); col.className = 'col-md-4 mb-2';
-            const inputId = `gchk_${app}_${code.replace(/[^a-zA-Z0-9]/g,'_')}`;
-            col.innerHTML = `<div class="form-check"><input class="form-check-input global-criteria-chk" type="checkbox" value="${code}" id="${inputId}"><label class="form-check-label" for="${inputId}" title="${getCriteriaDescription(code).replace(/"/g,'&quot;')}">${code}.</label></div>`;
-            row.appendChild(col);
-        });
-        container.appendChild(div);
-    });
-    container.querySelectorAll('.global-criteria-chk').forEach(chk => { chk.checked = state.globalCriteria.includes(chk.value); });
-    document.getElementById('globalCriteriaModal').dataset.currentApp = app;
 }
+
 
 // =============================================================================
 // UTILIDADES COMUNES
