@@ -1842,39 +1842,39 @@ function exportSubjectToJSON() {
     }
     // Reconstruir estructura de competencias agrupando por prefijo
     const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
-    const competencias = Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(key => ({
-        competencia: key,
-        criterios: groups[key].map(code => ({
-            codigo: code + '.',
-            texto: subjectInfo.criteriaDescriptions[code] || ''
-        }))
-    }));
-    const data = { materia: subjectInfo.name, curso: subjectInfo.course, competencias };
-    downloadJSON(data, `Materia_${makeBaseName('', subjectInfo.name, subjectInfo.course)}.json`);
-}
-
-function groupCriteriaByCompetence(codes) {
-    const groups = {};
-    codes.forEach(code => {
-        // Generic grouping: take all but the last numeric segment
-        const parts = code.split('.');
-        const key = parts.length > 1 ? parts.slice(0, -1).join('.') : code;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(code);
+    Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach((key, idx) => {
+        const div = document.createElement('div');
+        div.className = 'criteria-group'; div.style.borderLeftColor = competenceColors[idx % competenceColors.length];
+        const selAllId = `selall_glob_${app}_${key.replace(/[^a-zA-Z0-9]/g,'_')}`;
+        div.innerHTML = `<div class="group-title"><input class="form-check-input competence-select-all" type="checkbox" id="${selAllId}" style="cursor:pointer;flex-shrink:0;margin-top:0;"><label for="${selAllId}" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;margin:0;font-weight:800;font-size:1.2rem;color:var(--dark);"><i class="bi bi-diagram-3"></i> ${key}</label></div><div class="row"></div>`;
+        const row = div.querySelector('.row');
+        groups[key].forEach(code => {
+            const col = document.createElement('div'); col.className = 'col-md-4 mb-2';
+            const inputId = `gchk_${app}_${code.replace(/[^a-zA-Z0-9]/g,'_')}`;
+            col.innerHTML = `<div class="form-check"><input class="form-check-input global-criteria-chk" type="checkbox" value="${code}" id="${inputId}"><label class="form-check-label" for="${inputId}" title="${getCriteriaDescription(code).replace(/"/g,'&quot;')}">${code}.</label></div>`;
+            row.appendChild(col);
+        });
+        // Select-all checkbox toggles all criteria in this group
+        div.querySelector('.competence-select-all').addEventListener('change', function() {
+            div.querySelectorAll('.global-criteria-chk').forEach(chk => chk.checked = this.checked);
+        });
+        // When individual criteria change, update select-all state
+        row.addEventListener('change', function(e) {
+            if (e.target.classList.contains('global-criteria-chk')) {
+                const allChks = div.querySelectorAll('.global-criteria-chk');
+                div.querySelector('.competence-select-all').checked = allChks.length > 0 && [...allChks].every(c => c.checked);
+            }
+        });
+        container.appendChild(div);
     });
-    return groups;
-}
-
-function populateCriteriaModal(app) {
-    const label = subjectInfo.name ? `Criterios — ${subjectInfo.name}${subjectInfo.course ? ' ' + subjectInfo.course : ''}` : 'Criterios de la materia';
-    const TITLES = { exam:`${label} — Examen por preguntas`, test:`${label} — Tipo test`, generic:`${label} — Evaluación genérica` };
-    document.getElementById('globalCriteriaModalTitle').textContent = TITLES[app] || label;
-    const state = appStates[app];
-    const container = document.getElementById('globalCriteriaGroupedContainer');
-    container.innerHTML = '';
-    if (!subjectInfo.criteriaCodes.length) {
-        container.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> No hay criterios cargados. Importa una materia primero usando el botón <strong>Importar materia</strong>.</div>';
-        document.getElementById('globalCriteriaModal').dataset.currentApp = app;
+    container.querySelectorAll('.global-criteria-chk').forEach(chk => { chk.checked = state.globalCriteria.includes(chk.value); });
+    // Sync select-all checkboxes with current selection
+    container.querySelectorAll('.criteria-group').forEach(group => {
+        const allChks = group.querySelectorAll('.global-criteria-chk');
+        const selAll = group.querySelector('.competence-select-all');
+        if (selAll) selAll.checked = allChks.length > 0 && [...allChks].every(c => c.checked);
+    });
+    document.getElementById('globalCriteriaModal').dataset.currentApp = app;
         return;
     }
     const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
@@ -2822,7 +2822,8 @@ function populateExamQuestionCriteria(question) {
     const groups = groupCriteriaByCompetence(examState.globalCriteria);
     Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).forEach((key, idx) => {
         const div = document.createElement('div'); div.className='criteria-group'; div.style.borderLeftColor=competenceColors[idx%competenceColors.length];
-        div.innerHTML = `<div class="group-title"><i class="bi bi-diagram-3"></i> ${key}</div><div class="row"></div>`;
+        const selAllId = `selall_q_${question.id}_${key.replace(/[^a-zA-Z0-9]/g,'_')}`;
+        div.innerHTML = `<div class="group-title"><input class="form-check-input q-competence-select-all" type="checkbox" id="${selAllId}" style="cursor:pointer;flex-shrink:0;margin-top:0;"><label for="${selAllId}" style="cursor:pointer;display:inline-flex;align-items:center;gap:8px;margin:0;font-weight:800;font-size:1.2rem;color:var(--dark);"><i class="bi bi-diagram-3"></i> ${key}</label></div><div class="row"></div>`;
         const row = div.querySelector('.row');
         groups[key].forEach(code => {
             const col = document.createElement('div'); col.className='col-md-6 mb-2';
@@ -2830,7 +2831,24 @@ function populateExamQuestionCriteria(question) {
             col.innerHTML = `<div class="form-check"><input class="form-check-input question-criteria-chk" type="checkbox" value="${code}" id="${id}" ${question.criteriaCodes.includes(code)?'checked':''}><label class="form-check-label" for="${id}" title="${getCriteriaDescription(code).replace(/"/g,'&quot;')}">${code}.</label></div>`;
             row.appendChild(col);
         });
+        // Select-all checkbox toggles all criteria in this group
+        div.querySelector('.q-competence-select-all').addEventListener('change', function() {
+            div.querySelectorAll('.question-criteria-chk').forEach(chk => chk.checked = this.checked);
+        });
+        // When individual criteria change, update select-all state
+        row.addEventListener('change', function(e) {
+            if (e.target.classList.contains('question-criteria-chk')) {
+                const allChks = div.querySelectorAll('.question-criteria-chk');
+                div.querySelector('.q-competence-select-all').checked = allChks.length > 0 && [...allChks].every(c => c.checked);
+            }
+        });
         container.appendChild(div);
+    });
+    // Sync select-all checkboxes with initial inline checked state
+    container.querySelectorAll('.criteria-group').forEach(group => {
+        const allChks = group.querySelectorAll('.question-criteria-chk');
+        const selAll = group.querySelector('.q-competence-select-all');
+        if (selAll) selAll.checked = allChks.length > 0 && [...allChks].every(c => c.checked);
     });
     document.getElementById('examSaveQuestionCriteria').onclick = function() {
         question.criteriaCodes = [...container.querySelectorAll('.question-criteria-chk:checked')].map(c=>c.value);
