@@ -2004,7 +2004,7 @@ function renderStudentTags(state, tagsId, countId, onChange) {
     });
     tagsDiv.querySelectorAll('i[data-action="delete"]').forEach(icon => icon.addEventListener('click', function(e) {
         e.stopPropagation();
-        const i = parseInt(this.dataset.stuidx);
+        const i = parseInt(this.dataset.stuidx, 10);
         const studentName = state.students[i]?.fullName || 'este alumno';
         if (confirm(`¿Estás seguro de que deseas eliminar a ${studentName}?`)) {
             state.students.splice(i, 1);
@@ -2016,7 +2016,7 @@ function renderStudentTags(state, tagsId, countId, onChange) {
     }));
     tagsDiv.querySelectorAll('i[data-action="edit"]').forEach(icon => icon.addEventListener('click', function(e) {
         e.stopPropagation();
-        const i = parseInt(this.dataset.stuidx);
+        const i = parseInt(this.dataset.stuidx, 10);
         const oldName = state.students[i].fullName;
         const newName = prompt('Editar nombre del alumno:', oldName);
         if (newName && newName.trim() && newName.trim() !== oldName) {
@@ -2284,7 +2284,7 @@ function getCriteriaFamilyIndex(code) {
     // Generic: use last numeric segment parity
     const parts = code.split('.');
     const last = parts.filter(p => /^\d+$/.test(p)).pop();
-    return last ? parseInt(last) : 0;
+    return last ? parseInt(last, 10) : 0;
 }
 // criteriaFamilyBg(code, app?) — uses the generic implementation defined in the subject section above
 // Redefine to accept optional app param and use app-specific stripe colors for alternating rows
@@ -2332,7 +2332,7 @@ function renderSimpleGradeTable(state, tableId, tbodyId, descFn, app) {
     tbody.querySelectorAll('.generic-score-input').forEach(inp => {
         attachGradeInputLiveValidation(inp);
         inp.addEventListener('change', function() {
-            const sIdx = parseInt(this.dataset.student), cIdx = parseInt(this.dataset.criterion);
+            const sIdx = parseInt(this.dataset.student, 10), cIdx = parseInt(this.dataset.criterion, 10);
             let val = parseGradeInput(this.value); val = Math.min(Math.max(val,0),9999); this.value = formatGradeDisplay(val);
             if (!state.scores[sIdx]) state.scores[sIdx] = [];
             state.scores[sIdx][cIdx] = val;
@@ -2791,7 +2791,7 @@ function renderExamQuestionsTable() {
     // name / description live input
     tbody.querySelectorAll('.exam-q-name-input, .exam-q-desc-textarea').forEach(el => {
         el.addEventListener('input', function() {
-            const i = parseInt(this.dataset.qidx);
+            const i = parseInt(this.dataset.qidx, 10);
             if (examState.questions[i]) examState.questions[i][this.dataset.field] = this.value;
             // si cambia el nombre, refrescar tabla de calificación si está visible
             if (this.dataset.field === 'name' && document.getElementById('examScreenGrade').classList.contains('active')) renderExamGradeTable();
@@ -2800,7 +2800,7 @@ function renderExamQuestionsTable() {
     tbody.querySelectorAll('.max-score-input').forEach(inp => {
         attachGradeInputLiveValidation(inp);
         inp.addEventListener('change', function() {
-            const i = parseInt(this.dataset.qidx);
+            const i = parseInt(this.dataset.qidx, 10);
             let val = parseGradeInput(this.value); if (val <= 0) val = 10;
             val = Math.min(Math.max(val, 0.1), 9999);
             if (examState.questions[i]) examState.questions[i].maxScore = val;
@@ -2809,12 +2809,12 @@ function renderExamQuestionsTable() {
         });
     });
     tbody.querySelectorAll('.assign-criteria-btn').forEach(btn => btn.addEventListener('click', function() {
-        const q = examState.questions.find(q => q.id === parseInt(this.dataset.qid));
+        const q = examState.questions.find(q => q.id === parseInt(this.dataset.qid, 10));
         document.getElementById('examModalQuestionId').textContent = q.id;
         populateExamQuestionCriteria(q);
     }));
     tbody.querySelectorAll('.insert-after-btn').forEach(btn => btn.addEventListener('click', function() {
-        const i = parseInt(this.dataset.index);
+        const i = parseInt(this.dataset.index, 10);
         const newId = examState.questions.length ? Math.max(...examState.questions.map(q=>q.id))+1 : 1;
         examState.questions.splice(i+1, 0, {id:newId, maxScore:10, criteriaCodes:[], name:'', description:''});
         examState.scores.forEach(row => row.splice(i+1, 0, 0));
@@ -2822,7 +2822,7 @@ function renderExamQuestionsTable() {
         document.getElementById('examInputNumQuestions').value = examState.questions.length; validateExamCriteria();
     }));
     tbody.querySelectorAll('.delete-question-btn').forEach(btn => btn.addEventListener('click', function() {
-        const i = parseInt(this.dataset.index);
+        const i = parseInt(this.dataset.index, 10);
         if (examState.questions.length <= 1 && !confirm('¿Eliminar la última pregunta?')) return;
         examState.questions.splice(i,1); examState.scores.forEach(row => row.splice(i,1));
         reorderExamQuestionIds(); normalizeExamScores(); renderExamQuestionsTable();
@@ -2892,7 +2892,7 @@ function renderExamGradeTable() {
     }).join('') + '</tr>';
     // click en encabezado → modal descripción
     thead.querySelectorAll('th.exam-q-th-clickable').forEach(th =>
-        th.addEventListener('click', () => openQuestionDescModal(parseInt(th.dataset.qidx)))
+        th.addEventListener('click', () => openQuestionDescModal(parseInt(th.dataset.qidx, 10)))
     );
     tbody.innerHTML = '';
     examState.students.forEach((student, sIdx) => {
@@ -2908,7 +2908,7 @@ function renderExamGradeTable() {
     tbody.querySelectorAll('.exam-score-input').forEach(inp => {
         attachGradeInputLiveValidation(inp);
         inp.addEventListener('change', function() {
-            const sIdx = parseInt(this.dataset.student), qIdx = parseInt(this.dataset.question);
+            const sIdx = parseInt(this.dataset.student, 10), qIdx = parseInt(this.dataset.question, 10);
             let val = parseGradeInput(this.value); const max=examState.questions[qIdx].maxScore;
             if (val > max) {
                 showGradeMaxWarning(this, max, getQuestionLabel(examState.questions[qIdx]));
@@ -2985,19 +2985,19 @@ function attachTestGradeEvents() {
         if (row) row.querySelectorAll('td').forEach((td, i) => { if(i>=4) td.textContent=grade.toFixed(2); });
     };
     document.querySelectorAll('.test-correct-select').forEach(sel => sel.addEventListener('change', function() {
-        const sIdx = parseInt(this.dataset.student); const newC = parseInt(this.value);
+        const sIdx = parseInt(this.dataset.student, 10); const newC = parseInt(this.value, 10);
         testState.studentScores[sIdx].correct = newC;
         const selW = document.querySelector(`.test-wrong-select[data-student="${sIdx}"]`);
         const maxW = testState.totalQuestions - newC; const curW = testState.studentScores[sIdx].wrong;
         selW.innerHTML = '';
         for(let i=0;i<=maxW;i++){const o=document.createElement('option');o.value=i;o.textContent=i;if(i===curW&&curW<=maxW)o.selected=true;selW.appendChild(o);}
         if(curW>maxW){selW.value=maxW; testState.studentScores[sIdx].wrong=maxW;}
-        testState.studentScores[sIdx].unanswered = testState.totalQuestions - newC - parseInt(selW.value);
+        testState.studentScores[sIdx].unanswered = testState.totalQuestions - newC - parseInt(selW.value, 10);
         document.getElementById(`test_unanswered_${sIdx}`).textContent = testState.studentScores[sIdx].unanswered;
         updateRow(sIdx);
     }));
     document.querySelectorAll('.test-wrong-select').forEach(sel => sel.addEventListener('change', function() {
-        const sIdx = parseInt(this.dataset.student); const newW = parseInt(this.value);
+        const sIdx = parseInt(this.dataset.student, 10); const newW = parseInt(this.value, 10);
         testState.studentScores[sIdx].wrong = newW;
         testState.studentScores[sIdx].unanswered = testState.totalQuestions - testState.studentScores[sIdx].correct - newW;
         document.getElementById(`test_unanswered_${sIdx}`).textContent = testState.studentScores[sIdx].unanswered;
@@ -3208,7 +3208,7 @@ function inst_renderMatrix() {
             cell.dataset.instr=i; cell.dataset.crit=origIdx;
             cell.addEventListener('click',function(){
                 this.classList.toggle('selected');
-                instrumentState.matrix[parseInt(this.dataset.instr)][parseInt(this.dataset.crit)]=this.classList.contains('selected');
+                instrumentState.matrix[parseInt(this.dataset.instr, 10)][parseInt(this.dataset.crit, 10)]=this.classList.contains('selected');
                 inst_renderMatrix(); inst_updateIrEvalButton();
             });
             td.appendChild(cell); tr.appendChild(td);
@@ -3319,7 +3319,7 @@ function inst_renderEvaluation() {
             inp.dataset.student=sIdx; inp.dataset.instr=i;
             attachGradeInputLiveValidation(inp);
             inp.addEventListener('change',function(){
-                const s=parseInt(this.dataset.student), iI=parseInt(this.dataset.instr);
+                const s=parseInt(this.dataset.student, 10), iI=parseInt(this.dataset.instr, 10);
                 let val=Math.min(10,Math.max(0,parseGradeInput(this.value))); this.value=formatGradeDisplay(val);
                 if(!instrumentState.evalScores[s]) instrumentState.evalScores[s]=[];
                 instrumentState.evalScores[s][iI]=val; inst_updateCriteriaRow(s,showGrade);
@@ -3339,7 +3339,7 @@ function inst_renderEvaluation() {
         tbody.appendChild(tr);
     });
     document.querySelectorAll('.inst-eval-weight-input:not(.inst-weight-readonly)').forEach(inp=>inp.addEventListener('input',function(){
-        const i=parseInt(this.dataset.i), nI=instrumentState.instruments.length;
+        const i=parseInt(this.dataset.i, 10), nI=instrumentState.instruments.length;
         let val=parseFloat(this.value); const minWI=1, maxWI=inst_maxWeightForEditable();
         if(isNaN(val)||val<minWI){val=minWI; this.value=val;} if(val>maxWI){val=maxWI; this.value=val;}
         instrumentState.evalWeights[i]=val; instrumentState.instruments[i].weight=val;
@@ -3352,7 +3352,7 @@ function inst_renderEvaluation() {
     document.getElementById('inst_evalThead').addEventListener('click', function(e) {
         const th = e.target.closest('th.inst-header-clickable');
         if (!th) return;
-        const idx = parseInt(th.dataset.instrIdx);
+        const idx = parseInt(th.dataset.instrIdx, 10);
         if (isNaN(idx)) return;
         openInstrDescModal(idx);
     });
@@ -3602,13 +3602,13 @@ function pond_renderImportCards() {
     // Events: nombre
     container.querySelectorAll('.pond-act-nombre').forEach(inp => {
         inp.addEventListener('change', function() {
-            ponderacionState.actividades[parseInt(this.dataset.idx)].nombre = this.value.trim() || `Actividad ${parseInt(this.dataset.idx)+1}`;
+            ponderacionState.actividades[parseInt(this.dataset.idx, 10)].nombre = this.value.trim() || `Actividad ${parseInt(this.dataset.idx, 10)+1}`;
         });
     });
     // Events: peso (editable only)
     container.querySelectorAll('.pond-act-peso:not([readonly])').forEach(inp => {
         inp.addEventListener('input', function() {
-            const idx = parseInt(this.dataset.idx);
+            const idx = parseInt(this.dataset.idx, 10);
             let val = parseFloat(this.value);
             if (isNaN(val) || val < 0) val = 0;
             if (val > 100) val = 100;
@@ -3624,7 +3624,7 @@ function pond_renderImportCards() {
     // Events: file
     container.querySelectorAll('input[type="file"][data-idx]').forEach(inp => {
         inp.addEventListener('change', function() {
-            if (this.files.length) pond_loadFile(parseInt(this.dataset.idx), this.files[0]);
+            if (this.files.length) pond_loadFile(parseInt(this.dataset.idx, 10), this.files[0]);
             this.value = '';
         });
     });
@@ -4136,7 +4136,7 @@ window.onload = function() {
     // Modal descripción de pregunta (pantalla Calificación)
     document.getElementById('examQDescSaveBtn').addEventListener('click', function() {
         const modal = document.getElementById('examQuestionDescModal');
-        const qIdx  = parseInt(modal.dataset.qIdx);
+        const qIdx  = parseInt(modal.dataset.qIdx, 10);
         if (isNaN(qIdx) || !examState.questions[qIdx]) return;
         examState.questions[qIdx].name        = document.getElementById('examQDescName').value;
         examState.questions[qIdx].description = document.getElementById('examQDescText').value;
@@ -4192,7 +4192,7 @@ window.onload = function() {
     document.getElementById('examNameInput').addEventListener('input', e=>{ examState.examName=e.target.value; updateExamConfigWarning(); });
     document.getElementById('examCourseInput').addEventListener('input', e=>{ examState.course=e.target.value; updateExamConfigWarning(); });
     document.getElementById('examBtnSetQuestions').addEventListener('click', function() {
-        const num=parseInt(document.getElementById('examInputNumQuestions').value)||1;
+        const num=parseInt(document.getElementById('examInputNumQuestions').value, 10)||1;
         examState.questions=Array.from({length:num},(_,i)=>({id:i+1,maxScore:10,criteriaCodes:[],name:'',description:''}));
         normalizeExamScores(); renderExamQuestionsTable(); validateExamCriteria(); updateExamConfigWarning();
     });
@@ -4243,7 +4243,7 @@ window.onload = function() {
     document.getElementById('testExamTitleInput').addEventListener('input', e=>{ testState.examName=e.target.value; updateTestConfigWarning(); });
     document.getElementById('testCourseInput').addEventListener('input', e=>{ testState.course=e.target.value; updateTestConfigWarning(); });
     document.getElementById('testTotalQuestions').addEventListener('input', function() {
-        let val=parseInt(this.value)||1; if(val<1) val=1; this.value=val; testState.totalQuestions=val;
+        let val=parseInt(this.value, 10)||1; if(val<1) val=1; this.value=val; testState.totalQuestions=val;
         testState.studentScores=testState.students.map(()=>({correct:0,wrong:0,unanswered:val}));
         if(document.getElementById('testScreenGrade').classList.contains('active')) renderTestGradeTable();
     });
@@ -4368,7 +4368,7 @@ window.onload = function() {
     document.getElementById('inst_actividadInput').addEventListener('input', e=>{ instrumentState.actividad=e.target.value; inst_updateConfigButtonState(); });
     document.getElementById('inst_claseInput').addEventListener('input', e=>{ instrumentState.clase=e.target.value; inst_updateConfigButtonState(); });
     document.getElementById('inst_numInstrumentos').addEventListener('change', function() {
-        inst_setNumInstruments(parseInt(this.value)||1);
+        inst_setNumInstruments(parseInt(this.value, 10)||1);
         if(document.getElementById('inst_relacion').classList.contains('active')) inst_renderMatrix();
         if(document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation();
     });
@@ -4376,7 +4376,7 @@ window.onload = function() {
         if(e.target.matches('input[data-field="name"]')){ instrumentState.instruments[e.target.dataset.idx].name=e.target.value; }
         if(e.target.matches('textarea[data-field="description"]')){ instrumentState.instruments[e.target.dataset.idx].description=e.target.value; }
         if(e.target.matches('input[data-field="weight"]:not(.inst-weight-readonly)')){
-            const idx=parseInt(e.target.dataset.idx), nI=instrumentState.instruments.length;
+            const idx=parseInt(e.target.dataset.idx, 10), nI=instrumentState.instruments.length;
             if(idx===nI-1) return;
             const minW=1, maxW=inst_maxWeightForEditable();
             let v=parseFloat(e.target.value);
@@ -4485,7 +4485,7 @@ window.onload = function() {
     // Modal descripción de instrumento (pantalla Evaluación)
     document.getElementById('inst_instrDescSaveBtn').addEventListener('click', function() {
         const modal = document.getElementById('inst_instrDescModal');
-        const idx = parseInt(modal.dataset.instrIdx);
+        const idx = parseInt(modal.dataset.instrIdx, 10);
         if (isNaN(idx) || !instrumentState.instruments[idx]) return;
         // Guardar nombre (si no está vacío)
         const newName = document.getElementById('inst_instrDescName').value.trim();
@@ -4516,7 +4516,7 @@ window.onload = function() {
     document.getElementById('pond_tabImport')?.addEventListener('click', () => {
         ponderacionState.nombre = document.getElementById('pond_nombreInput')?.value.trim() || ponderacionState.nombre;
         ponderacionState.curso  = document.getElementById('pond_cursoInput')?.value.trim()  || ponderacionState.curso;
-        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value) || 2;
+        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value, 10) || 2;
         pond_showScreen('Import');
     });
     document.getElementById('pond_tabResults')?.addEventListener('click', () => {
@@ -4529,7 +4529,7 @@ window.onload = function() {
     document.getElementById('pond_nombreInput')?.addEventListener('input', function() { ponderacionState.nombre = this.value.trim(); });
     document.getElementById('pond_cursoInput')?.addEventListener('input', function() { ponderacionState.curso = this.value.trim(); });
     document.getElementById('pond_numActividadesInput')?.addEventListener('change', function() {
-        let n = parseInt(this.value);
+        let n = parseInt(this.value, 10);
         if (isNaN(n) || n < 2) { n = 2; this.value = 2; }
         if (n > 10) { n = 10; this.value = 10; }
         ponderacionState.numActividades = n;
@@ -4539,7 +4539,7 @@ window.onload = function() {
     document.getElementById('pond_btnGoImport')?.addEventListener('click', () => {
         ponderacionState.nombre = document.getElementById('pond_nombreInput').value.trim();
         ponderacionState.curso  = document.getElementById('pond_cursoInput').value.trim();
-        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput').value) || 2;
+        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput').value, 10) || 2;
         if (!pond_validateConfig()) return;
         pond_showScreen('Import');
     });
@@ -4570,7 +4570,7 @@ window.onload = function() {
     document.getElementById('pond_exportConfigJsonBtn')?.addEventListener('click', () => {
         ponderacionState.nombre = document.getElementById('pond_nombreInput')?.value.trim() || ponderacionState.nombre;
         ponderacionState.curso  = document.getElementById('pond_cursoInput')?.value.trim()  || ponderacionState.curso;
-        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value) || 2;
+        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value, 10) || 2;
         pond_exportConfig();
     });
     document.getElementById('pond_importConfigJsonBtn')?.addEventListener('click', () => {
@@ -4583,7 +4583,7 @@ window.onload = function() {
     document.getElementById('pond_saveConfigLocalBtn')?.addEventListener('click', () => {
         ponderacionState.nombre = document.getElementById('pond_nombreInput')?.value.trim() || ponderacionState.nombre;
         ponderacionState.curso  = document.getElementById('pond_cursoInput')?.value.trim()  || ponderacionState.curso;
-        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value) || 2;
+        ponderacionState.numActividades = parseInt(document.getElementById('pond_numActividadesInput')?.value, 10) || 2;
         pond_saveConfigLocal();
     });
     document.getElementById('pond_loadConfigLocalBtn')?.addEventListener('click', pond_loadConfigLocal);
