@@ -2473,7 +2473,7 @@ function renderSimpleGradeTable(state, tableId, tbodyId, descFn, app) {
     tbody.innerHTML = '';
     state.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml(tbodyId, sIdx)}<strong>${student.fullName}</strong></div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml(tbodyId, sIdx)}</div></td>`;
         state.globalCriteria.forEach((c, cIdx) => {
             const td = document.createElement('td'); td.style.minWidth='100px';
             const fbg = criteriaFamilyBg(c, app);
@@ -2572,7 +2572,7 @@ function renderResultsTable(app) {
     const endCol = showGlobal ? criteria.length + 1 : criteria.length;
     buildResultsData(app, showGlobal).forEach((row, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml(tbodyId, sIdx, {endCol: endCol})}<strong>${row.Alumno}</strong></div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${row.Alumno}</strong>${fillRightBtnHtml(tbodyId, sIdx, {endCol: endCol})}</div></td>`;
         criteria.forEach(c => {
             const td = document.createElement('td');
             const fbg = criteriaFamilyBg(c, app);
@@ -3055,7 +3055,7 @@ function renderExamGradeTable() {
     tbody.innerHTML = '';
     examState.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml('examGradeTbody', sIdx)}<strong>${student.fullName}</strong></div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('examGradeTbody', sIdx)}</div></td>`;
         examState.questions.forEach((q, qIdx) => {
             const td = document.createElement('td'); td.style.minWidth='80px';
             td.innerHTML = `<input type="text" inputmode="decimal" class="form-control form-control-sm grade-text-input exam-score-input" data-student="${sIdx}" data-question="${qIdx}" value="${formatGradeDisplay(examState.scores[sIdx]?.[qIdx]??0)}" placeholder="0">`;
@@ -3110,7 +3110,7 @@ function renderTestGradeTable() {
         const sc = testState.studentScores[sIdx];
         sc.unanswered = Math.max(0, testState.totalQuestions - sc.correct - sc.wrong);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml('testGradeTbody', sIdx, {endCol: 2})}<strong>${student.fullName}</strong></div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('testGradeTbody', sIdx, {endCol: 2})}</div></td>`;
         const tdC = document.createElement('td');
         const selC = document.createElement('select'); selC.className='grade-select test-correct-select'; selC.dataset.student=sIdx;
         for (let i=0;i<=testState.totalQuestions;i++) { const o=document.createElement('option'); o.value=i; o.textContent=i; if(i===sc.correct) o.selected=true; selC.appendChild(o); }
@@ -3468,7 +3468,7 @@ function inst_renderEvaluation() {
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
     const nInstr = instrumentState.instruments.length;
     instrumentState.students.forEach((student,sIdx)=>{
-        const tr=document.createElement('tr'); tr.innerHTML=`<td><div class="student-cell-wrap">${fillRightBtnHtml('inst_evalTbody', sIdx, {endCol: nInstr})}<strong>${student.fullName}</strong></div></td>`;
+        const tr=document.createElement('tr'); tr.innerHTML=`<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('inst_evalTbody', sIdx, {endCol: nInstr})}</div></td>`;
         instrumentState.instruments.forEach((_,i)=>{
             const td=document.createElement('td');
             td.style.cssText='text-align:center;vertical-align:middle;padding:4px;';
@@ -3963,7 +3963,7 @@ function pond_renderResults() {
         const totalCols = colIdx - 1;
         rows.forEach((row, sIdx) => {
             const tr = document.createElement('tr');
-            let html = `<td><div class="student-cell-wrap">${fillRightBtnHtml('pond_resultsTbody', sIdx, {endCol: totalCols})}<strong>${row.Alumno}</strong></div></td>`;
+            let html = `<td><div class="student-cell-wrap"><strong>${row.Alumno}</strong>${fillRightBtnHtml('pond_resultsTbody', sIdx, {endCol: totalCols})}</div></td>`;
             if (showActs) acts.forEach((a, ai) => {
                 const v = row[`__ACT__${ai}`];
                 html += v===null||v===undefined
