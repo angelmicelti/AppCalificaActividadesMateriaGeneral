@@ -1,8 +1,9 @@
-const CACHE_NAME = 'eval-cache-v8.17';
+const CACHE_NAME = 'eval-cache-v8.18';
 const urlsToCache = [
   '.',
   './index.html', // Ajusta el nombre real de tu archivo HTML
   './manifest.json',
+  './Tutorial_AppCalificaActividadesMateriaGeneral.pdf',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css',
