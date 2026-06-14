@@ -831,6 +831,54 @@
             content: none;
         }
 
+        /* ===== FILL DOWN / FILL RIGHT BUTTONS ===== */
+        .fill-down-btn, .fill-right-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.7rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+        .fill-down-btn:hover, .fill-right-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+        .fill-down-btn:active, .fill-right-btn:active {
+            transform: scale(0.95);
+        }
+        /* Inside <th> headers */
+        th .fill-down-btn {
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        /* Inside student name <td> */
+        .student-cell-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .student-cell-wrap strong {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .crit-family-stripe {
             background-color: var(--crit-stripe-bg, #f0f7ff);
         }
@@ -2297,6 +2345,112 @@ function criteriaFamilyBg(code, app) {
     if (h % 2 === 0) return '';
     return FAMILY_STRIPE_COLORS[app] || '#f0f4ff';
 }
+
+// =============================================================================
+// FILL DOWN / FILL RIGHT HELPERS
+// =============================================================================
+/**
+ * Copies the value from the first data row of a column to all rows below.
+ * Works with <input>, <select>, or plain text cells.
+ * @param {string} tbodyId - ID of the <tbody>
+ * @param {number} colIndex - 0-based column index (within the row, NOT counting the ALUMNADO column separately)
+ * @param {object} [opts] - Options
+ * @param {boolean} [opts.skipReadOnly=false] - If true, skip cells that have no input/select
+ * @param {number[]} [opts.onlyEditableCols] - If set, only fill columns at these indices
+ */
+function fillDownColumn(tbodyId, colIndex, opts) {
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody || !tbody.children.length) return;
+    const rows = tbody.children;
+    const sourceCell = rows[0].children[colIndex];
+    if (!sourceCell) return;
+
+    // Read source value
+    const sourceInput = sourceCell.querySelector('input, select');
+    const value = sourceInput ? sourceInput.value : sourceCell.textContent.trim();
+    if (!value) return; // Don't fill if source is empty
+
+    for (let i = 1; i < rows.length; i++) {
+        const targetCell = rows[i].children[colIndex];
+        if (!targetCell) continue;
+        const targetInput = targetCell.querySelector('input, select');
+        if (targetInput) {
+            targetInput.value = value;
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        } else if (!opts || !opts.skipReadOnly) {
+            targetCell.textContent = value;
+        }
+    }
+}
+
+/**
+ * Copies the value from the first data cell of a row to all cells to the right.
+ * Works with <input>, <select>, or plain text cells.
+ * @param {string} tbodyId - ID of the <tbody>
+ * @param {number} rowIndex - 0-based row index
+ * @param {object} [opts] - Options
+ * @param {number} [opts.startCol=1] - Column index to start reading from (default: 1 = first data column)
+ * @param {number} [opts.endCol] - Last column index to fill (default: all columns to the right)
+ * @param {number[]} [opts.onlyEditableCols] - If set, only fill columns at these indices
+ */
+function fillRightRow(tbodyId, rowIndex, opts) {
+    opts = opts || {};
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody || !tbody.children[rowIndex]) return;
+    const row = tbody.children[rowIndex];
+    const startCol = opts.startCol !== undefined ? opts.startCol : 1;
+    const endCol = opts.endCol !== undefined ? opts.endCol : row.children.length - 1;
+
+    const sourceCell = row.children[startCol];
+    if (!sourceCell) return;
+
+    // Read source value
+    const sourceInput = sourceCell.querySelector('input, select');
+    const value = sourceInput ? sourceInput.value : sourceCell.textContent.trim();
+    if (!value) return;
+
+    for (let i = startCol + 1; i <= endCol; i++) {
+        if (opts.onlyEditableCols && !opts.onlyEditableCols.includes(i)) continue;
+        const targetCell = row.children[i];
+        if (!targetCell) continue;
+        const targetInput = targetCell.querySelector('input, select');
+        if (targetInput) {
+            targetInput.value = value;
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+            targetCell.textContent = value;
+        }
+    }
+}
+
+/**
+ * Creates a fill-down button HTML string.
+ * @param {string} tbodyId
+ * @param {number} colIndex - column index in the row
+ * @param {object} [opts] - passed to fillDownColumn
+ * @returns {string} HTML string
+ */
+function fillDownBtnHtml(tbodyId, colIndex, opts) {
+    const optsJs = opts ? JSON.stringify(opts).replace(/"/g, '&quot;') : '';
+    const args = opts ? `'${tbodyId}', ${colIndex}, ${optsJs}` : `'${tbodyId}', ${colIndex}`;
+    return `<button class="fill-down-btn" type="button" title="Extender nota hacia abajo" onclick="event.stopPropagation(); fillDownColumn(${args})">⬇</button>`;
+}
+
+/**
+ * Creates a fill-right button HTML string.
+ * @param {string} tbodyId
+ * @param {number} rowIndex
+ * @param {object} [opts] - passed to fillRightRow
+ * @returns {string} HTML string
+ */
+function fillRightBtnHtml(tbodyId, rowIndex, opts) {
+    const optsJs = opts ? JSON.stringify(opts).replace(/"/g, '&quot;') : '';
+    const args = opts ? `'${tbodyId}', ${rowIndex}, ${optsJs}` : `'${tbodyId}', ${rowIndex}`;
+    return `<button class="fill-right-btn" type="button" title="Extender nota hacia la derecha" onclick="event.stopPropagation(); fillRightRow(${args})">➡</button>`;
+}
+
 function renderSimpleGradeTable(state, tableId, tbodyId, descFn, app) {
     const getDesc = descFn || getCriteriaDescription;
     const thead = document.querySelector(`#${tableId} thead`);
@@ -2308,17 +2462,18 @@ function renderSimpleGradeTable(state, tableId, tbodyId, descFn, app) {
     normalizeScores(state, state.globalCriteria.length);
     state.scores.forEach(row => row && row.forEach((s,i,a) => { if(s>10) a[i]=10; else if(s<0) a[i]=0; }));
     const hasCustom = c => state.criteriaDescriptions && state.criteriaDescriptions[c];
-    thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map(c => {
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + state.globalCriteria.map((c, cIdx) => {
         const custom = hasCustom(c) ? ' criteria-th-custom' : '';
         const appAttr = app ? ` data-app="${app}"` : '';
         const fbg = criteriaFamilyBg(c, app);
         const bgStyle = fbg ? ` style="background-color:${fbg};"` : '';
-        return `<th class="criteria-th-editable${custom}" data-code="${c}"${appAttr}${bgStyle} title="${getDesc(c).replace(/"/g,'&quot;')}\n\n(Clic para editar)">${c}.<br><small>(0-10)</small></th>`;
+        const colIdx = cIdx + 1; // +1 because col 0 is ALUMNADO
+        return `<th class="criteria-th-editable${custom}" data-code="${c}"${appAttr}${bgStyle} title="${getDesc(c).replace(/"/g,'&quot;')}\n\n(Clic para editar)">${c}.<br><small>(0-10)</small>${fillDownBtnHtml(tbodyId, colIdx)}</th>`;
     }).join('') + '</tr>';
     tbody.innerHTML = '';
     state.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${student.fullName}</strong></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml(tbodyId, sIdx)}<strong>${student.fullName}</strong></div></td>`;
         state.globalCriteria.forEach((c, cIdx) => {
             const td = document.createElement('td'); td.style.minWidth='100px';
             const fbg = criteriaFamilyBg(c, app);
@@ -2405,17 +2560,19 @@ function renderResultsTable(app) {
     if (app === 'generic') normalizeGenericScores();
     const showGlobal = document.getElementById(checkId).checked;
     const criteria = state.globalCriteria;
-    thead.innerHTML = '<tr><th>ALUMNADO</th>' + criteria.map(c=>{
+    thead.innerHTML = '<tr><th>ALUMNADO</th>' + criteria.map((c, cIdx)=>{
         const custom = state.criteriaDescriptions && state.criteriaDescriptions[c] ? ' criteria-th-custom' : '';
         const fbg = criteriaFamilyBg(c, app);
         const bgStyle = fbg ? ` style="background-color:${fbg};"` : '';
-        return `<th class="criteria-th-editable${custom}" data-code="${c}" data-app="${app}"${bgStyle} title="${getAppCriterionDesc(c,app).replace(/"/g,'&quot;')}\n\n(Clic para editar)">${c}.</th>`;
+        const colIdx = cIdx + 1;
+        return `<th class="criteria-th-editable${custom}" data-code="${c}" data-app="${app}"${bgStyle} title="${getAppCriterionDesc(c,app).replace(/"/g,'&quot;')}\n\n(Clic para editar)">${c}.${fillDownBtnHtml(tbodyId, colIdx)}</th>`;
     }).join('') + (showGlobal ? '<th>Calificación</th>' : '') + '</tr>';
     tbody.innerHTML = '';
     const gradeColor = v => `hsl(${v * 12}, 80%, 70%)`;
-    buildResultsData(app, showGlobal).forEach(row => {
+    const endCol = showGlobal ? criteria.length + 1 : criteria.length;
+    buildResultsData(app, showGlobal).forEach((row, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${row.Alumno}</strong></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml(tbodyId, sIdx, {endCol: endCol})}<strong>${row.Alumno}</strong></div></td>`;
         criteria.forEach(c => {
             const td = document.createElement('td');
             const fbg = criteriaFamilyBg(c, app);
@@ -2886,18 +3043,19 @@ function renderExamGradeTable() {
         const label = getQuestionLabel(q);
         const hasDesc = q.description && q.description.trim();
         const titleTxt = hasDesc ? `${label} · max ${q.maxScore}\n${q.description}\n\n(Clic para editar)` : `${label} · max ${q.maxScore}\n(Clic para editar)`;
+        const colIdx = qIdx + 1;
         return `<th class="exam-q-th-clickable" data-qidx="${qIdx}" title="${titleTxt.replace(/"/g,'&quot;')}">
-            ${label}<span class="q-desc-dot">${hasDesc ? '📝 max '+q.maxScore : 'max '+q.maxScore}</span>
+            ${label}<span class="q-desc-dot">${hasDesc ? '📝 max '+q.maxScore : 'max '+q.maxScore}</span>${fillDownBtnHtml('examGradeTbody', colIdx)}
         </th>`;
     }).join('') + '</tr>';
     // click en encabezado → modal descripción
     thead.querySelectorAll('th.exam-q-th-clickable').forEach(th =>
-        th.addEventListener('click', () => openQuestionDescModal(parseInt(th.dataset.qidx, 10)))
+        th.addEventListener('click', (e) => { if (!e.target.closest('.fill-down-btn')) openQuestionDescModal(parseInt(th.dataset.qidx, 10)); })
     );
     tbody.innerHTML = '';
     examState.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${student.fullName}</strong></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml('examGradeTbody', sIdx)}<strong>${student.fullName}</strong></div></td>`;
         examState.questions.forEach((q, qIdx) => {
             const td = document.createElement('td'); td.style.minWidth='80px';
             td.innerHTML = `<input type="text" inputmode="decimal" class="form-control form-control-sm grade-text-input exam-score-input" data-student="${sIdx}" data-question="${qIdx}" value="${formatGradeDisplay(examState.scores[sIdx]?.[qIdx]??0)}" placeholder="0">`;
@@ -2940,7 +3098,7 @@ function renderTestGradeTable() {
     const thead = document.querySelector('#testGradeTable thead'), tbody = document.getElementById('testGradeTbody');
     if (!thead||!tbody) return;
     if (!testState.students.length) { thead.innerHTML=''; tbody.innerHTML='<tr><td colspan="4" class="text-center p-4">Añade alumnos en Configuración.</td></tr>'; return; }
-    thead.innerHTML = '<tr><th>ALUMNADO</th><th>Aciertos</th><th>Fallos</th><th>NS/NC</th>' + testState.globalCriteria.map(c=>{
+    thead.innerHTML = `<tr><th>ALUMNADO</th><th>Aciertos${fillDownBtnHtml('testGradeTbody', 1)}</th><th>Fallos${fillDownBtnHtml('testGradeTbody', 2)}</th><th>NS/NC</th>` + testState.globalCriteria.map((c,cIdx)=>{
         const custom = testState.criteriaDescriptions && testState.criteriaDescriptions[c] ? ' criteria-th-custom' : '';
         const fbg = criteriaFamilyBg(c, 'test');
         const bgStyle = fbg ? ` style="background-color:${fbg};"` : '';
@@ -2952,7 +3110,7 @@ function renderTestGradeTable() {
         const sc = testState.studentScores[sIdx];
         sc.unanswered = Math.max(0, testState.totalQuestions - sc.correct - sc.wrong);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${student.fullName}</strong></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap">${fillRightBtnHtml('testGradeTbody', sIdx, {endCol: 2})}<strong>${student.fullName}</strong></div></td>`;
         const tdC = document.createElement('td');
         const selC = document.createElement('select'); selC.className='grade-select test-correct-select'; selC.dataset.student=sIdx;
         for (let i=0;i<=testState.totalQuestions;i++) { const o=document.createElement('option'); o.value=i; o.textContent=i; if(i===sc.correct) o.selected=true; selC.appendChild(o); }
@@ -3297,9 +3455,10 @@ function inst_renderEvaluation() {
     document.getElementById('inst_evalThead').innerHTML='<tr><th>ALUMNADO</th>'+instrumentState.instruments.map((inst,i)=>{
         const hasDesc = inst.description && inst.description.trim();
         const descTitle = (hasDesc ? inst.description + '\n\n' : '') + 'Clic para editar nombre y descripción';
+        const colIdx = i + 1;
         return `<th class="inst-header-clickable" data-instr-idx="${i}" title="${descTitle.replace(/"/g,'&quot;')}" style="white-space:nowrap;min-width:110px;vertical-align:middle;">`+
             `<span style="display:block;font-size:0.85rem;font-weight:700;color:#0b4b6b;">${inst.name}</span>`+
-            `<span class="inst-desc-indicator">${hasDesc ? '📝' : '✎'}</span></th>`;
+            `<span class="inst-desc-indicator">${hasDesc ? '📝' : '✎'}</span>${fillDownBtnHtml('inst_evalTbody', colIdx)}</th>`;
     }).join('')+usedCriteria.map(c=>{
         const custom = instrumentState.criteriaDescriptions && instrumentState.criteriaDescriptions[c] ? ' criteria-th-custom' : '';
         const fbg = criteriaFamilyBg(c, 'inst');
@@ -3307,8 +3466,9 @@ function inst_renderEvaluation() {
         return `<th class="criteria-th-editable${custom}" data-code="${c}" data-app="inst"${bgStyle} title="${getAppCriterionDesc(c,'inst').replace(/"/g,'&quot;')}\n\n(Clic para editar)">${c}</th>`;
     }).join('')+(showGrade?'<th>Calificación</th>':'')+'</tr>';
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
+    const nInstr = instrumentState.instruments.length;
     instrumentState.students.forEach((student,sIdx)=>{
-        const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${student.fullName}</strong></td>`;
+        const tr=document.createElement('tr'); tr.innerHTML=`<td><div class="student-cell-wrap">${fillRightBtnHtml('inst_evalTbody', sIdx, {endCol: nInstr})}<strong>${student.fullName}</strong></div></td>`;
         instrumentState.instruments.forEach((_,i)=>{
             const td=document.createElement('td');
             td.style.cssText='text-align:center;vertical-align:middle;padding:4px;';
@@ -3350,6 +3510,7 @@ function inst_renderEvaluation() {
     }));
     // Click en encabezado de instrumento → modal descripción
     document.getElementById('inst_evalThead').addEventListener('click', function(e) {
+        if (e.target.closest('.fill-down-btn')) return;
         const th = e.target.closest('th.inst-header-clickable');
         if (!th) return;
         const idx = parseInt(th.dataset.instrIdx, 10);
@@ -3779,26 +3940,30 @@ function pond_renderResults() {
 
     // Header
     let hHtml = '<tr><th>ALUMNADO</th>';
+    let colIdx = 1;
     if (showActs) acts.forEach((a,i) => {
         hHtml += `<th style="background:#b2ebf2;font-size:0.8rem;" title="Peso: ${a.peso}%">
             <span style="color:#006064;">A${i+1}: ${a.nombre}</span><br>
-            <small class="text-muted fw-normal">${a.peso}%</small></th>`;
+            <small class="text-muted fw-normal">${a.peso}%</small>${fillDownBtnHtml('pond_resultsTbody', colIdx)}</th>`;
+        colIdx++;
     });
     criteria.forEach(c => {
         const fbg = criteriaFamilyBg(c, 'pond');
         const bgStyle = fbg ? ` style="background-color:${fbg};"` : '';
-        hHtml += `<th${bgStyle}>${c}</th>`;
+        hHtml += `<th${bgStyle}>${c}${fillDownBtnHtml('pond_resultsTbody', colIdx)}</th>`;
+        colIdx++;
     });
-    if (showGrade) hHtml += '<th><strong>Calificación</strong></th>';
+    if (showGrade) { hHtml += `<th><strong>Calificación</strong>${fillDownBtnHtml('pond_resultsTbody', colIdx)}</th>`; colIdx++; }
     hHtml += '</tr>';
     if (thead) thead.innerHTML = hHtml;
 
     // Body
     if (tbody) {
         tbody.innerHTML = '';
-        rows.forEach(row => {
+        const totalCols = colIdx - 1;
+        rows.forEach((row, sIdx) => {
             const tr = document.createElement('tr');
-            let html = `<td><strong>${row.Alumno}</strong></td>`;
+            let html = `<td><div class="student-cell-wrap">${fillRightBtnHtml('pond_resultsTbody', sIdx, {endCol: totalCols})}<strong>${row.Alumno}</strong></div></td>`;
             if (showActs) acts.forEach((a, ai) => {
                 const v = row[`__ACT__${ai}`];
                 html += v===null||v===undefined
