@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>EVALUACIÓN CRITERIAL · MULTIMATERIA · V1.0</title>
+    <title>EVALUACIÓN CRITERIAL · MULTIMATERIA · LOCAL</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <meta name="theme-color" content="#0b4b6b">
@@ -17,26 +18,22 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* ===== CSS CUSTOM PROPERTIES ===== */
         :root {
             --primary: #2563eb;
             --primary-dark: #1d4ed8;
-            --primary-light: #dbeafe;
             --secondary: #64748b;
             --success: #059669;
-            --success-light: #d1fae5;
             --warning: #d97706;
             --warning-light: #fef3c7;
             --danger: #dc2626;
-            --danger-light: #fee2e2;
             --info: #0891b2;
-            --info-light: #cffafe;
             --purple: #7c3aed;
-            --purple-light: #ede9fe;
             --dark: #1e293b;
-            --body-bg: #f1f5f9;
-            --card-bg: #ffffff;
             --radius: 12px;
             --radius-lg: 20px;
             --radius-xl: 28px;
@@ -45,14 +42,16 @@
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
             --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
             --transition: all 0.2s ease;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         /* ===== BASE STYLES ===== */
         *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            background: var(--body-bg);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             padding: 12px;
             margin: 0;
             padding-left: max(12px, env(safe-area-inset-left));
@@ -67,11 +66,13 @@
         .container-custom {
             max-width: 1400px;
             margin: 0 auto;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-xl);
             padding: 32px 40px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         /* ===== SCREENS ===== */
@@ -254,6 +255,23 @@
             .home-card:hover { transform: none; }
         }
 
+
+        .home-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1;
+        }
+        .home-card:hover::before {
+            opacity: 1;
+        }
+
         #cardExam         { background: #f0f7ff; border-color: #bfdbfe; }
         #cardExam::after  { background: #2563eb; }
         #cardExam:hover   { border-color: #2563eb; }
@@ -273,6 +291,12 @@
         #cardPonderacion { background: #ecfeff; border-color: #a5f3fc; }
         #cardPonderacion::after { background: #0891b2; }
         #cardPonderacion:hover { border-color: #0891b2; }
+
+        #cardRubricas      { background: #fff1f5; border-color: #fbcfe0; }
+        #cardRubricas::after  { background: #f5576c; }
+        #cardRubricas::before { background: linear-gradient(135deg, #f5576c, #f093fb); }
+        #cardRubricas:hover   { border-color: #f5576c; }
+
 
         /* ===== BUTTONS ===== */
         .btn-purple {
@@ -458,6 +482,38 @@
         }
         @keyframes fadeInTip { from { opacity: 0; transform: translateX(-50%) translateY(-4px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes fadeOutTip { from { opacity: 1; } to { opacity: 0; } }
+        /* ===== TEC4-style max warning (aliases) ===== */
+        input.grade-text-input.input-max-exceeded {
+            border-color: var(--warning) !important;
+            background-color: var(--warning-light) !important;
+            animation: shakeInput 0.4s ease;
+        }
+        .max-warning-tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            background: #92400e;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            animation: fadeInTip 0.25s ease, fadeOutTip 0.3s ease 1.8s forwards;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .max-warning-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #92400e;
+        }
 
         /* ===== GRADE SELECT ===== */
         .grade-select {
@@ -1090,32 +1146,362 @@
                 border: 1px solid #ccc;
             }
         }
+
+        /* ===== BUTTON RIPPLE EFFECT (from TEC4) ===== */
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            pointer-events: none;
+        }
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* ===== UTILITY ANIMATIONS ===== */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+        .animate-slideInUp { animation: slideInUp 0.5s ease; }
+
+        /* ===== SMOOTH SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #764ba2, #667eea); }
+
+        /* ===== APP SWITCHER OVERFLOW INDICATOR ===== */
+        .app-switcher {
+            scroll-snap-type: x mandatory;
+            position: relative;
+        }
+        .app-switcher .btn { scroll-snap-align: start; }
+        .app-switcher::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 8px;
+            width: 40px;
+            background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .app-switcher.has-overflow::after { opacity: 1; }
+
+        /* ===== COPY BUTTONS (grade table) ===== */
+        .copy-row-btn, .copy-col-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border: 1px solid #adb5bd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        .copy-row-btn:hover, .copy-col-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            transform: scale(1.12);
+        }
+
+        /* ===== PONDERACIÓN BREAKDOWN MODAL ===== */
+        .pond-breakdown-table th { font-size: 0.82rem; white-space: nowrap; }
+        .pond-breakdown-table td { font-size: 0.9rem; }
+        .pond-act-cell-clickable {
+            cursor: pointer;
+            position: relative;
+            transition: filter 0.2s;
+            user-select: none;
+        }
+        .pond-act-cell-clickable:hover {
+            filter: brightness(0.85);
+            box-shadow: inset 0 0 0 2px var(--primary);
+        }
+
+        /* ===== RÚBRICAS (APP 6) ===== */
+        .rubric-aspect-tag, .rubric-value-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 50px;
+            font-size: 0.9rem; font-weight: 500; margin: 4px;
+            box-shadow: var(--shadow); transition: var(--transition);
+        }
+        .rubric-aspect-tag {
+            background: linear-gradient(135deg, #fde2e4, #fad2e1);
+            border: 1px solid #f4978e; color: #9d2449;
+        }
+        .rubric-value-tag {
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border: 1px solid #a5b4fc; color: #3730a3;
+        }
+        .rubric-aspect-tag .rm-btn, .rubric-value-tag .rm-btn {
+            cursor: pointer; opacity: 0.65; transition: var(--transition);
+            border: none; background: transparent; color: inherit;
+            font-size: 0.95rem; line-height: 1; padding: 0;
+        }
+        .rubric-aspect-tag .rm-btn:hover, .rubric-value-tag .rm-btn:hover {
+            opacity: 1; transform: scale(1.2);
+        }
+        .rubric-teacher-table th, .rubric-teacher-table td {
+            vertical-align: middle; text-align: center; font-size: 0.92rem;
+        }
+        .rubric-teacher-table thead th {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            color: #fff; font-weight: 600; position: sticky; top: 0; z-index: 2;
+        }
+        .rubric-teacher-table select, .rubric-coeval-table select {
+            min-width: 110px; padding: 6px 10px; border-radius: 8px;
+            border: 1px solid #e2e8f0; background: #fff; font-size: 0.88rem;
+        }
+        .rubric-coeval-tabs {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            border-bottom: 2px solid #fde2e4; padding-bottom: 8px; margin-bottom: 16px;
+        }
+        .rubric-coeval-tab {
+            padding: 8px 16px; border-radius: 50px; background: #fde2e4;
+            color: #9d2449; cursor: pointer; font-weight: 500; font-size: 0.9rem;
+            border: 1px solid transparent; transition: var(--transition);
+            max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .rubric-coeval-tab:hover { background: #fad2e1; transform: translateY(-1px); }
+        .rubric-coeval-tab.active {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            color: #fff; box-shadow: var(--shadow);
+        }
+        .rubric-coeval-pane { display: none; }
+        .rubric-coeval-pane.active { display: block; animation: fadeSlideIn 0.3s ease; }
+        .rubric-coeval-table thead th {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: #fff; font-weight: 600; position: sticky; top: 0; z-index: 2;
+        }
+        .rubric-coeval-table th, .rubric-coeval-table td {
+            vertical-align: middle; text-align: center; font-size: 0.88rem;
+        }
+        .rubric-results-table thead th {
+            background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff;
+        }
+        .rubric-results-table td { text-align: center; vertical-align: middle; }
+        .rubric-results-table .final-score {
+            font-weight: 700; color: #0b4b6b; font-size: 1.05rem;
+        }
+        .rubric-bulk-bar {
+            background: linear-gradient(135deg, #fff5f7, #ffe4ec);
+            border: 1px solid #f4978e; border-radius: 12px;
+            padding: 12px 16px; margin-bottom: 12px;
+        }
+        .rubric-bulk-bar .form-select { max-width: 200px; display: inline-block; }
+        .rubric-slider {
+            -webkit-appearance: none; appearance: none;
+            height: 8px; border-radius: 50px;
+            background: linear-gradient(90deg, #f5576c, #f093fb); outline: none;
+        }
+        .rubric-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #fff; border: 3px solid #f5576c; cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        .rubric-slider::-moz-range-thumb {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #fff; border: 3px solid #f5576c; cursor: pointer;
+        }
+
+        /* ===== PREDEFINED TASKS (GENERIC) ===== */
+        .predefined-tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; padding: 8px 4px;
+        }
+        .predefined-task-card {
+            border: 2px solid #e2e8f0; border-radius: 14px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            cursor: pointer; transition: var(--transition);
+            display: flex; flex-direction: column; gap: 8px; position: relative;
+        }
+        .predefined-task-card:hover {
+            border-color: #f5576c;
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.18);
+            transform: translateY(-3px);
+        }
+        .predefined-task-card.selected {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #fff0f3, #ffe4ec);
+            box-shadow: 0 8px 24px rgba(245, 87, 108, 0.25);
+        }
+        .predefined-task-card.selected::after {
+            content: "✓"; position: absolute; top: 8px; right: 10px;
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            color: #fff; width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.95rem; box-shadow: var(--shadow);
+        }
+        .predefined-task-name {
+            font-weight: 700; color: var(--dark); font-size: 1.05rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .predefined-task-name i { color: #f5576c; }
+        .predefined-task-count {
+            display: inline-block; background: #fde2e4; color: #9d2449;
+            padding: 2px 10px; border-radius: 50px; font-size: 0.78rem; font-weight: 600;
+        }
+        .predefined-task-criteria {
+            background: #f8fafc; border-radius: 8px; padding: 8px 10px;
+            font-size: 0.82rem; color: #475569;
+            max-height: 110px; overflow-y: auto; line-height: 1.5;
+        }
+        .predefined-task-criteria .crit-chip {
+            display: inline-block; background: #e0e7ff; color: #3730a3;
+            padding: 2px 8px; border-radius: 50px; margin: 2px 3px;
+            font-weight: 600; font-size: 0.78rem; border: 1px solid #c7d2fe;
+        }
+        .predefined-task-card.custom-task {
+            border-style: dashed; border-color: #94a3b8;
+            background: linear-gradient(135deg, #fefce8, #fef9c3);
+        }
+        .predefined-task-card.custom-task:hover {
+            border-color: #ca8a04;
+            box-shadow: 0 8px 24px rgba(202, 138, 4, 0.20);
+        }
+        .predefined-task-card.custom-task .predefined-task-name i { color: #ca8a04; }
+        .predefined-task-card.custom-task .predefined-task-count {
+            background: #fef3c7; color: #92400e;
+        }
+        .predefined-task-card.custom-task.selected {
+            border-color: #ca8a04;
+            background: linear-gradient(135deg, #fef9c3, #fef08a);
+            box-shadow: 0 8px 24px rgba(202, 138, 4, 0.25);
+        }
+        .predefined-task-card.custom-task.selected::after {
+            background: linear-gradient(135deg, #ca8a04, #f59e0b);
+        }
+        .predefined-task-badge-custom, .predefined-task-badge-default {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 1px 8px; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 600; margin-left: auto;
+        }
+        .predefined-task-badge-custom {
+            background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+        }
+        .predefined-task-badge-default {
+            background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe;
+        }
+        .predefined-task-actions {
+            display: flex; gap: 6px; margin-top: 6px; padding-top: 8px;
+            border-top: 1px dashed #e2e8f0; justify-content: flex-end;
+        }
+        .predefined-task-action-btn {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; font-size: 0.78rem; font-weight: 500;
+            border-radius: 8px; border: 1px solid transparent;
+            background: transparent; cursor: pointer; transition: var(--transition);
+            line-height: 1.2;
+        }
+        .predefined-task-action-btn.edit-btn { color: var(--primary); border-color: #bfdbfe; background: #eff6ff; }
+        .predefined-task-action-btn.edit-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .predefined-task-action-btn.delete-btn { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+        .predefined-task-action-btn.delete-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .predefined-task-action-btn.restore-btn { color: var(--success); border-color: #bbf7d0; background: #f0fdf4; }
+        .predefined-task-action-btn.restore-btn:hover { background: var(--success); color: #fff; border-color: var(--success); }
+        .predefined-tasks-toolbar {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #fff5f7, #ffe4ec);
+            border: 1px solid #f4978e; border-radius: 12px; margin-bottom: 12px;
+        }
+        .predefined-tasks-toolbar .toolbar-info {
+            color: #9d2449; font-size: 0.85rem; font-weight: 500;
+            margin-left: auto; display: flex; align-items: center; gap: 4px;
+        }
+        .predefined-edit-criteria-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 6px 12px; margin-top: 8px; max-height: 380px; overflow-y: auto;
+            padding: 10px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;
+        }
+        .predefined-edit-criteria-grid .form-check { margin-bottom: 4px; }
+        .predefined-edit-criteria-grid .form-check-label { font-size: 0.88rem; cursor: pointer; }
+        .predefined-edit-group-title {
+            font-weight: 700; color: var(--dark); font-size: 0.92rem;
+            margin: 8px 0 4px 0; padding-bottom: 4px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .predefined-edit-summary {
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border: 1px solid #a5b4fc; border-radius: 10px;
+            padding: 8px 12px; margin-top: 10px;
+            font-size: 0.88rem; color: #3730a3; font-weight: 500;
+        }
+
+            .predefined-tasks-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .rubric-coeval-tab { max-width: 140px !important; font-size: 0.8rem !important; padding: 6px 10px !important; }
+        }
     </style>
 </head>
 <body>
 <div id="intro-overlay">
     <div class="intro-title">EVALUACIÓN CRITERIAL<br>MULTIMATERIA</div>
-    <div class="intro-subtitle">by @angelmicelti</div>
+    <div class="intro-subtitle">by @angelmicelti · v2.0</div>
 </div>
 
 <div class="container-custom">
-    <!-- CABECERA -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3" style="gap:10px;">
-        <h1 class="fw-bold mb-0" style="color: #0b4b6b; font-size: clamp(1.1rem,4vw,1.8rem);">
+    <!-- CABECERA — fila 1: título + acciones de usuario -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2" style="gap:8px;">
+        <h1 class="fw-bold mb-0" style="color: #0b4b6b; font-size: clamp(1rem,3.5vw,1.5rem);">
             <i class="bi bi-diagram-3 me-2" style="color: #0d6efd;"></i>EVALUACIÓN CRITERIAL · <span id="subjectNameDisplay">[sin materia]</span>
         </h1>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+        </div>
         <input type="file" id="importSubjectFile" accept=".json" class="d-none">
     </div>
 
     <!-- Navigation Buttons (always visible) -->
-    <div class="app-switcher mb-4" role="group">
+    <div class="app-switcher mb-3" role="group">
         <button type="button" class="btn btn-outline-secondary" id="btnHome"><i class="fas fa-home"></i> Inicio</button>
         <button type="button" class="btn btn-outline-primary" id="btnAppExam"><i class="bi bi-pencil-square"></i> Examen Preguntas/Criterios</button>
         <button type="button" class="btn btn-outline-success" id="btnAppTest"><i class="fas fa-calculator"></i> Examen Tipo Test</button>
         <button type="button" class="btn btn-outline-warning" id="btnAppGeneric"><i class="bi bi-check2-circle"></i> Actividad por Criterios</button>
         <button type="button" class="btn btn-outline-secondary" id="btnAppInstrumentos"><i class="bi bi-grid-3x3-gap-fill"></i> Actividad por Instrumentos</button>
         <button type="button" class="btn btn-outline-info" id="btnAppPonderacion"><i class="bi bi-layers-half"></i> Ponderación</button>
+        <button type="button" class="btn btn-outline-danger" id="btnAppRubricas"><i class="bi bi-grid-1x2-fill"></i> Rúbricas</button>
         <a href="Tutorial_AppCalificaActividadesMateriaGeneral.pdf" class="btn btn-outline-danger ms-auto" id="btnTutorial" download><i class="bi bi-file-pdf"></i> Tutorial</a>
+    </div>
+
+    <!-- Título dinámico de la pantalla actual (bajo la navbar) + botones de navegación de la app -->
+    <div id="currentScreenTitle" class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; gap:10px;">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <i id="currentScreenTitleIcon" class="bi bi-house-door-fill" style="font-size: 1.5rem; color: #0b4b6b;"></i>
+            <h2 id="currentScreenTitleText" class="fw-bold mb-0" style="font-size: clamp(1.1rem, 3vw, 1.6rem); color: #0b4b6b;">Inicio</h2>
+            <span id="activityNameBadge" class="badge bg-secondary ms-2 fs-6" style="display:none;"></span>
+        </div>
+        <div id="currentScreenNav" class="btn-group flex-shrink-0" role="group"></div>
     </div>
 
     <!-- HOME -->
@@ -1156,27 +1542,23 @@
             <div class="col-md-6"><div class="card home-card p-4 text-center h-100 d-flex flex-column" id="cardInstrumentos"><i class="bi bi-grid-3x3-gap-fill" style="font-size: 3rem; color: #6f42c1;"></i><h3 class="mt-3 fw-bold">Actividad por instrumentos</h3><p class="text-muted flex-grow-1">Define instrumentos, relación con criterios de la materia y califica.</p><button class="btn btn-purple mt-auto"><i class="bi bi-box-arrow-in-right"></i> Usar</button></div></div>
         </div>
         <div class="row g-4 justify-content-center mt-2">
-            <div class="col-md-8"><div class="card home-card p-4 text-center h-100 d-flex flex-column" id="cardPonderacion"><i class="bi bi-layers-half" style="font-size: 3rem; color: #0dcaf0;"></i><h3 class="mt-3 fw-bold">Ponderación de actividades</h3><p class="text-muted flex-grow-1">Combina los resultados de varias actividades del mismo tipo aplicando un peso porcentual a cada una y obtén la nota ponderada por criterio.</p><button class="btn btn-info mt-auto text-white"><i class="bi bi-box-arrow-in-right"></i> Usar</button></div></div>
+            <div class="col-md-6"><div class="card home-card p-4 text-center h-100 d-flex flex-column" id="cardPonderacion"><i class="bi bi-layers-half" style="font-size: 3rem; color: #0dcaf0;"></i><h3 class="mt-3 fw-bold">Ponderación de actividades</h3><p class="text-muted flex-grow-1">Combina los resultados de varias actividades del mismo tipo aplicando un peso porcentual a cada una y obtén la nota ponderada por criterio.</p><button class="btn btn-info mt-auto text-white"><i class="bi bi-box-arrow-in-right"></i> Usar</button></div></div>
+            <div class="col-md-6"><div class="card home-card p-4 text-center h-100 d-flex flex-column" id="cardRubricas"><i class="bi bi-grid-1x2-fill" style="font-size: 3rem; color: #f5576c;"></i><h3 class="mt-3 fw-bold">Evaluación de rúbricas</h3><p class="text-muted flex-grow-1">Evalúa con rúbricas combinando valoración del profesor y coevaluación entre compañeros.</p><button class="btn btn-danger mt-auto"><i class="bi bi-box-arrow-in-right"></i> Usar</button></div></div>
         </div>
     </div>
-<!-- APP 1: EXAMEN POR PREGUNTAS -->
+    <!-- APP 1: EXAMEN POR PREGUNTAS -->
     <div id="appExamContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
-            <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
-                <i class="bi bi-pencil-square" style="color:#0d6efd;"></i> Examen por preguntas
-            </h3>
-            <div class="btn-group flex-shrink-0" role="group">
-                <button type="button" class="btn btn-outline-primary active" id="examNavConfig">⚙️ Configuración</button>
-                <button type="button" class="btn btn-outline-primary" id="examNavGrade">📝 Calificación</button>
-                <button type="button" class="btn btn-outline-primary" id="examNavResults">📊 Resultados</button>
-            </div>
+        <div id="examNavButtons" style="display:none;">
+            <button type="button" class="btn btn-outline-primary active" id="examNavConfig">⚙️ Configuración</button>
+            <button type="button" class="btn btn-outline-primary" id="examNavGrade">📝 Calificación</button>
+            <button type="button" class="btn btn-outline-primary" id="examNavResults">📊 Resultados</button>
         </div>
         <div id="examScreenConfig" class="screen active">
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración del examen <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre y curso del examen."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" placeholder="Introduce un nombre"></div>
-                    <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="examCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="examNameInput" class="form-control" placeholder="Ej: Examen 1ª Evaluación"></div>
+                    <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="examCourseInput" class="form-control" placeholder="Ej: 4º ESO A"></div>
                 </div>
             </div>
             <div class="section-card">
@@ -1251,22 +1633,17 @@
 
     <!-- APP 2: TIPO TEST -->
     <div id="appTestContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
-            <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
-                <i class="fas fa-calculator" style="color:#198754;"></i> Examen tipo test
-            </h3>
-            <div class="btn-group flex-shrink-0" role="group">
-                <button type="button" class="btn btn-outline-primary active" id="testNavConfig">⚙️ Configuración</button>
-                <button type="button" class="btn btn-outline-primary" id="testNavGrade">📝 Calificación</button>
-                <button type="button" class="btn btn-outline-primary" id="testNavResults">📊 Resultados</button>
-            </div>
+        <div id="testNavButtons" style="display:none;">
+            <button type="button" class="btn btn-outline-primary active" id="testNavConfig">⚙️ Configuración</button>
+            <button type="button" class="btn btn-outline-primary" id="testNavGrade">📝 Calificación</button>
+            <button type="button" class="btn btn-outline-primary" id="testNavResults">📊 Resultados</button>
         </div>
         <div id="testScreenConfig" class="screen active">
             <div class="section-card">
                 <div class="section-title"><i class="fas fa-clipboard-list"></i> Configuración del test <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Título del test y curso."></i></div>
                 <div class="row g-4">
-                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Introduce un nombre"></div>
-                    <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="testCourseInput" class="form-control" placeholder="Ejemplo 4º ESO"></div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre del examen</label><input type="text" id="testExamTitleInput" class="form-control" placeholder="Ej: Test 1ª Evaluación"></div>
+                    <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="testCourseInput" class="form-control" placeholder="Ej: 4º ESO A"></div>
                 </div>
             </div>
                         <div class="section-card">
@@ -1351,22 +1728,17 @@
 
     <!-- APP 3: GENÉRICA -->
     <div id="appGenericContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
-            <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
-                <i class="bi bi-check2-circle" style="color:#fd7e14;"></i> Actividad evaluada mediante criterios
-            </h3>
-            <div class="btn-group flex-shrink-0" role="group">
-                <button type="button" class="btn btn-outline-primary active" id="genericNavConfig">⚙️ Configuración</button>
-                <button type="button" class="btn btn-outline-primary" id="genericNavGrade">📝 Calificación</button>
-                <button type="button" class="btn btn-outline-primary" id="genericNavResults">📊 Resultados</button>
-            </div>
+        <div id="genericNavButtons" style="display:none;">
+            <button type="button" class="btn btn-outline-primary active" id="genericNavConfig">⚙️ Configuración</button>
+            <button type="button" class="btn btn-outline-primary" id="genericNavGrade">📝 Calificación</button>
+            <button type="button" class="btn btn-outline-primary" id="genericNavResults">📊 Resultados</button>
         </div>
         <div id="genericScreenConfig" class="screen active">
             <div class="section-card">
                 <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la actividad <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Nombre de la actividad y curso."></i></div>
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" placeholder="Introduce un nombre"></div>
-                    <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="genericCourseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📌 Nombre de la actividad</label><input type="text" id="genericExamNameInput" class="form-control" placeholder="Ej: Práctica 3"></div>
+                    <div class="col-md-3"><label class="form-label fw-semibold">📚 Curso</label><input type="text" id="genericCourseInput" class="form-control" placeholder="Ej: 4º ESO A"></div>
                 </div>
             </div>
             <div class="section-card">
@@ -1395,6 +1767,7 @@
                     <input type="file" id="genericImportConfigFile" accept=".json" class="hidden">
                     <button id="genericSaveToLocalBtn" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
                     <button id="genericLoadFromLocalBtn" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+                    <button class="btn btn-outline-danger btn-sm" id="genericBtnPredefinedTasks"><i class="bi bi-clipboard-list"></i> Actividades predefinidas</button>
                     <button id="genericResetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
                 </div>
             </div>
@@ -1434,15 +1807,10 @@
 
     <!-- APP 4: INSTRUMENTOS (PESOS AUTO) -->
     <div id="appInstrumentosContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
-            <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
-                <i class="bi bi-grid-3x3-gap-fill" style="color:#6f42c1;"></i> Actividad evaluada por instrumentos
-            </h3>
-            <div class="btn-group flex-shrink-0" role="group">
-                <button type="button" class="btn btn-outline-primary active" id="inst_config-tab"><i class="bi bi-gear-fill"></i> Configuración</button>
-                <button type="button" class="btn btn-outline-primary" id="inst_relacion-tab"><i class="bi bi-diagram-3"></i> Relación</button>
-                <button type="button" class="btn btn-outline-primary" id="inst_eval-tab"><i class="bi bi-bar-chart-line"></i> Evaluación</button>
-            </div>
+        <div id="instNavButtons" style="display:none;">
+            <button type="button" class="btn btn-outline-primary active" id="inst_config-tab"><i class="bi bi-gear-fill"></i> Configuración</button>
+            <button type="button" class="btn btn-outline-primary" id="inst_relacion-tab"><i class="bi bi-diagram-3"></i> Relación</button>
+            <button type="button" class="btn btn-outline-primary" id="inst_eval-tab"><i class="bi bi-bar-chart-line"></i> Evaluación</button>
         </div>
         <div class="tab-content">
             <!-- CONFIG -->
@@ -1450,8 +1818,8 @@
                 <div class="section-card">
                     <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la actividad</div>
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre de la actividad <span class="text-danger">*</span></label><input type="text" id="inst_actividadInput" class="form-control" placeholder="Introduce un nombre"></div>
-                        <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso <span class="text-danger">*</span></label><input type="text" id="inst_claseInput" class="form-control" placeholder="Ejemplo: 4º ESO"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">📌 Nombre de la actividad <span class="text-danger">*</span></label><input type="text" id="inst_actividadInput" class="form-control" placeholder="Ej: Proyecto Mecanismos"></div>
+                        <div class="col-md-6"><label class="form-label fw-semibold">📚 Curso <span class="text-danger">*</span></label><input type="text" id="inst_claseInput" class="form-control" placeholder="Ej: 4º ESO A"></div>
                     </div>
                 </div>
                 <div class="section-card">
@@ -1548,15 +1916,10 @@
 
     <!-- APP 5: PONDERACIÓN DE ACTIVIDADES -->
     <div id="appPonderacionContainer" class="screen">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3" style="gap:10px;">
-            <h3 class="fw-bold mb-0" style="font-size:clamp(0.95rem,3vw,1.4rem);">
-                <i class="bi bi-layers-half" style="color:#0dcaf0;"></i> Ponderación de actividades
-            </h3>
-            <div class="btn-group flex-shrink-0" role="group">
-                <button type="button" class="btn btn-outline-info active" id="pond_tabConfig"><i class="bi bi-gear-fill"></i> Configuración</button>
-                <button type="button" class="btn btn-outline-info" id="pond_tabImport"><i class="bi bi-cloud-upload"></i> Importar</button>
-                <button type="button" class="btn btn-outline-info" id="pond_tabResults"><i class="bi bi-bar-chart-line"></i> Resultados</button>
-            </div>
+        <div id="pondNavButtons" style="display:none;">
+            <button type="button" class="btn btn-outline-info active" id="pond_tabConfig"><i class="bi bi-gear-fill"></i> Configuración</button>
+            <button type="button" class="btn btn-outline-info" id="pond_tabImport"><i class="bi bi-cloud-upload"></i> Importar</button>
+            <button type="button" class="btn btn-outline-info" id="pond_tabResults"><i class="bi bi-bar-chart-line"></i> Resultados</button>
         </div>
 
         <!-- CONFIG -->
@@ -1570,7 +1933,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">📚 Curso <span class="text-danger">*</span></label>
-                        <input type="text" id="pond_cursoInput" class="form-control" placeholder="Ej: 4º ESO">
+                        <input type="text" id="pond_cursoInput" class="form-control" placeholder="Ej: 4º ESO A">
                     </div>
                 </div>
             </div>
@@ -1596,6 +1959,7 @@
                     <input type="file" id="pond_importConfigFile" accept=".json" class="hidden">
                     <button id="pond_saveConfigLocalBtn" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
                     <button id="pond_loadConfigLocalBtn" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+                    <button id="pond_resetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
                 </div>
             </div>
             <div id="pond_configWarning" class="validation-warning" style="display:none;"></div>
@@ -1675,7 +2039,283 @@
         </div>
     </div>
 
+    <div id="appRubricasContainer" class="screen">
+        <div id="rubricNavButtons" style="display:none;">
+            <button class="btn btn-outline-danger active" id="rubricNavSetup"><i class="bi bi-gear-fill"></i> Configuración</button>
+            <button class="btn btn-outline-danger" id="rubricNavEval"><i class="bi bi-clipboard-check"></i> Evaluación</button>
+            <button class="btn btn-outline-danger" id="rubricNavResults"><i class="bi bi-bar-chart-line"></i> Resultados</button>
+        </div>
+
+        <!-- PANTALLA CONFIGURACIÓN -->
+        <div id="rubricScreenSetup" class="screen active">
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-pencil-square"></i> Configuración de la evaluación <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Título de la evaluación y grupo/clase."></i></div>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5"><label class="form-label fw-semibold">📌 Título de la evaluación</label><input type="text" id="rubricEvalNameInput" class="form-control" placeholder="Ej: Exposición, Proyecto..."></div>
+                    <div class="col-md-4"><label class="form-label fw-semibold">📚 Grupo / Clase</label><input type="text" id="rubricGroupNameInput" class="form-control" placeholder="Ej: 4º ESO A"></div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-people-fill"></i> Alumnado (orden alfabético) <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Añade alumnos manualmente o impórtalos desde Excel/JSON."></i></div>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <div class="d-flex flex-wrap"><input type="text" id="rubricStudentNameInput" class="form-control" placeholder="Apellidos, Nombre" style="width:260px;"><button id="rubricBtnAddStudent" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> +</button></div>
+                    <div><label for="rubricImportFile" class="import-label"><i class="fas fa-file-import"></i> Importar Excel/JSON</label><input type="file" id="rubricImportFile" accept=".xlsx,.xls,.json" hidden></div>
+                    <button id="rubricBtnClearStudents" class="btn btn-sm btn-outline-danger">Limpiar lista</button>
+                </div>
+                <div id="rubricStudentListContainer" class="mt-3 p-3 bg-white rounded-3 border"><span class="fw-bold">📌 Lista: </span><span id="rubricStudentCountBadge">0</span> alumnos<div id="rubricStudentTags" class="mt-2 d-flex flex-wrap"></div></div>
+                <div id="rubricDuplicateMessage" class="small text-danger mt-2"></div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-list-check"></i> Aspectos a evaluar <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Cada aspecto es una dimensión de la rúbrica (ej: Contenido, Expresión oral...)."></i></div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <input type="text" id="rubricAspectNameInput" class="form-control" placeholder="Nuevo aspecto (ej: Pronunciación)" style="max-width:320px;">
+                    <button id="rubricBtnAddAspect" class="btn btn-success"><i class="bi bi-plus-circle"></i> Añadir aspecto</button>
+                </div>
+                <div id="rubricAspectsContainer" class="mt-3"></div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-award"></i> Niveles de logro <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Valores cualitativos o numéricos de menor a mayor. 'NE' (No Evaluado) se añade automáticamente y no computa."></i></div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <input type="text" id="rubricValueNameInput" class="form-control" placeholder="Nuevo nivel (ej: Excelente, 5, Suficiente...)" style="max-width:320px;">
+                    <button id="rubricBtnAddValue" class="btn btn-success"><i class="bi bi-plus-circle"></i> Añadir nivel</button>
+                </div>
+                <div id="rubricValuesContainer" class="mt-3"></div>
+                <div class="form-text"><i class="bi bi-info-circle"></i> El nivel <strong>NE</strong> (No Evaluado) se incluye automáticamente y no se computa en los cálculos.</div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-sliders"></i> Ponderación profesor / coevaluación <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Ajusta el peso porcentual de la nota del profesor frente a la coevaluación del alumnado."></i></div>
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-8">
+                        <input type="range" min="0" max="100" value="75" class="form-range rubric-slider" id="rubricTeacherWeight">
+                        <div class="d-flex justify-content-between mt-2 small">
+                            <span><i class="bi bi-person-fill" style="color:#f5576c;"></i> Profesor: <strong id="rubricTeacherWeightValue">75%</strong></span>
+                            <span><i class="bi bi-people-fill" style="color:#f093fb;"></i> Coevaluación: <strong id="rubricStudentWeightValue">25%</strong></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="badge bg-danger p-2 me-1"><i class="bi bi-person-fill"></i> <span id="rubricTeacherPercent">75</span>%</span>
+                        <span class="badge bg-purple p-2"><i class="bi bi-people-fill"></i> <span id="rubricStudentPercent">25</span>%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-check2-square"></i> Criterios de la materia <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Selecciona los criterios de evaluación que se asociarán a esta rúbrica. Cada criterio recibirá la nota final del alumno."></i></div>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#globalCriteriaModal" data-app="rubric"><i class="bi bi-check2-square"></i> Seleccionar criterios de la materia</button>
+                    <span id="rubricSelectedCriteriaBadges" class="d-flex flex-wrap gap-1"></span>
+                </div>
+                <div class="form-text mt-2"><i class="bi bi-info-circle"></i> Estos criterios se usarán para exportar las <strong>notas por criterio</strong> en los resultados. La nota final del alumno se asignará a cada criterio seleccionado.</div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-gear-wide-connected"></i> Gestión de información <i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Exporta, importa o guarda localmente la configuración completa de la rúbrica."></i></div>
+                <div class="d-flex flex-wrap gap-2 justify-content-start">
+                    <button id="rubricExportConfigBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-arrow-down"></i> Exportar JSON</button>
+                    <button id="rubricImportConfigBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-arrow-up"></i> Importar JSON</button>
+                    <input type="file" id="rubricImportConfigFile" accept=".json" hidden>
+                    <button id="rubricSaveToLocalBtn" class="btn btn-outline-success btn-sm"><i class="bi bi-save"></i> Guardar local</button>
+                    <button id="rubricLoadFromLocalBtn" class="btn btn-outline-info btn-sm"><i class="bi bi-folder-symlink"></i> Cargar local</button>
+                    <button id="rubricResetAllBtn" class="btn btn-outline-danger btn-sm"><i class="bi bi-eraser"></i> Reiniciar todo</button>
+                </div>
+            </div>
+
+            <div id="rubricSetupWarning" class="validation-warning" style="display:none;"></div>
+            <div class="d-flex justify-content-end mt-3">
+                <button id="rubricBtnGoEval" class="btn btn-danger btn-lg"><i class="bi bi-arrow-right"></i> Ir a Evaluación</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA EVALUACIÓN -->
+        <div id="rubricScreenEval" class="screen">
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-person-fill"></i> Evaluación del profesor <span class="badge bg-danger ms-2"><span id="rubricTeacherPercentEval">75</span>% de la nota</span><i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Selecciona el nivel de logro de cada alumno en cada aspecto."></i></div>
+                <div class="rubric-bulk-bar d-flex flex-wrap align-items-center gap-2">
+                    <label class="fw-semibold mb-0"><i class="bi bi-lightning-charge-fill"></i> Acciones masivas:</label>
+                    <select id="rubricBulkValue" class="form-select form-select-sm"></select>
+                    <button id="rubricBulkAllAspects" class="btn btn-sm btn-outline-danger"><i class="bi bi-grid-fill"></i> Aplicar a todos los aspectos</button>
+                    <span id="rubricBulkAspects" class="d-flex flex-wrap gap-1 ms-2"></span>
+                </div>
+                <div class="table-responsive" style="max-height:500px;">
+                    <table class="table table-bordered table-striped rubric-teacher-table" id="rubricTeacherTable">
+                        <thead id="rubricTeacherThead"></thead>
+                        <tbody id="rubricTeacherTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-people-fill"></i> Coevaluación del alumnado <span class="badge bg-purple ms-2"><span id="rubricStudentPercentEval">25</span>% de la nota</span><i class="bi bi-question-circle help-icon" data-bs-toggle="tooltip" title="Cada alumno evalúa a sus compañeros en cada aspecto."></i></div>
+                <div class="rubric-bulk-bar d-flex flex-wrap align-items-center gap-2">
+                    <label class="fw-semibold mb-0"><i class="bi bi-lightning-charge-fill"></i> Aplicar a todos:</label>
+                    <select id="rubricCoevalBulkValue" class="form-select form-select-sm"></select>
+                    <button id="rubricCoevalBulkAll" class="btn btn-sm btn-outline-purple"><i class="bi bi-grid-fill"></i> Aplicar a todos los aspectos</button>
+                </div>
+                <div class="rubric-coeval-tabs" id="rubricCoevalTabs"></div>
+                <div id="rubricCoevalPanes"></div>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between gap-2 mt-3">
+                <button id="rubricBtnBackSetup" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver a Configuración</button>
+                <div class="d-flex flex-wrap gap-2">
+                    <button id="rubricExportDataBtn" class="btn btn-outline-primary"><i class="bi bi-download"></i> Exportar datos</button>
+                    <button id="rubricImportDataBtn" class="btn btn-outline-secondary"><i class="bi bi-upload"></i> Importar datos</button>
+                    <input type="file" id="rubricImportDataFile" accept=".json" hidden>
+                    <button id="rubricClearDataBtn" class="btn btn-outline-danger"><i class="bi bi-trash3"></i> Limpiar datos</button>
+                    <button id="rubricBtnCalc" class="btn btn-danger btn-lg"><i class="bi bi-calculator"></i> Calcular notas</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA RESULTADOS -->
+        <div id="rubricScreenResults" class="screen">
+            <div class="section-card">
+                <div class="section-title"><i class="bi bi-bar-chart-line"></i> Resultados de la evaluación <span id="rubricResultsTitleBadge" class="badge bg-success ms-2 fs-6"></span></div>
+                <div class="alert alert-info small mb-3"><i class="bi bi-info-circle-fill"></i> Las notas se calculan en escala 0-10 según la posición del nivel de logro (o linealmente si los valores son numéricos). El nivel <strong>NE</strong> no computa.</div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover rubric-results-table" id="rubricResultsTable">
+                        <thead><tr><th>Estudiante</th><th>Nota Profesor</th><th>Nota Coevaluación</th><th>Nota Final</th></tr></thead>
+                        <tbody id="rubricResultsTbody"></tbody>
+                    </table>
+                </div>
+                <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
+                    <button id="rubricExportResultsBtn" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
+                    <button id="rubricExportPdfBtn" class="btn btn-outline-danger"><i class="bi bi-file-pdf"></i> Exportar PDF</button>
+                    <button id="rubricExportJsonResultsBtn" class="btn btn-outline-dark"><i class="bi bi-filetype-json"></i> Exportar JSON</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-start mt-3">
+                <button id="rubricBtnBackEval" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Volver a Evaluación</button>
+            </div>
+        </div>
+    </div>
+
+</div>
     <!-- MODAL COMPARTIDO: CRITERIOS -->
+        <div class="modal fade" id="pondBreakdownModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(145deg, #00bcd4, #0097a7);">
+                    <h5 class="modal-title text-white"><i class="bi bi-layers-half me-2"></i>Desglose por actividad</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="pondBreakdownModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL OPCIONES EXPORTACIÓN RÚBRICAS -->
+    <div class="modal fade" id="rubricExportOptionsModal" tabindex="-1" aria-labelledby="rubricExportOptionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(145deg, #f5576c, #f093fb);">
+                    <h5 class="modal-title text-white" id="rubricExportOptionsModalLabel"><i class="bi bi-file-earmark-arrow-down me-2"></i>Exportar resultados</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fw-semibold mb-2">Selecciona los elementos a incluir:</p>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="rubricExpOptTeacher" checked>
+                        <label class="form-check-label" for="rubricExpOptTeacher"><i class="bi bi-person-fill text-danger"></i> Nota profesor</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="rubricExpOptCoeval" checked>
+                        <label class="form-check-label" for="rubricExpOptCoeval"><i class="bi bi-people-fill" style="color:#f093fb;"></i> Coevaluación</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="rubricExpOptFinal" checked>
+                        <label class="form-check-label" for="rubricExpOptFinal"><i class="bi bi-trophy-fill text-success"></i> Nota final</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="rubricExpOptCriteria">
+                        <label class="form-check-label" for="rubricExpOptCriteria"><i class="bi bi-check2-square text-primary"></i> Notas por criterio <span class="text-muted small">(requiere criterios seleccionados)</span></label>
+                    </div>
+                    <div id="rubricExpOptWarning" class="text-danger small mt-2" style="display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" id="rubricExpOptConfirm"><i class="bi bi-download"></i> Exportar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL ACTIVIDADES PREDEFINIDAS (Actividad por criterios) -->
+    <div class="modal fade" id="genericPredefinedTasksModal" tabindex="-1" aria-labelledby="genericPredefinedTasksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-fullscreen-lg-down modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(145deg, #f5576c, #f093fb);">
+                    <h5 class="modal-title text-white" id="genericPredefinedTasksModalLabel"><i class="bi bi-clipboard-list me-2"></i>Actividades predefinidas</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small mb-3"><i class="bi bi-info-circle-fill"></i> Selecciona una actividad y sus criterios se cargarán en el formulario. Puedes <b>añadir nuevas actividades</b>, <b>editar las existentes</b> (cambiar nombre o criterios) o <b>eliminar</b> las personalizadas. Los cambios se guardan en tu navegador.</div>
+
+                    <!-- Toolbar de gestión del catálogo -->
+                    <div class="predefined-tasks-toolbar">
+                        <button class="btn btn-success btn-sm" id="genericPredefNewBtn"><i class="bi bi-plus-circle"></i> Nueva actividad</button>
+                        <button class="btn btn-outline-warning btn-sm" id="genericPredefRestoreAllBtn" title="Restaurar todas las actividades predeterminadas (se perderán las personalizadas)"><i class="bi bi-arrow-counterclockwise"></i> Restaurar predeterminadas</button>
+                        <button class="btn btn-outline-primary btn-sm" id="genericPredefExportBtn" title="Exportar catálogo a JSON"><i class="bi bi-file-earmark-arrow-down"></i> Exportar catálogo</button>
+                        <button class="btn btn-outline-secondary btn-sm" id="genericPredefImportBtn" title="Importar catálogo desde JSON"><i class="bi bi-file-earmark-arrow-up"></i> Importar catálogo</button>
+                        <input type="file" id="genericPredefImportFile" accept=".json" hidden>
+                        <span class="toolbar-info"><i class="bi bi-info-circle"></i> <span id="genericPredefCustomCount">0</span> personalizadas / <span id="genericPredefDefaultCount">0</span> predeterminadas</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                        <input type="text" id="genericPredefinedSearch" class="form-control form-control-sm" placeholder="Buscar actividad..." style="max-width:280px;">
+                        <span class="text-muted small ms-auto"><span id="genericPredefinedCount">0</span> actividades en total</span>
+                    </div>
+                    <div class="predefined-tasks-grid" id="genericPredefinedTasksGrid"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" id="genericPredefinedApplyBtn" disabled><i class="bi bi-check2-circle"></i> Aplicar criterios de la actividad seleccionada</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR/CREAR ACTIVIDAD PREDEFINIDA -->
+    <div class="modal fade" id="genericPredefEditModal" tabindex="-1" aria-labelledby="genericPredefEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(145deg, #0d6efd, #0b5ed7);">
+                    <h5 class="modal-title text-white" id="genericPredefEditModalLabel"><i class="bi bi-pencil-square me-2"></i>Editar actividad</h5>
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="genericPredefEditName" class="form-label fw-semibold">Nombre de la actividad <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="genericPredefEditName" placeholder="Ej: Exposición oral, Proyecto final...">
+                        <div class="form-text">El nombre debe ser único en el catálogo. Si editas una actividad predeterminada, se creará una versión personalizada y la original quedará oculta hasta que la restaures.</div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold">Criterios de evaluación TEC.4.X.Y. <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-2 mb-2">
+                            <button class="btn btn-sm btn-outline-primary" id="genericPredefSelectAll" type="button"><i class="bi bi-check2-square"></i> Seleccionar todos</button>
+                            <button class="btn btn-sm btn-outline-secondary" id="genericPredefClearAll" type="button"><i class="bi bi-square"></i> Borrar selección</button>
+                        </div>
+                        <div id="genericPredefEditCriteriaGrid" class="predefined-edit-criteria-grid"></div>
+                        <div class="predefined-edit-summary" id="genericPredefEditSummary"><i class="bi bi-info-circle"></i> 0 criterios seleccionados</div>
+                    </div>
+                    <div id="genericPredefEditMessage" class="text-danger small mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" id="genericPredefEditSaveBtn"><i class="bi bi-save"></i> Guardar actividad</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ASIGNAR CRITERIOS A PREGUNTA (solo examen) -->
     <div class="modal fade" id="globalCriteriaModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-fullscreen-lg-down">
             <div class="modal-content">
@@ -1805,7 +2445,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -1863,6 +2502,10 @@ function loadSubjectFromJSON(file) {
                 appStates[app].globalCriteria = [];
                 appStates[app].criteriaDescriptions = {};
             });
+            rubricState.globalCriteria = [];
+            rubricState.criteriaDescriptions = {};
+            // Limpiar calificaciones de todas las apps (datos de la materia anterior)
+            resetAllAppScores();
             instrumentCriteria = codes.slice();
             instrumentState.matrix = instrumentState.instruments.map(() => new Array(instrumentCriteria.length).fill(false));
             if (document.getElementById('inst_relacion').classList.contains('active')) inst_renderMatrix();
@@ -1870,7 +2513,8 @@ function loadSubjectFromJSON(file) {
             renderAllBadges();
             updateExamConfigWarning(); updateTestConfigWarning(); updateGenericConfigWarning(); inst_updateConfigButtonState();
             updateSubjectDisplay();
-            alert(`✅ Materia "${subjectInfo.name}${subjectInfo.course ? subjectInfo.course : ''}" cargada con ${codes.length} criterios.`);
+            let msg = `✅ Materia "${subjectInfo.name}${subjectInfo.course ? subjectInfo.course : ''}" cargada con ${codes.length} criterios.`;
+            alert(msg);
             // Collapse the import accordion after 5 seconds so user can read the criteria count
             const collapseImport = document.getElementById('collapseImport');
             if (collapseImport) {
@@ -1882,24 +2526,6 @@ function loadSubjectFromJSON(file) {
         } catch(err) { alert('Error al procesar la materia: ' + err.message); }
     };
     reader.readAsText(file);
-}
-
-function exportSubjectToJSON() {
-    if (!subjectInfo.name || !subjectInfo.criteriaCodes.length) {
-        alert('No hay materia cargada para exportar.');
-        return;
-    }
-    // Reconstruir estructura de competencias agrupando por prefijo
-    const groups = groupCriteriaByCompetence(subjectInfo.criteriaCodes);
-    const competencias = Object.keys(groups).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(key => ({
-        competencia: key,
-        criterios: groups[key].map(code => ({
-            codigo: code + '.',
-            texto: subjectInfo.criteriaDescriptions[code] || ''
-        }))
-    }));
-    const data = { materia: subjectInfo.name, curso: subjectInfo.course, competencias };
-    downloadJSON(data, `Materia_${makeBaseName('', subjectInfo.name, subjectInfo.course)}.json`);
 }
 
 function groupCriteriaByCompetence(codes) {
@@ -1916,9 +2542,9 @@ function groupCriteriaByCompetence(codes) {
 
 function populateCriteriaModal(app) {
     const label = subjectInfo.name ? `Criterios — ${subjectInfo.name}${subjectInfo.course ? ' ' + subjectInfo.course : ''}` : 'Criterios de la materia';
-    const TITLES = { exam:`${label} — Examen por preguntas`, test:`${label} — Tipo test`, generic:`${label} — Evaluación genérica` };
+    const TITLES = { exam:`${label} — Examen por preguntas`, test:`${label} — Tipo test`, generic:`${label} — Evaluación genérica`, rubric:`${label} — Evaluación de rúbricas` };
     document.getElementById('globalCriteriaModalTitle').textContent = TITLES[app] || label;
-    const state = appStates[app];
+    const state = app === 'rubric' ? rubricState : appStates[app];
     const container = document.getElementById('globalCriteriaGroupedContainer');
     container.innerHTML = '';
     if (!subjectInfo.criteriaCodes.length) {
@@ -1972,6 +2598,37 @@ const capitalizeFirst = str => str ? str.charAt(0).toUpperCase() + str.slice(1) 
 const capitalizeBasename = name => name.split('_').map(capitalizeFirst).join('_');
 const makeBaseName = (prefix, name, course) => capitalizeBasename(sanitizeFilename(`${prefix}_${name}_${course}`).replace(/_+/g,'_'));
 
+
+// === Helpers de seguridad (from TEC4) ===
+const escapeHtml = str => (str||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+// === Helpers para acceso seguro a localStorage ===
+const _lsAvailable = (() => {
+    try {
+        const k = '__test_ls_' + Math.random().toString(36).slice(2);
+        window.localStorage.setItem(k, '1');
+        window.localStorage.removeItem(k);
+        return true;
+    } catch(e) {
+        console.warn('localStorage no disponible (entorno sandbox o privado). Las funciones de guardado local estarán deshabilitadas.', e);
+        return false;
+    }
+})();
+function safeLSGet(key) {
+    if (!_lsAvailable) return null;
+    try { return window.localStorage.getItem(key); } catch(e) { return null; }
+}
+function safeLSSet(key, value) {
+    if (!_lsAvailable) return false;
+    try { window.localStorage.setItem(key, value); return true; }
+    catch(e) { console.warn('No se pudo escribir en localStorage:', e); return false; }
+}
+function safeLSRemove(key) {
+    if (!_lsAvailable) return false;
+    try { window.localStorage.removeItem(key); return true; } catch(e) { return false; }
+}
+const _msgTimers = {};
+
 function setBodyColor(app) {
     const colors = { 'exam':'#e8f1ff', 'test':'#e8f5ee', 'generic':'#fff4e5', 'instrumentos':'#f0eafa', 'ponderacion':'#e0f7fa', 'home':'#FFFFF7' };
     document.body.style.backgroundColor = colors[app] || '#e9f0f5';
@@ -1983,11 +2640,17 @@ function downloadJSON(data, filename) {
 }
 function showMessage(id, html, ms = 3000) {
     const el = document.getElementById(id);
-    if (el) { el.innerHTML = html; setTimeout(() => el.innerHTML = '', ms); }
+    if (!el) return;
+    if (_msgTimers[id]) clearTimeout(_msgTimers[id]);
+    el.innerHTML = html;
+    _msgTimers[id] = setTimeout(() => {
+        if (document.getElementById(id)) document.getElementById(id).innerHTML = '';
+        delete _msgTimers[id];
+    }, ms);
 }
 function showDuplicateMessage(id, text) {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = text ? `<i class="bi bi-exclamation-triangle-fill"></i> ${text}` : '';
+    if (el) el.innerHTML = text ? `<i class="bi bi-exclamation-triangle-fill"></i> ${escapeHtml(text)}` : '';
 }
 
 // --- Helpers reutilizables ---
@@ -2001,20 +2664,22 @@ function readJSONFile(file, cb) {
 
 /** Guarda datos en localStorage y muestra confirmación. */
 function localSave(key, getData) {
-    localStorage.setItem(key, JSON.stringify(getData()));
+    if (!safeLSSet(key, JSON.stringify(getData()))) {
+        return alert('⚠️ No se pudo guardar localmente: el almacenamiento del navegador no está disponible en este entorno (vista previa sandbox). Usa la opción "Exportar JSON" para guardar el archivo manualmente.');
+    }
     alert('✅ Guardado localmente.');
 }
 
 /** Carga datos de localStorage y llama a onData(parsed); muestra alerta si no hay datos o hay error. */
 function localLoad(key, onData) {
-    const saved = localStorage.getItem(key);
+    const saved = safeLSGet(key);
     if (!saved) return alert('No hay datos guardados.');
     try { onData(JSON.parse(saved)); } catch(e) { alert('Error al cargar: ' + e.message); }
 }
 
 /** Recupera calificaciones de localStorage: applyFn(data) modifica el estado, renderFn() re-renderiza. */
 function recoverScores(lsKey, applyFn, renderFn, msgId) {
-    const saved = localStorage.getItem(lsKey);
+    const saved = safeLSGet(lsKey);
     if (!saved) return alert('No hay calificaciones guardadas.');
     try { const data = JSON.parse(saved); applyFn(data); renderFn(); showMessage(msgId, '<i class="bi bi-check-circle"></i> Calificaciones recuperadas.'); }
     catch(e) { alert('Error: ' + e.message); }
@@ -2046,7 +2711,7 @@ function renderStudentTags(state, tagsId, countId, onChange) {
     state.students.forEach((student, idx) => {
         const span = document.createElement('span');
         span.className = 'student-tag';
-        span.innerHTML = `${student.fullName}
+        span.innerHTML = `${escapeHtml(student.fullName)}
             <i class="bi bi-pencil-fill text-primary" style="cursor:pointer; margin-left:5px;" data-stuidx="${idx}" data-action="edit"></i>
             <i class="bi bi-x-circle-fill text-danger" style="cursor:pointer;" data-stuidx="${idx}" data-action="delete"></i>`;
         tagsDiv.appendChild(span);
@@ -2138,7 +2803,24 @@ function formatGradeDisplay(val) {
     return parseFloat(val.toFixed(2)).toString();
 }
 
-function attachGradeInputLiveValidation(inp) {
+function removeMaxWarning(inp) {
+    if (!inp) return;
+    inp.classList.remove('input-max-exceeded', 'input-max-warning');
+    const tip = inp.parentElement.querySelector('.max-warning-tooltip, .grade-max-warning-tip');
+    if (tip) tip.remove();
+}
+function showMaxWarning(inp, maxVal) {
+    if (!inp) return;
+    removeMaxWarning(inp);
+    inp.classList.add('input-max-exceeded');
+    const tip = document.createElement('div');
+    tip.className = 'max-warning-tooltip';
+    tip.textContent = `Máximo: ${maxVal}`;
+    inp.parentElement.style.position = inp.parentElement.style.position || 'relative';
+    inp.parentElement.appendChild(tip);
+    setTimeout(() => { if (tip && tip.parentElement) tip.remove(); }, 2200);
+}
+function attachGradeInputLiveValidation(inp, maxVal) {
     inp.addEventListener('input', function () {
         let v = this.value.replace(/[^0-9.,]/g, '');
         v = v.replace(/,/g, '.');
@@ -2161,6 +2843,18 @@ function attachGradeInputLiveValidation(inp) {
     inp.addEventListener('blur', function () {
         this.classList.remove('input-invalid');
     });
+
+    // Max validation (TEC4-style, optional maxVal)
+    if (maxVal !== undefined && maxVal !== null) {
+        inp.addEventListener('input', function() {
+            const v = parseFloat(this.value.replace(',', '.'));
+            if (!isNaN(v) && v > maxVal) {
+                showMaxWarning(this, maxVal);
+            } else {
+                removeMaxWarning(this);
+            }
+        });
+    }
 }
 
 function showGradeMaxWarning(inputEl, maxVal, label) {
@@ -2235,7 +2929,7 @@ const _appDescColors = {
     generic: 'linear-gradient(145deg, #fd7e14, #e85d04)',
     inst:    'linear-gradient(145deg, #6f42c1, #5a34a0)'
 };
-const _appDescNames = { exam:'Examen', test:'Test', generic:'Actividad genérica', inst:'Instrumentos' };
+const _appDescNames = { exam:'Examen', test:'Test', generic:'Actividad genérica', inst:'Instrumentos', rubric:'Rúbricas' };
 
 /** Abre el modal compartido para editar la descripción del criterio en cualquier app. */
 function openCriterionDescModal(code, app) {
@@ -2252,7 +2946,7 @@ function openCriterionDescModal(code, app) {
 }
 
 /** Alias para compatibilidad con código heredado. */
-function openGenericCriterionDescModal(code) { openCriterionDescModal(code, 'generic'); }
+
 
 // =============================================================================
 // BADGES DE CRITERIOS
@@ -2285,7 +2979,7 @@ function renderGlobalBadges(app) {
     }
     if (app === 'generic') validateGenericCriteria();
 }
-function renderAllBadges() { ['exam','test','generic'].forEach(renderGlobalBadges); }
+function renderAllBadges() { ['exam','test','generic','rubric'].forEach(renderGlobalBadges); }
 
 // =============================================================================
 // NORMALIZACIÓN DE PUNTUACIONES
@@ -2329,12 +3023,6 @@ const FAMILY_STRIPE_COLORS = {
     inst:    '#f5eeff',
     pond:    '#e8fdff'
 };
-function getCriteriaFamilyIndex(code) {
-    // Generic: use last numeric segment parity
-    const parts = code.split('.');
-    const last = parts.filter(p => /^\d+$/.test(p)).pop();
-    return last ? parseInt(last, 10) : 0;
-}
 // criteriaFamilyBg(code, app?) — uses the generic implementation defined in the subject section above
 // Redefine to accept optional app param and use app-specific stripe colors for alternating rows
 function criteriaFamilyBg(code, app) {
@@ -2474,7 +3162,7 @@ function renderSimpleGradeTable(state, tableId, tbodyId, descFn, app) {
     tbody.innerHTML = '';
     state.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml(tbodyId, sIdx)}</div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${escapeHtml(student.fullName)}</strong>${fillRightBtnHtml(tbodyId, sIdx)}</div></td>`;
         state.globalCriteria.forEach((c, cIdx) => {
             const td = document.createElement('td'); td.style.minWidth='100px';
             const fbg = criteriaFamilyBg(c, app);
@@ -2573,7 +3261,7 @@ function renderResultsTable(app) {
     const endCol = showGlobal ? criteria.length + 1 : criteria.length;
     buildResultsData(app, showGlobal).forEach((row, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${row.Alumno}</strong>${fillRightBtnHtml(tbodyId, sIdx, {endCol: endCol})}</div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${escapeHtml(row.Alumno)}</strong>${fillRightBtnHtml(tbodyId, sIdx, {endCol: endCol})}</div></td>`;
         criteria.forEach(c => {
             const td = document.createElement('td');
             const fbg = criteriaFamilyBg(c, app);
@@ -2745,14 +3433,14 @@ function saveScoresLocal(app) {
 
 /** Guarda toda la configuración de una app en localStorage. */
 function saveAppToLocal(app) {
-    const keys = { exam:'multi_exam_app', test:'multi_test_app', generic:'multi_generic_app' };
+    const keys = { exam:'multimateria_exam_app', test:'multimateria_test_app', generic:'multimateria_generic_app' };
     localStorage.setItem(keys[app], JSON.stringify(appStates[app]));
     alert('✅ Configuración guardada.');
 }
 
 /** Carga toda la configuración de una app desde localStorage y refresca la UI. */
 function loadAppFromLocal(app) {
-    const keys = { exam:'multi_exam_app', test:'multi_test_app', generic:'multi_generic_app' };
+    const keys = { exam:'multimateria_exam_app', test:'multimateria_test_app', generic:'multimateria_generic_app' };
     localLoad(keys[app], saved => {
         if (app === 'exam') {
             Object.assign(examState, saved);
@@ -2788,6 +3476,35 @@ function loadAppFromLocal(app) {
     });
 }
 
+/** Limpia las calificaciones de TODAS las apps (sin tocar la configuración).
+ *  Se llama al cargar una actividad nueva, una materia nueva, o un nuevo usuario,
+ *  para que no queden calificaciones obsoletas de la actividad anterior. */
+function resetAllAppScores() {
+    // Examen por preguntas
+    examState.scores = examState.students.map(() => new Array(examState.questions.length).fill(0));
+    // Examen tipo test
+    testState.studentScores = testState.students.map(() => ({ correct: 0, wrong: 0, unanswered: testState.totalQuestions }));
+    // Actividad genérica
+    genericState.scores = genericState.students.map(() => new Array(genericState.globalCriteria.length).fill(0));
+    // Instrumentos
+    instrumentState.evalScores = instrumentState.students.map(() => new Array(instrumentState.instruments.length).fill(0));
+    // Rúbricas
+    rubricState.teacher = {};
+    rubricState.coevaluation = {};
+    rubricState.results = null;
+    // Ponderación (limpiar resultados de las actividades importadas)
+    if (typeof ponderacionState !== 'undefined' && ponderacionState.actividades) {
+        ponderacionState.actividades.forEach(a => { a.resultados = []; a.loaded = false; });
+    }
+    // Re-renderizar las tablas de calificación si están visibles
+    try { if (document.getElementById('examScreenGrade')?.classList.contains('active')) renderExamGradeTable(); } catch(e) {}
+    try { if (document.getElementById('testScreenGrade')?.classList.contains('active')) renderTestGradeTable(); } catch(e) {}
+    try { if (document.getElementById('genericScreenGrade')?.classList.contains('active')) renderGenericGradeTable(); } catch(e) {}
+    try { if (document.getElementById('inst_eval')?.classList.contains('active')) inst_renderEvaluation(); } catch(e) {}
+    try { if (typeof rubric_renderTeacherTable === 'function' && document.getElementById('rubricScreenEval')?.classList.contains('active')) { rubric_renderTeacherTable(); rubric_renderCoevaluation(); } } catch(e) {}
+    try { if (typeof pond_renderResults === 'function' && document.getElementById('pond_screenResults')?.classList.contains('active')) pond_renderResults(); } catch(e) {}
+}
+
 /** Reinicia el estado completo de una app (exam / test / generic). */
 function resetAppState(app) {
     const cfgs = {
@@ -2795,14 +3512,14 @@ function resetAppState(app) {
             label:'el examen',
             defaults:{ examName:'Examen sin título', course:'', students:[], questions:[{id:1,maxScore:10,criteriaCodes:[],name:'',description:''}], globalCriteria:[], scores:[], criteriaDescriptions:{} },
             inputs:[['examNameInput','Examen sin título'],['examCourseInput',''],['examInputNumQuestions',1]],
-            lsKey:'multi_exam_app',
+            lsKey:'multimateria_exam_app',
             extra:() => { renderExamQuestionsTable(); renderExamStudentTags(); }
         },
         test: {
             label:'el test',
             defaults:{ examName:'Examen tipo test', course:'', totalQuestions:20, penaltyFactor:0, globalCriteria:[], students:[], studentScores:[], criteriaDescriptions:{} },
             inputs:[['testExamTitleInput','Examen tipo test'],['testCourseInput',''],['testTotalQuestions',20]],
-            lsKey:'multi_test_app',
+            lsKey:'multimateria_test_app',
             extra:() => {
                 document.querySelectorAll('#testPenaltyOptions .penalty-option input').forEach(r => { if(r.value==='0') r.checked=true; });
                 document.querySelectorAll('.penalty-option').forEach(o => o.classList.toggle('selected', o.querySelector('input')?.checked));
@@ -2813,7 +3530,7 @@ function resetAppState(app) {
             label:'la actividad genérica',
             defaults:{ examName:'Actividad sin título', course:'', globalCriteria:[], students:[], scores:[], criteriaDescriptions:{} },
             inputs:[['genericExamNameInput','Actividad sin título'],['genericCourseInput','']],
-            lsKey:'multi_generic_app',
+            lsKey:'multimateria_generic_app',
             extra:() => renderGenericStudentTags()
         }
     }[app];
@@ -2826,6 +3543,8 @@ function resetAppState(app) {
     if (app==='exam') { validateExamCriteria(); updateExamConfigWarning(); }
     if (app==='test') updateTestConfigWarning();
     if (app==='generic') updateGenericConfigWarning();
+    // Actualizar el badge de nombre de actividad (ahora mostrará "Actividad sin nombre" o el título por defecto)
+    updateActivityBadge(currentApp);
     alert('✅ Datos reiniciados.');
 }
 
@@ -3056,7 +3775,7 @@ function renderExamGradeTable() {
     tbody.innerHTML = '';
     examState.students.forEach((student, sIdx) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('examGradeTbody', sIdx)}</div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${escapeHtml(student.fullName)}</strong>${fillRightBtnHtml('examGradeTbody', sIdx)}</div></td>`;
         examState.questions.forEach((q, qIdx) => {
             const td = document.createElement('td'); td.style.minWidth='80px';
             td.innerHTML = `<input type="text" inputmode="decimal" class="form-control form-control-sm grade-text-input exam-score-input" data-student="${sIdx}" data-question="${qIdx}" value="${formatGradeDisplay(examState.scores[sIdx]?.[qIdx]??0)}" placeholder="0">`;
@@ -3111,7 +3830,7 @@ function renderTestGradeTable() {
         const sc = testState.studentScores[sIdx];
         sc.unanswered = Math.max(0, testState.totalQuestions - sc.correct - sc.wrong);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('testGradeTbody', sIdx, {endCol: 2})}</div></td>`;
+        tr.innerHTML = `<td><div class="student-cell-wrap"><strong>${escapeHtml(student.fullName)}</strong>${fillRightBtnHtml('testGradeTbody', sIdx, {endCol: 2})}</div></td>`;
         const tdC = document.createElement('td');
         const selC = document.createElement('select'); selC.className='grade-select test-correct-select'; selC.dataset.student=sIdx;
         for (let i=0;i<=testState.totalQuestions;i++) { const o=document.createElement('option'); o.value=i; o.textContent=i; if(i===sc.correct) o.selected=true; selC.appendChild(o); }
@@ -3469,7 +4188,7 @@ function inst_renderEvaluation() {
     const tbody=document.getElementById('inst_evalTbody'); tbody.innerHTML='';
     const nInstr = instrumentState.instruments.length;
     instrumentState.students.forEach((student,sIdx)=>{
-        const tr=document.createElement('tr'); tr.innerHTML=`<td><div class="student-cell-wrap"><strong>${student.fullName}</strong>${fillRightBtnHtml('inst_evalTbody', sIdx, {endCol: nInstr})}</div></td>`;
+        const tr=document.createElement('tr'); tr.innerHTML=`<td><div class="student-cell-wrap"><strong>${escapeHtml(student.fullName)}</strong>${fillRightBtnHtml('inst_evalTbody', sIdx, {endCol: nInstr})}</div></td>`;
         instrumentState.instruments.forEach((_,i)=>{
             const td=document.createElement('td');
             td.style.cssText='text-align:center;vertical-align:middle;padding:4px;';
@@ -3669,6 +4388,7 @@ function resetInstrumentosState() {
     inst_renderInstrumentsTable(); renderInstrumentosStudentTags(); inst_updateConfigButtonState();
     if (document.getElementById('inst_relacion').classList.contains('active')) inst_renderMatrix();
     if (document.getElementById('inst_eval').classList.contains('active')) inst_renderEvaluation();
+    updateActivityBadge(currentApp);
     alert('✅ Datos de instrumentos reiniciados.');
 }
 
@@ -3964,7 +4684,7 @@ function pond_renderResults() {
         const totalCols = colIdx - 1;
         rows.forEach((row, sIdx) => {
             const tr = document.createElement('tr');
-            let html = `<td><div class="student-cell-wrap"><strong>${row.Alumno}</strong>${fillRightBtnHtml('pond_resultsTbody', sIdx, {endCol: totalCols})}</div></td>`;
+            let html = `<td><div class="student-cell-wrap"><strong>${escapeHtml(row.Alumno)}</strong>${fillRightBtnHtml('pond_resultsTbody', sIdx, {endCol: totalCols})}</div></td>`;
             if (showActs) acts.forEach((a, ai) => {
                 const v = row[`__ACT__${ai}`];
                 html += v===null||v===undefined
@@ -3986,6 +4706,28 @@ function pond_renderResults() {
             }
             tr.innerHTML = html;
             tbody.appendChild(tr);
+        });
+    }
+
+    // Make activity cells clickable for breakdown (TEC4-style)
+    const tbodyEl = document.getElementById('pond_resultsTbody');
+    if (tbodyEl) {
+        tbodyEl.querySelectorAll('tr').forEach((tr, sIdx) => {
+            const cells = tr.querySelectorAll('td');
+            // Activity cells start at index 1 (after student name) and end before the final grade cell.
+            // We add click handler to each activity cell.
+            const studentKey = tr.dataset.studentKey || (tr.querySelector('strong') ? tr.querySelector('strong').textContent : '');
+            cells.forEach((cell, cIdx) => {
+                if (cIdx === 0) return; // skip student name
+                if (cell.classList.contains('pond-final-grade')) return; // skip final grade
+                cell.classList.add('pond-act-cell-clickable');
+                cell.title = 'Clic para ver desglose';
+                const actIdx = cIdx - 1; // 0-based activity index
+                cell.addEventListener('click', function() {
+                    const row = ponderacionState.results && ponderacionState.results[sIdx];
+                    if (row) showPondBreakdown(row.Alumno || studentKey, actIdx);
+                });
+            });
         });
     }
 }
@@ -4087,13 +4829,13 @@ function pond_saveConfigLocal() {
         numActividades: ponderacionState.numActividades
     };
     try {
-        localStorage.setItem('pond_config_local', JSON.stringify(configData));
+        localStorage.setItem('pond_config_backup', JSON.stringify(configData));
         alert('✅ Configuración guardada en almacenamiento local.');
     } catch(e) { alert('Error al guardar: ' + e.message); }
 }
 function pond_loadConfigLocal() {
     try {
-        const raw = localStorage.getItem('pond_config_local');
+        const raw = localStorage.getItem('pond_config_backup');
         if (!raw) { alert('No hay configuración guardada localmente.'); return; }
         const data = JSON.parse(raw);
         ponderacionState.nombre = data.nombre || '';
@@ -4168,13 +4910,13 @@ function pond_saveSessionLocal() {
         }))
     };
     try {
-        localStorage.setItem('pond_session_local', JSON.stringify(sessionData));
+        localStorage.setItem('pond_import_backup', JSON.stringify(sessionData));
         alert(`✅ Sesión guardada localmente (${loadedCount} de ${total} actividades cargadas).`);
     } catch(e) { alert('Error al guardar: ' + e.message); }
 }
 function pond_loadSessionLocal() {
     try {
-        const raw = localStorage.getItem('pond_session_local');
+        const raw = localStorage.getItem('pond_import_backup');
         if (!raw) { alert('No hay sesión guardada localmente.'); return; }
         const data = JSON.parse(raw);
         if (!data || data._type !== 'pond_session') { alert('Los datos guardados no son una sesión válida.'); return; }
@@ -4234,12 +4976,1324 @@ function pond_validateConfig() {
 // =============================================================================
 // NAVEGACIÓN
 // =============================================================================
+const RUBRIC_STORAGE_KEY = 'rubricData_multimateria';
+// Clave para persistencia del catálogo de actividades predefinidas personalizadas
+const PREDEFINED_TASKS_STORAGE_KEY = 'predefinedTasks_multimateria_v1';
+
+// Catálogo BASE de actividades predefinidas (criterios de la materia) — no modificar en runtime
+const PREDEFINED_TASKS_DEFAULT = {};
+
+// Catálogo activo (editable en runtime): se carga al inicio desde localStorage o desde el DEFAULT
+let RUBRIC_PREDEFINED_TASKS = {};
+
+// Carga el catálogo activo desde localStorage; si no hay datos, usa el DEFAULT
+function loadPredefinedTasks() {
+    try {
+        const raw = safeLSGet(PREDEFINED_TASKS_STORAGE_KEY);
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                // Validar que cada valor sea un array de strings
+                const cleaned = {};
+                Object.entries(data).forEach(([k, v]) => {
+                    if (typeof k === 'string' && k.trim() && Array.isArray(v)) {
+                        cleaned[k.trim()] = v.filter(c => typeof c === 'string' && c.trim());
+                    }
+                });
+                if (Object.keys(cleaned).length > 0) {
+                    RUBRIC_PREDEFINED_TASKS = cleaned;
+                    return;
+                }
+            }
+        }
+    } catch(e) {
+        console.warn('No se pudo cargar el catálogo personalizado de actividades:', e);
+    }
+    // Fallback: copia profunda del DEFAULT
+    RUBRIC_PREDEFINED_TASKS = {};
+    Object.entries(PREDEFINED_TASKS_DEFAULT).forEach(([k, v]) => {
+        RUBRIC_PREDEFINED_TASKS[k] = [...v];
+    });
+}
+
+// Persiste el catálogo activo en localStorage
+function savePredefinedTasks() {
+    if (!safeLSSet(PREDEFINED_TASKS_STORAGE_KEY, JSON.stringify(RUBRIC_PREDEFINED_TASKS))) {
+        console.warn('No se pudo guardar el catálogo personalizado (almacenamiento no disponible).');
+    }
+}
+
+// Indica si una actividad es personalizada (no está en el catálogo DEFAULT)
+function isCustomPredefinedTask(name) {
+    return !Object.prototype.hasOwnProperty.call(PREDEFINED_TASKS_DEFAULT, name);
+}
+
+// Inicializar el catálogo al cargar el script
+loadPredefinedTasks();
+// Estado de la app de rúbricas
+const rubricState = {
+    evalName: '',
+    groupName: "",
+    students: [],            // [{id, fullName}]
+    aspects: [],             // ["Pronunciación", ...]
+    values: ["NE"],          // ["NE", "Insuficiente", "Suficiente", ...]
+    teacherWeight: 75,
+    teacher: {},             // { studentName: { aspect: "valor" } }
+    coevaluation: {},        // { evaluator: { evaluated: { aspect: "valor" } } }
+    results: null,           // { studentName: {teacherScore, coevaluationScore, finalScore, criteriaScores} }
+    globalCriteria: [],      // ["TEC.4.3.1", ...]
+    criteriaDescriptions: {} // { "TEC.4.3.1": "descripción personalizada" }
+};
+
+// Sincroniza las estructuras teacher/coevaluation con la lista de alumnos y aspectos
+function rubric_syncStructures() {
+    const names = rubricState.students.map(s => s.fullName);
+    // Teacher
+    const newTeacher = {};
+    names.forEach(n => {
+        newTeacher[n] = rubricState.teacher[n] || {};
+        rubricState.aspects.forEach(a => {
+            if (!newTeacher[n][a]) newTeacher[n][a] = 'NE';
+        });
+    });
+    rubricState.teacher = newTeacher;
+    // Coevaluación
+    const newCoeval = {};
+    names.forEach(evaluator => {
+        newCoeval[evaluator] = {};
+        names.forEach(evaluated => {
+            if (evaluator === evaluated) return;
+            newCoeval[evaluator][evaluated] = (rubricState.coevaluation[evaluator] && rubricState.coevaluation[evaluator][evaluated]) || {};
+            rubricState.aspects.forEach(a => {
+                if (!newCoeval[evaluator][evaluated][a]) newCoeval[evaluator][evaluated][a] = 'NE';
+            });
+        });
+    });
+    rubricState.coevaluation = newCoeval;
+}
+
+// Convierte un valor a escala 0-10 (NE = 0 / excluido de la media)
+function rubric_scaleScore(score) {
+    if (score === 'NE') return null;
+    const validValues = rubricState.values.filter(v => v !== 'NE');
+    if (validValues.length === 0) return 0;
+    // ¿Valores numéricos?
+    const allNumeric = validValues.every(v => !isNaN(parseFloat(v)));
+    if (allNumeric) {
+        const nums = validValues.map(v => parseFloat(v));
+        const minV = Math.min(...nums);
+        const maxV = Math.max(...nums);
+        const s = parseFloat(score);
+        if (isNaN(s)) return 0;
+        if (maxV === minV) return 10;
+        return ((s - minV) / (maxV - minV)) * 10;
+    }
+    // Valores cualitativos: por posición
+    const idx = validValues.indexOf(score);
+    if (idx === -1) return 0;
+    if (validValues.length === 1) return 10;
+    return (idx / (validValues.length - 1)) * 10;
+}
+
+// Renderizado: header
+function rubric_updateHeader() {
+    // Actualizar el badge genérico de nombre de actividad
+    updateActivityBadge('rubricas');
+}
+
+// Renderizado: pesos
+function rubric_updateWeightDisplay() {
+    const tw = rubricState.teacherWeight;
+    document.getElementById('rubricTeacherWeight').value = tw;
+    document.getElementById('rubricTeacherWeightValue').textContent = tw + '%';
+    document.getElementById('rubricStudentWeightValue').textContent = (100 - tw) + '%';
+    document.getElementById('rubricTeacherPercent').textContent = tw;
+    document.getElementById('rubricStudentPercent').textContent = 100 - tw;
+    document.getElementById('rubricTeacherPercentEval').textContent = tw;
+    document.getElementById('rubricStudentPercentEval').textContent = 100 - tw;
+}
+
+// Renderizado: tags de alumnos
+function rubric_renderStudentTags() {
+    const container = document.getElementById('rubricStudentTags');
+    const badge = document.getElementById('rubricStudentCountBadge');
+    if (!container) return;
+    container.innerHTML = '';
+    rubricState.students.forEach(s => {
+        const tag = document.createElement('span');
+        tag.className = 'student-tag';
+        tag.innerHTML = `${escapeHtml(s.fullName)} <i class="bi bi-x-circle-fill" data-id="${s.id}" title="Eliminar"></i>`;
+        tag.querySelector('i').addEventListener('click', () => {
+            rubricState.students = rubricState.students.filter(x => x.id !== s.id);
+            rubric_syncStructures();
+            rubric_renderStudentTags();
+            rubric_saveLocal();
+        });
+        container.appendChild(tag);
+    });
+    if (badge) badge.textContent = rubricState.students.length;
+}
+
+// Renderizado: aspectos
+function rubric_renderAspects() {
+    const container = document.getElementById('rubricAspectsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    if (rubricState.aspects.length === 0) {
+        container.innerHTML = '<span class="text-muted small"><i class="bi bi-info-circle"></i> No hay aspectos definidos.</span>';
+        return;
+    }
+    rubricState.aspects.forEach((asp, idx) => {
+        const tag = document.createElement('span');
+        tag.className = 'rubric-aspect-tag';
+        tag.innerHTML = `<i class="bi bi-tag-fill"></i> ${escapeHtml(asp)} <button class="rm-btn" title="Eliminar"><i class="bi bi-x-circle-fill"></i></button>`;
+        tag.querySelector('.rm-btn').addEventListener('click', () => {
+            if (!confirm(`¿Eliminar el aspecto "${asp}"?`)) return;
+            rubricState.aspects.splice(idx, 1);
+            rubric_syncStructures();
+            rubric_renderAspects();
+            rubric_saveLocal();
+        });
+        container.appendChild(tag);
+    });
+}
+
+// Renderizado: niveles de logro
+function rubric_renderValues() {
+    const container = document.getElementById('rubricValuesContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    if (rubricState.values.length === 0) {
+        container.innerHTML = '<span class="text-muted small"><i class="bi bi-info-circle"></i> No hay niveles definidos.</span>';
+        return;
+    }
+    rubricState.values.forEach((val, idx) => {
+        const tag = document.createElement('span');
+        tag.className = 'rubric-value-tag';
+        const isNE = val === 'NE';
+        tag.innerHTML = `<i class="bi ${isNE ? 'bi-dash-circle-fill' : 'bi-star-fill'}"></i> ${escapeHtml(val)} ${isNE ? '<span class="small text-muted">(auto)</span>' : '<button class="rm-btn" title="Eliminar"><i class="bi bi-x-circle-fill"></i></button>'}`;
+        if (!isNE) {
+            tag.querySelector('.rm-btn').addEventListener('click', () => {
+                if (!confirm(`¿Eliminar el nivel "${val}"?`)) return;
+                rubricState.values.splice(idx, 1);
+                rubric_renderValues();
+                rubric_saveLocal();
+            });
+        }
+        container.appendChild(tag);
+    });
+}
+
+// Llena cualquier <select> con los niveles de logro
+function rubric_fillValueSelect(selectEl, selected) {
+    if (!selectEl) return;
+    selectEl.innerHTML = '';
+    rubricState.values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        if (v === 'NE') opt.className = 'ne-option';
+        if (v === selected) opt.selected = true;
+        selectEl.appendChild(opt);
+    });
+}
+
+// Renderizado: tabla del profesor
+function rubric_renderTeacherTable() {
+    const thead = document.getElementById('rubricTeacherThead');
+    const tbody = document.getElementById('rubricTeacherTbody');
+    if (!thead || !tbody) return;
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    const trh = document.createElement('tr');
+    trh.appendChild(Object.assign(document.createElement('th'), {textContent: 'Estudiante'}));
+    rubricState.aspects.forEach(a => {
+        trh.appendChild(Object.assign(document.createElement('th'), {textContent: a}));
+    });
+    trh.appendChild(Object.assign(document.createElement('th'), {textContent: 'Acción rápida'}));
+    thead.appendChild(trh);
+
+    rubricState.students.forEach(s => {
+        const tr = document.createElement('tr');
+        const nameTd = document.createElement('td');
+        nameTd.className = 'fw-semibold';
+        nameTd.textContent = s.fullName;
+        tr.appendChild(nameTd);
+
+        rubricState.aspects.forEach(a => {
+            const td = document.createElement('td');
+            const sel = document.createElement('select');
+            sel.className = 'form-select form-select-sm';
+            rubric_fillValueSelect(sel, rubricState.teacher[s.fullName]?.[a] || 'NE');
+            sel.addEventListener('change', () => {
+                if (!rubricState.teacher[s.fullName]) rubricState.teacher[s.fullName] = {};
+                rubricState.teacher[s.fullName][a] = sel.value;
+                rubric_saveLocal();
+            });
+            td.appendChild(sel);
+            tr.appendChild(td);
+        });
+
+        const actionTd = document.createElement('td');
+        const wrap = document.createElement('div');
+        wrap.className = 'd-flex gap-1 align-items-center';
+        const quickSel = document.createElement('select');
+        quickSel.className = 'form-select form-select-sm';
+        quickSel.style.maxWidth = '120px';
+        rubric_fillValueSelect(quickSel, 'NE');
+        const applyBtn = document.createElement('button');
+        applyBtn.className = 'btn btn-sm btn-outline-danger';
+        applyBtn.textContent = 'Aplicar';
+        applyBtn.addEventListener('click', () => {
+            if (!confirm(`¿Aplicar "${quickSel.value}" a todos los aspectos de ${s.fullName}?`)) return;
+            if (!rubricState.teacher[s.fullName]) rubricState.teacher[s.fullName] = {};
+            rubricState.aspects.forEach(a => rubricState.teacher[s.fullName][a] = quickSel.value);
+            rubric_renderTeacherTable();
+            rubric_saveLocal();
+        });
+        wrap.appendChild(quickSel);
+        wrap.appendChild(applyBtn);
+        actionTd.appendChild(wrap);
+        tr.appendChild(actionTd);
+        tbody.appendChild(tr);
+    });
+}
+
+// Renderizado: barra de acciones masivas (profesor)
+function rubric_renderBulkBar() {
+    const sel = document.getElementById('rubricBulkValue');
+    const aspectsContainer = document.getElementById('rubricBulkAspects');
+    if (sel) rubric_fillValueSelect(sel, 'NE');
+    if (!aspectsContainer) return;
+    aspectsContainer.innerHTML = '';
+    rubricState.aspects.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-outline-secondary';
+        btn.textContent = a;
+        btn.addEventListener('click', () => {
+            if (!sel) return;
+            if (!confirm(`¿Aplicar "${sel.value}" a todos los alumnos en el aspecto "${a}"?`)) return;
+            rubricState.students.forEach(s => {
+                if (!rubricState.teacher[s.fullName]) rubricState.teacher[s.fullName] = {};
+                rubricState.teacher[s.fullName][a] = sel.value;
+            });
+            rubric_renderTeacherTable();
+            rubric_saveLocal();
+        });
+        aspectsContainer.appendChild(btn);
+    });
+}
+
+// Renderizado: coevaluación (pestañas + paneles)
+function rubric_renderCoevaluation() {
+    const tabsContainer = document.getElementById('rubricCoevalTabs');
+    const panesContainer = document.getElementById('rubricCoevalPanes');
+    if (!tabsContainer || !panesContainer) return;
+    tabsContainer.innerHTML = '';
+    panesContainer.innerHTML = '';
+
+    const coevalBulk = document.getElementById('rubricCoevalBulkValue');
+    if (coevalBulk) rubric_fillValueSelect(coevalBulk, 'NE');
+
+    if (rubricState.students.length === 0) {
+        tabsContainer.innerHTML = '<span class="text-muted small">No hay alumnos.</span>';
+        return;
+    }
+
+    rubricState.students.forEach((evaluator, idx) => {
+        const tab = document.createElement('div');
+        tab.className = 'rubric-coeval-tab' + (idx === 0 ? ' active' : '');
+        tab.textContent = evaluator.fullName;
+        tab.dataset.idx = idx;
+        tab.addEventListener('click', () => {
+            tabsContainer.querySelectorAll('.rubric-coeval-tab').forEach(t => t.classList.remove('active'));
+            panesContainer.querySelectorAll('.rubric-coeval-pane').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const pane = panesContainer.querySelector(`[data-pane-idx="${idx}"]`);
+            if (pane) pane.classList.add('active');
+        });
+        tabsContainer.appendChild(tab);
+
+        const pane = document.createElement('div');
+        pane.className = 'rubric-coeval-pane' + (idx === 0 ? ' active' : '');
+        pane.dataset.paneIdx = idx;
+        const table = document.createElement('table');
+        table.className = 'table table-bordered table-striped rubric-coeval-table';
+        const thead = document.createElement('thead');
+        const trh = document.createElement('tr');
+        trh.appendChild(Object.assign(document.createElement('th'), {textContent: 'Evaluado'}));
+        rubricState.aspects.forEach(a => trh.appendChild(Object.assign(document.createElement('th'), {textContent: a})));
+        thead.appendChild(trh);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        rubricState.students.forEach(evaluated => {
+            if (evaluated.id === evaluator.id) return;
+            const tr = document.createElement('tr');
+            const nameTd = document.createElement('td');
+            nameTd.className = 'fw-semibold';
+            nameTd.textContent = evaluated.fullName;
+            tr.appendChild(nameTd);
+            rubricState.aspects.forEach(a => {
+                const td = document.createElement('td');
+                const sel = document.createElement('select');
+                sel.className = 'form-select form-select-sm';
+                const current = rubricState.coevaluation[evaluator.fullName]?.[evaluated.fullName]?.[a] || 'NE';
+                rubric_fillValueSelect(sel, current);
+                sel.addEventListener('change', () => {
+                    if (!rubricState.coevaluation[evaluator.fullName]) rubricState.coevaluation[evaluator.fullName] = {};
+                    if (!rubricState.coevaluation[evaluator.fullName][evaluated.fullName]) rubricState.coevaluation[evaluator.fullName][evaluated.fullName] = {};
+                    rubricState.coevaluation[evaluator.fullName][evaluated.fullName][a] = sel.value;
+                    rubric_saveLocal();
+                });
+                td.appendChild(sel);
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        pane.appendChild(table);
+        panesContainer.appendChild(pane);
+    });
+}
+// Cálculo de notas
+function rubric_calculate() {
+    if (rubricState.students.length === 0) { alert('No hay alumnos.'); return; }
+    if (rubricState.aspects.length === 0) { alert('No hay aspectos.'); return; }
+    if (rubricState.values.length <= 1) { alert('Define al menos un nivel de logro (además de NE).'); return; }
+
+    rubric_syncStructures();
+    const results = {};
+    const studentWeight = 100 - rubricState.teacherWeight;
+    rubricState.students.forEach(s => {
+        const name = s.fullName;
+        let tSum = 0, tCount = 0;
+        rubricState.aspects.forEach(a => {
+            const v = rubricState.teacher[name]?.[a];
+            if (v && v !== 'NE') {
+                const sc = rubric_scaleScore(v);
+                if (sc !== null) { tSum += sc; tCount++; }
+            }
+        });
+        const teacherScore = tCount > 0 ? tSum / tCount : 0;
+
+        let cSum = 0, cCount = 0;
+        rubricState.students.forEach(evaluator => {
+            if (evaluator.fullName === name) return;
+            const ev = rubricState.coevaluation[evaluator.fullName]?.[name];
+            if (!ev) return;
+            let evSum = 0, evCnt = 0;
+            rubricState.aspects.forEach(a => {
+                const v = ev[a];
+                if (v && v !== 'NE') {
+                    const sc = rubric_scaleScore(v);
+                    if (sc !== null) { evSum += sc; evCnt++; }
+                }
+            });
+            if (evCnt > 0) { cSum += evSum / evCnt; cCount++; }
+        });
+        const coevaluationScore = cCount > 0 ? cSum / cCount : 0;
+        const finalScore = (teacherScore * rubricState.teacherWeight / 100) + (coevaluationScore * studentWeight / 100);
+
+        // Notas por criterio: en una rúbrica, cada criterio seleccionado recibe la nota final del alumno
+        const criteriaScores = {};
+        rubricState.globalCriteria.forEach(code => {
+            criteriaScores[code] = parseFloat(finalScore.toFixed(2));
+        });
+
+        results[name] = {
+            teacherScore: parseFloat(teacherScore.toFixed(2)),
+            coevaluationScore: parseFloat(coevaluationScore.toFixed(2)),
+            finalScore: parseFloat(finalScore.toFixed(2)),
+            criteriaScores: criteriaScores
+        };
+    });
+    rubricState.results = results;
+    rubric_renderResults();
+    rubric_showScreen('Results');
+    rubric_saveLocal();
+}
+
+// Renderizado: resultados
+function rubric_renderResults() {
+    const tbody = document.getElementById('rubricResultsTbody');
+    const thead = document.querySelector('#rubricResultsTable thead tr');
+    const badge = document.getElementById('rubricResultsTitleBadge');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    // Construir encabezado dinámico: Estudiante | Nota Profesor | Coevaluación | Nota Final | <criterios...>
+    if (thead) {
+        thead.innerHTML = '<th>Estudiante</th><th>Nota Profesor</th><th>Nota Coevaluación</th><th>Nota Final</th>'
+            + rubricState.globalCriteria.map(c => `<th title="${escapeHtml(getAppCriterionDesc(c, 'rubric'))}">${c}.</th>`).join('');
+    }
+    if (badge) badge.textContent = rubricState.evalName + (rubricState.groupName ? ' · ' + rubricState.groupName : '');
+    if (!rubricState.results) return;
+    Object.entries(rubricState.results).forEach(([name, r]) => {
+        const tr = document.createElement('tr');
+        let html = `<td class="fw-semibold text-start">${escapeHtml(name)}</td><td>${r.teacherScore.toFixed(2)}</td><td>${r.coevaluationScore.toFixed(2)}</td><td class="final-score">${r.finalScore.toFixed(2)}</td>`;
+        // Columnas de criterios
+        rubricState.globalCriteria.forEach(code => {
+            const val = r.criteriaScores && typeof r.criteriaScores[code] === 'number' ? r.criteriaScores[code].toFixed(2) : '—';
+            html += `<td>${val}</td>`;
+        });
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    });
+}
+
+// Navegación entre pantallas
+function rubric_showScreen(screen) {
+    ['rubricScreenSetup','rubricScreenEval','rubricScreenResults'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    ['rubricNavSetup','rubricNavEval','rubricNavResults'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    const map = { Setup:'rubricScreenSetup', Eval:'rubricScreenEval', Results:'rubricScreenResults' };
+    const tabMap = { Setup:'rubricNavSetup', Eval:'rubricNavEval', Results:'rubricNavResults' };
+    const target = document.getElementById(map[screen]);
+    if (target) target.classList.add('active');
+    const tab = document.getElementById(tabMap[screen]);
+    if (tab) tab.classList.add('active');
+
+    if (screen === 'Eval') {
+        if (rubricState.students.length === 0) { alert('Añade al menos un alumno.'); rubric_showScreen('Setup'); return; }
+        if (rubricState.aspects.length === 0) { alert('Añade al menos un aspecto.'); rubric_showScreen('Setup'); return; }
+        if (rubricState.values.filter(v => v !== 'NE').length === 0) { alert('Añade al menos un nivel de logro.'); rubric_showScreen('Setup'); return; }
+        rubric_syncStructures();
+        rubric_renderBulkBar();
+        rubric_renderTeacherTable();
+        rubric_renderCoevaluation();
+    }
+    if (screen === 'Results') {
+        rubric_renderResults();
+    }
+}
+
+// === Persistencia ===
+function rubric_serialize() {
+    return {
+        evalName: rubricState.evalName,
+        groupName: rubricState.groupName,
+        students: rubricState.students.map(s => ({id: s.id, fullName: s.fullName})),
+        aspects: [...rubricState.aspects],
+        values: [...rubricState.values],
+        teacherWeight: rubricState.teacherWeight,
+        teacher: rubricState.teacher,
+        coevaluation: rubricState.coevaluation,
+        results: rubricState.results,
+        globalCriteria: [...rubricState.globalCriteria],
+        criteriaDescriptions: {...rubricState.criteriaDescriptions}
+    };
+}
+function rubric_loadFromObj(data) {
+    if (!data || typeof data !== 'object') throw new Error('Datos inválidos');
+    rubricState.evalName     = data.evalName || '';
+    rubricState.groupName    = data.groupName || '';
+    rubricState.students     = (data.students || []).map(s => ({id: s.id || uuid(), fullName: s.fullName}));
+    rubricState.aspects      = Array.isArray(data.aspects) ? [...data.aspects] : [];
+    rubricState.values       = Array.isArray(data.values) ? [...data.values] : ['NE'];
+    if (!rubricState.values.includes('NE')) rubricState.values.unshift('NE');
+    rubricState.teacherWeight= typeof data.teacherWeight === 'number' ? data.teacherWeight : 75;
+    rubricState.teacher      = data.teacher || {};
+    rubricState.coevaluation = data.coevaluation || {};
+    rubricState.results      = data.results || null;
+    rubricState.globalCriteria = Array.isArray(data.globalCriteria) ? [...data.globalCriteria] : [];
+    rubricState.criteriaDescriptions = data.criteriaDescriptions && typeof data.criteriaDescriptions === 'object' ? {...data.criteriaDescriptions} : {};
+    rubric_syncStructures();
+}
+function rubric_saveLocal() {
+    if (!safeLSSet(RUBRIC_STORAGE_KEY, JSON.stringify(rubric_serialize()))) {
+        console.warn('No se pudo guardar rúbrica (almacenamiento no disponible).');
+    }
+}
+function rubric_loadLocal(silent) {
+    try {
+        const raw = safeLSGet(RUBRIC_STORAGE_KEY);
+        if (!raw) { if (!silent) alert('No hay datos guardados.'); return false; }
+        rubric_loadFromObj(JSON.parse(raw));
+        rubric_refreshAllUI();
+        if (!silent) alert('✅ Datos de rúbrica cargados.');
+        return true;
+    } catch(e) {
+        if (!silent) alert('Error al cargar: ' + e.message);
+        else console.warn('rubric_loadLocal (silencioso):', e.message);
+        return false;
+    }
+}
+function rubric_refreshAllUI() {
+    rubric_updateHeader();
+    rubric_updateWeightDisplay();
+    const nameInput = document.getElementById('rubricEvalNameInput');
+    const groupInput = document.getElementById('rubricGroupNameInput');
+    if (nameInput) nameInput.value = rubricState.evalName;
+    if (groupInput) groupInput.value = rubricState.groupName;
+    rubric_renderStudentTags();
+    rubric_renderAspects();
+    rubric_renderValues();
+    renderGlobalBadges('rubric');
+}
+
+// === Exportar / Importar ===
+function rubric_exportConfig() {
+    const cfg = {
+        evalName: rubricState.evalName,
+        groupName: rubricState.groupName,
+        students: rubricState.students.map(s => ({fullName: s.fullName})),
+        aspects: [...rubricState.aspects],
+        values: [...rubricState.values],
+        teacherWeight: rubricState.teacherWeight,
+        globalCriteria: [...rubricState.globalCriteria],
+        criteriaDescriptions: {...rubricState.criteriaDescriptions}
+    };
+    downloadJSON(cfg, `ConfigRubrica_${sanitizeFilename(rubricState.evalName)}_${sanitizeFilename(rubricState.groupName || 'singrupo')}.json`);
+}
+function rubric_importConfig(file) {
+    readJSONFile(file, data => {
+        try {
+            rubricState.evalName     = data.evalName || '';
+            rubricState.groupName    = data.groupName || '';
+            rubricState.students     = (data.students || []).map(s => ({id: uuid(), fullName: s.fullName}));
+            rubricState.aspects      = Array.isArray(data.aspects) ? [...data.aspects] : [];
+            rubricState.values       = Array.isArray(data.values) ? [...data.values] : ['NE'];
+            if (!rubricState.values.includes('NE')) rubricState.values.unshift('NE');
+            rubricState.teacherWeight= typeof data.teacherWeight === 'number' ? data.teacherWeight : 75;
+            rubricState.teacher = {};
+            rubricState.coevaluation = {};
+            rubricState.results = null;
+            rubricState.globalCriteria = Array.isArray(data.globalCriteria) ? [...data.globalCriteria] : [];
+            rubricState.criteriaDescriptions = data.criteriaDescriptions && typeof data.criteriaDescriptions === 'object' ? {...data.criteriaDescriptions} : {};
+            rubric_syncStructures();
+            rubric_refreshAllUI();
+            rubric_saveLocal();
+            alert('✅ Configuración importada.');
+        } catch(err) { alert('Error: ' + err.message); }
+    });
+}
+function rubric_importData(file) {
+    readJSONFile(file, data => {
+        try {
+            rubric_loadFromObj(data);
+            rubric_refreshAllUI();
+            rubric_saveLocal();
+            alert('✅ Datos importados.');
+        } catch(err) { alert('Error: ' + err.message); }
+    });
+}
+function rubric_exportExcel(opts) {
+    if (!rubricState.results) { alert('Calcula las notas primero.'); return; }
+    opts = opts || { teacher:true, coeval:true, final:true, criteria:false };
+    const header = ['Estudiante'];
+    if (opts.teacher)  header.push('Nota Profesor');
+    if (opts.coeval)   header.push('Nota Coevaluación');
+    if (opts.final)    header.push('Nota Final');
+    if (opts.criteria) rubricState.globalCriteria.forEach(c => header.push(c + '.'));
+    const rows = [header];
+    Object.entries(rubricState.results).forEach(([name, r]) => {
+        const row = [name];
+        if (opts.teacher)  row.push(r.teacherScore);
+        if (opts.coeval)   row.push(r.coevaluationScore);
+        if (opts.final)    row.push(r.finalScore);
+        if (opts.criteria) rubricState.globalCriteria.forEach(c => {
+            row.push(r.criteriaScores && typeof r.criteriaScores[c] === 'number' ? r.criteriaScores[c] : '');
+        });
+        rows.push(row);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+    XLSX.writeFile(wb, `ResultadosRubrica_${sanitizeFilename(rubricState.evalName)}.xlsx`);
+}
+function rubric_exportPdf(opts) {
+    if (!rubricState.results) { alert('Calcula las notas primero.'); return; }
+    opts = opts || { teacher:true, coeval:true, final:true, criteria:false };
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: opts.criteria && rubricState.globalCriteria.length > 4 ? 'landscape' : 'portrait' });
+    doc.setFontSize(16);
+    doc.text(`Resultados de rubrica: ${rubricState.evalName}`, 14, 18);
+    doc.setFontSize(11);
+    doc.text(`Grupo: ${rubricState.groupName || '—'}`, 14, 26);
+    doc.setFontSize(9);
+    doc.text(`Peso profesor: ${rubricState.teacherWeight}% - Coevaluacion: ${100 - rubricState.teacherWeight}%`, 14, 32);
+    const header = ['Estudiante'];
+    if (opts.teacher)  header.push('Nota Profesor');
+    if (opts.coeval)   header.push('Nota Coeval.');
+    if (opts.final)    header.push('Nota Final');
+    if (opts.criteria) rubricState.globalCriteria.forEach(c => header.push(c + '.'));
+    const body = Object.entries(rubricState.results).map(([n, r]) => {
+        const row = [n];
+        if (opts.teacher)  row.push(r.teacherScore.toFixed(2));
+        if (opts.coeval)   row.push(r.coevaluationScore.toFixed(2));
+        if (opts.final)    row.push(r.finalScore.toFixed(2));
+        if (opts.criteria) rubricState.globalCriteria.forEach(c => {
+            row.push(r.criteriaScores && typeof r.criteriaScores[c] === 'number' ? r.criteriaScores[c].toFixed(2) : '—');
+        });
+        return row;
+    });
+    doc.autoTable({
+        head: [header],
+        body: body,
+        startY: 38,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [245, 87, 108] },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 } }
+    });
+    doc.save(`ResultadosRubrica_${sanitizeFilename(rubricState.evalName)}.pdf`);
+}
+function rubric_exportJsonResults(opts) {
+    if (!rubricState.results) { alert('Calcula las notas primero.'); return; }
+    opts = opts || { teacher:true, coeval:true, final:true, criteria:false };
+    // Construir resultados filtrados según opciones
+    const filteredResults = {};
+    Object.entries(rubricState.results).forEach(([name, r]) => {
+        const item = {};
+        if (opts.teacher)  item.teacherScore = r.teacherScore;
+        if (opts.coeval)   item.coevaluationScore = r.coevaluationScore;
+        if (opts.final)    item.finalScore = r.finalScore;
+        if (opts.criteria) {
+            item.criteriaScores = {};
+            rubricState.globalCriteria.forEach(c => {
+                item.criteriaScores[c] = r.criteriaScores && typeof r.criteriaScores[c] === 'number' ? r.criteriaScores[c] : null;
+            });
+        }
+        filteredResults[name] = item;
+    });
+    downloadJSON({
+        evalName: rubricState.evalName,
+        groupName: rubricState.groupName,
+        teacherWeight: rubricState.teacherWeight,
+        globalCriteria: opts.criteria ? [...rubricState.globalCriteria] : undefined,
+        options: opts,
+        results: filteredResults
+    }, `ResultadosRubrica_${sanitizeFilename(rubricState.evalName)}.json`);
+}
+
+// === Lógica del modal de opciones de exportación ===
+let _rubricPendingExportFmt = null;
+function rubric_openExportOptions(fmt) {
+    if (!rubricState.results) { alert('Calcula las notas primero.'); return; }
+    _rubricPendingExportFmt = fmt;
+    // Ajustar el estado del checkbox "Notas criterios" según haya criterios seleccionados
+    const hasCriteria = rubricState.globalCriteria.length > 0;
+    const critChk = document.getElementById('rubricExpOptCriteria');
+    if (critChk) {
+        critChk.disabled = !hasCriteria;
+        critChk.checked = false;
+    }
+    const warning = document.getElementById('rubricExpOptWarning');
+    if (warning) {
+        if (!hasCriteria) {
+            warning.textContent = 'No hay criterios seleccionados. Ve a Configuración → Criterios de la materia para añadirlos.';
+            warning.style.display = 'block';
+        } else {
+            warning.textContent = '';
+            warning.style.display = 'none';
+        }
+    }
+    const modalEl = document.getElementById('rubricExportOptionsModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+function rubric_confirmExport() {
+    const opts = {
+        teacher:  document.getElementById('rubricExpOptTeacher').checked,
+        coeval:   document.getElementById('rubricExpOptCoeval').checked,
+        final:    document.getElementById('rubricExpOptFinal').checked,
+        criteria: document.getElementById('rubricExpOptCriteria').checked
+    };
+    if (!opts.teacher && !opts.coeval && !opts.final && !opts.criteria) {
+        alert('Selecciona al menos un elemento para exportar.');
+        return;
+    }
+    const modalEl = document.getElementById('rubricExportOptionsModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    if (_rubricPendingExportFmt === 'excel')      rubric_exportExcel(opts);
+    else if (_rubricPendingExportFmt === 'pdf')   rubric_exportPdf(opts);
+    else if (_rubricPendingExportFmt === 'json')  rubric_exportJsonResults(opts);
+    _rubricPendingExportFmt = null;
+}
+function rubric_reset() {
+    if (!confirm('¿Reiniciar toda la evaluación de rúbricas? Se perderán los datos.')) return;
+    rubricState.evalName = '';
+    rubricState.groupName = '';
+    rubricState.students = [];
+    rubricState.aspects = [];
+    rubricState.values = ['NE'];
+    rubricState.teacherWeight = 75;
+    rubricState.teacher = {};
+    rubricState.coevaluation = {};
+    rubricState.results = null;
+    rubricState.globalCriteria = [];
+    rubricState.criteriaDescriptions = {};
+    safeLSRemove(RUBRIC_STORAGE_KEY);
+    rubric_refreshAllUI();
+    rubric_showScreen('Setup');
+    updateActivityBadge(currentApp);
+}
+function rubric_clearData() {
+    if (!confirm('¿Borrar todas las puntuaciones (profesor y coevaluación)? Mantendrás alumnos, aspectos y niveles.')) return;
+    rubricState.teacher = {};
+    rubricState.coevaluation = {};
+    rubricState.results = null;
+    rubric_syncStructures();
+    rubric_saveLocal();
+    rubric_renderTeacherTable();
+    rubric_renderCoevaluation();
+    alert('Puntuaciones borradas.');
+}
+
+// =============================================================================
+// MODAL ACTIVIDADES PREDEFINIDAS (Actividad por criterios)
+// =============================================================================
+let _predefSelectedTask = null;
+let _predefEditingTask = null; // nombre de la actividad en edición (null = creando nueva)
+
+function generic_renderPredefinedTasks(filter) {
+    const grid = document.getElementById('genericPredefinedTasksGrid');
+    const countSpan = document.getElementById('genericPredefinedCount');
+    const customCountSpan = document.getElementById('genericPredefCustomCount');
+    const defaultCountSpan = document.getElementById('genericPredefDefaultCount');
+    const applyBtn = document.getElementById('genericPredefinedApplyBtn');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const filterLower = (filter || '').toLowerCase().trim();
+    const entries = Object.entries(RUBRIC_PREDEFINED_TASKS)
+        .filter(([name]) => !filterLower || name.toLowerCase().includes(filterLower))
+        // Ordenar: primero las predeterminadas alfabéticamente, luego las personalizadas alfabéticamente
+        .sort((a, b) => {
+            const aCustom = isCustomPredefinedTask(a[0]);
+            const bCustom = isCustomPredefinedTask(b[0]);
+            if (aCustom !== bCustom) return aCustom ? 1 : -1;
+            return a[0].localeCompare(b[0], 'es');
+        });
+    if (countSpan) countSpan.textContent = entries.length;
+    // Contar totales (sin filtro)
+    let totalCustom = 0, totalDefault = 0;
+    Object.keys(RUBRIC_PREDEFINED_TASKS).forEach(name => {
+        if (isCustomPredefinedTask(name)) totalCustom++;
+        else totalDefault++;
+    });
+    if (customCountSpan) customCountSpan.textContent = totalCustom;
+    if (defaultCountSpan) defaultCountSpan.textContent = totalDefault;
+
+    if (entries.length === 0) {
+        grid.innerHTML = '<div class="text-center text-muted p-4"><i class="bi bi-search" style="font-size:2rem;"></i><p class="mt-2 mb-0">No se encontraron actividades' + (filterLower ? ' para "' + escapeHtml(filter) + '"' : '') + '.</p></div>';
+    }
+
+    entries.forEach(([name, criteria]) => {
+        const isCustom = isCustomPredefinedTask(name);
+        const card = document.createElement('div');
+        card.className = 'predefined-task-card' + (isCustom ? ' custom-task' : '') + (_predefSelectedTask === name ? ' selected' : '');
+        card.dataset.task = name;
+
+        // Cabecera con icono + nombre + count + badge
+        const title = document.createElement('div');
+        title.className = 'predefined-task-name';
+        title.innerHTML = `<i class="bi ${isCustom ? 'bi-star-fill' : 'bi-clipboard2-check-fill'}"></i> <span>${escapeHtml(name)}</span> <span class="predefined-task-count ms-1">${criteria.length} crit.</span>`;
+        // Badge predeterminada/personalizada
+        const badge = document.createElement('span');
+        badge.className = isCustom ? 'predefined-task-badge-custom' : 'predefined-task-badge-default';
+        badge.innerHTML = isCustom ? '<i class="bi bi-star"></i> Personalizada' : '<i class="bi bi-bookmark-star"></i> Predeterminada';
+        title.appendChild(badge);
+        card.appendChild(title);
+
+        // Criterios en chips
+        const critDiv = document.createElement('div');
+        critDiv.className = 'predefined-task-criteria';
+        if (criteria.length === 0) {
+            critDiv.innerHTML = '<span class="text-muted small"><i class="bi bi-exclamation-triangle"></i> Sin criterios asignados</span>';
+        } else {
+            critDiv.innerHTML = criteria.map(c => `<span class="crit-chip">${c}.</span>`).join('');
+        }
+        card.appendChild(critDiv);
+
+        // Barra de acciones (editar / eliminar / restaurar)
+        const actions = document.createElement('div');
+        actions.className = 'predefined-task-actions';
+        // Botón editar
+        const editBtn = document.createElement('button');
+        editBtn.className = 'predefined-task-action-btn edit-btn';
+        editBtn.innerHTML = '<i class="bi bi-pencil"></i> Editar';
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            generic_openEditModal(name);
+        });
+        actions.appendChild(editBtn);
+        if (isCustom) {
+            // Actividad personalizada: botón eliminar
+            const delBtn = document.createElement('button');
+            delBtn.className = 'predefined-task-action-btn delete-btn';
+            delBtn.innerHTML = '<i class="bi bi-trash3"></i> Eliminar';
+            delBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                generic_deletePredefinedTask(name);
+            });
+            actions.appendChild(delBtn);
+        } else {
+            // Actividad predeterminada: botón restaurar (si ha sido modificada)
+            const defaultCriteria = PREDEFINED_TASKS_DEFAULT[name] || [];
+            const isModified = JSON.stringify(defaultCriteria) !== JSON.stringify(criteria);
+            if (isModified) {
+                const restoreBtn = document.createElement('button');
+                restoreBtn.className = 'predefined-task-action-btn restore-btn';
+                restoreBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Restaurar';
+                restoreBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    generic_restorePredefinedTask(name);
+                });
+                actions.appendChild(restoreBtn);
+            }
+        }
+        card.appendChild(actions);
+
+        // Click en la tarjeta (no en botones) → seleccionar
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.predefined-task-actions')) return;
+            grid.querySelectorAll('.predefined-task-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            _predefSelectedTask = name;
+            if (applyBtn) applyBtn.disabled = false;
+        });
+        grid.appendChild(card);
+    });
+
+    if (_predefSelectedTask && !entries.some(([n]) => n === _predefSelectedTask)) {
+        _predefSelectedTask = null;
+        if (applyBtn) applyBtn.disabled = true;
+    }
+}
+
+function generic_applyPredefinedTask() {
+    if (!_predefSelectedTask) { alert('Selecciona una actividad.'); return; }
+    const criteria = RUBRIC_PREDEFINED_TASKS[_predefSelectedTask];
+    if (!criteria) return;
+    if (criteria.length === 0) {
+        if (!confirm(`La actividad "${_predefSelectedTask}" no tiene criterios asignados. ¿Quieres aplicarla de todas formas?`)) return;
+    }
+    const existing = new Set(genericState.globalCriteria);
+    criteria.forEach(c => existing.add(c));
+    genericState.globalCriteria = [...existing];
+    genericState.globalCriteria.sort((a, b) => {
+        const na = a.split('.').map(Number);
+        const nb = b.split('.').map(Number);
+        for (let i = 0; i < Math.max(na.length, nb.length); i++) {
+            const da = na[i] || 0, db = nb[i] || 0;
+            if (da !== db) return da - db;
+        }
+        return 0;
+    });
+    normalizeGenericScores();
+    renderGlobalBadges('generic');
+    renderGenericStudentTags();
+    updateGenericConfigWarning();
+    const modalEl = document.getElementById('genericPredefinedTasksModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    alert(`✅ Se han cargado ${criteria.length} criterios de "${_predefSelectedTask}".\n\nAhora puedes añadir o editar criterios desde "Seleccionar criterios de la materia"`);
+    _predefSelectedTask = null;
+    const applyBtn = document.getElementById('genericPredefinedApplyBtn');
+    if (applyBtn) applyBtn.disabled = true;
+}
+
+// === Gestión del catálogo (nueva / editar / eliminar / restaurar / exportar / importar) ===
+
+function generic_openEditModal(taskName) {
+    _predefEditingTask = taskName || null;
+    const nameInput = document.getElementById('genericPredefEditName');
+    const titleEl = document.getElementById('genericPredefEditModalLabel');
+    const messageEl = document.getElementById('genericPredefEditMessage');
+    if (messageEl) messageEl.innerHTML = '';
+    if (taskName) {
+        // Editar existente
+        titleEl.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Editar actividad';
+        if (nameInput) nameInput.value = taskName;
+    } else {
+        // Nueva
+        titleEl.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Nueva actividad';
+        if (nameInput) nameInput.value = '';
+    }
+    // Renderizar checkboxes de criterios
+    generic_renderEditCriteriaGrid(taskName ? (RUBRIC_PREDEFINED_TASKS[taskName] || []) : []);
+    const modalEl = document.getElementById('genericPredefEditModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function generic_renderEditCriteriaGrid(selectedCriteria) {
+    const container = document.getElementById('genericPredefEditCriteriaGrid');
+    if (!container) return;
+    container.innerHTML = '';
+    const selected = new Set(selectedCriteria || []);
+    // Agrupar por familia de competencia
+    const groups = {};
+    subjectInfo.criteriaCodes.forEach(code => {
+        const match = code.match(/^(TEC\.4\.\d+)/);
+        const key = match ? match[1] : 'Otros';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(code);
+    });
+    Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric:true})).forEach(([groupKey, codes]) => {
+        const groupTitle = document.createElement('div');
+        groupTitle.className = 'predefined-edit-group-title';
+        groupTitle.style.gridColumn = '1 / -1';
+        groupTitle.innerHTML = `<i class="bi bi-diagram-3"></i> ${groupKey}`;
+        container.appendChild(groupTitle);
+        codes.forEach(code => {
+            const id = 'predefEdit_' + code.replace(/\./g, '_');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-check';
+            wrapper.innerHTML = `
+                <input class="form-check-input predef-edit-chk" type="checkbox" value="${code}" id="${id}" ${selected.has(code) ? 'checked' : ''}>
+                <label class="form-check-label" for="${id}" title="${escapeHtml(getCriteriaDescription(code))}">${code}.</label>
+            `;
+            container.appendChild(wrapper);
+        });
+    });
+    // Listener para actualizar resumen
+    container.querySelectorAll('.predef-edit-chk').forEach(chk => {
+        chk.addEventListener('change', generic_updateEditSummary);
+    });
+    generic_updateEditSummary();
+}
+
+function generic_updateEditSummary() {
+    const summary = document.getElementById('genericPredefEditSummary');
+    if (!summary) return;
+    const checked = document.querySelectorAll('#genericPredefEditCriteriaGrid .predef-edit-chk:checked');
+    const n = checked.length;
+    summary.innerHTML = `<i class="bi bi-info-circle"></i> ${n} criterio${n === 1 ? '' : 's'} seleccionado${n === 1 ? '' : 's'}`;
+    summary.style.background = n === 0
+        ? 'linear-gradient(135deg, #fee2e2, #fecaca)'
+        : 'linear-gradient(135deg, #e0e7ff, #c7d2fe)';
+    summary.style.color = n === 0 ? '#991b1b' : '#3730a3';
+}
+
+function generic_saveEditedTask() {
+    const nameInput = document.getElementById('genericPredefEditName');
+    const messageEl = document.getElementById('genericPredefEditMessage');
+    if (!nameInput) return;
+    const newName = nameInput.value.trim().toUpperCase();
+    if (messageEl) messageEl.innerHTML = '';
+    // Validar nombre
+    if (!newName) {
+        if (messageEl) messageEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> El nombre es obligatorio.';
+        return;
+    }
+    // Validar unicidad (si es nuevo o si cambió el nombre)
+    if (_predefEditingTask !== newName && Object.prototype.hasOwnProperty.call(RUBRIC_PREDEFINED_TASKS, newName)) {
+        if (messageEl) messageEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Ya existe una actividad con el nombre "${newName}".`;
+        return;
+    }
+    // Recoger criterios seleccionados
+    const checked = document.querySelectorAll('#genericPredefEditCriteriaGrid .predef-edit-chk:checked');
+    const newCriteria = [...checked].map(c => c.value);
+    if (newCriteria.length === 0) {
+        if (!confirm('No has seleccionado ningún criterio. ¿Quieres guardar la actividad de todas formas?')) return;
+    }
+    // Ordenar criterios
+    newCriteria.sort((a, b) => {
+        const na = a.split('.').map(Number);
+        const nb = b.split('.').map(Number);
+        for (let i = 0; i < Math.max(na.length, nb.length); i++) {
+            const da = na[i] || 0, db = nb[i] || 0;
+            if (da !== db) return da - db;
+        }
+        return 0;
+    });
+    // Si estábamos editando una tarea con nombre distinto, eliminar la anterior
+    if (_predefEditingTask && _predefEditingTask !== newName) {
+        delete RUBRIC_PREDEFINED_TASKS[_predefEditingTask];
+    }
+    // Guardar
+    RUBRIC_PREDEFINED_TASKS[newName] = newCriteria;
+    savePredefinedTasks();
+    // Cerrar modal
+    const modalEl = document.getElementById('genericPredefEditModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    // Re-render del catálogo
+    const search = document.getElementById('genericPredefinedSearch');
+    generic_renderPredefinedTasks(search ? search.value : '');
+    // Mensaje informativo
+    const wasEditing = _predefEditingTask !== null;
+    alert(`✅ Actividad "${newName}" ${wasEditing ? 'actualizada' : 'creada'} con ${newCriteria.length} criterios.`);
+    _predefEditingTask = null;
+}
+
+function generic_deletePredefinedTask(name) {
+    if (!Object.prototype.hasOwnProperty.call(RUBRIC_PREDEFINED_TASKS, name)) return;
+    if (!confirm(`¿Eliminar la actividad personalizada "${name}"?\n\nEsta acción no se puede deshacer.`)) return;
+    delete RUBRIC_PREDEFINED_TASKS[name];
+    savePredefinedTasks();
+    if (_predefSelectedTask === name) {
+        _predefSelectedTask = null;
+        const applyBtn = document.getElementById('genericPredefinedApplyBtn');
+        if (applyBtn) applyBtn.disabled = true;
+    }
+    const search = document.getElementById('genericPredefinedSearch');
+    generic_renderPredefinedTasks(search ? search.value : '');
+    alert(`✅ Actividad "${name}" eliminada del catálogo.`);
+}
+
+function generic_restorePredefinedTask(name) {
+    if (!Object.prototype.hasOwnProperty.call(PREDEFINED_TASKS_DEFAULT, name)) return;
+    if (!confirm(`¿Restaurar la actividad predeterminada "${name}" a sus criterios originales?\n\nSe perderán las modificaciones realizadas.`)) return;
+    RUBRIC_PREDEFINED_TASKS[name] = [...PREDEFINED_TASKS_DEFAULT[name]];
+    savePredefinedTasks();
+    const search = document.getElementById('genericPredefinedSearch');
+    generic_renderPredefinedTasks(search ? search.value : '');
+    alert(`✅ Actividad "${name}" restaurada a sus criterios originales.`);
+}
+
+function generic_restoreAllPredefinedTasks() {
+    if (!confirm('¿Restaurar TODAS las actividades predeterminadas a su estado original?\n\nEsto eliminará todas las actividades personalizadas y revertirá cualquier modificación. La acción no se puede deshacer.')) return;
+    RUBRIC_PREDEFINED_TASKS = {};
+    Object.entries(PREDEFINED_TASKS_DEFAULT).forEach(([k, v]) => {
+        RUBRIC_PREDEFINED_TASKS[k] = [...v];
+    });
+    savePredefinedTasks();
+    _predefSelectedTask = null;
+    const applyBtn = document.getElementById('genericPredefinedApplyBtn');
+    if (applyBtn) applyBtn.disabled = true;
+    const search = document.getElementById('genericPredefinedSearch');
+    if (search) search.value = '';
+    generic_renderPredefinedTasks('');
+    alert('✅ Catálogo restaurado al estado original (28 actividades predeterminadas).');
+}
+
+function generic_exportPredefinedTasks() {
+    const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        tasks: RUBRIC_PREDEFINED_TASKS
+    };
+    downloadJSON(data, 'CatalogoActividadesPredefinidas_TEC4.json');
+}
+
+function generic_importPredefinedTasks(file) {
+    readJSONFile(file, data => {
+        try {
+            if (!data || typeof data !== 'object') throw new Error('Formato no válido');
+            // Aceptar tanto {tasks: {...}} como {...} directo
+            const tasks = data.tasks && typeof data.tasks === 'object' ? data.tasks : data;
+            if (!tasks || typeof tasks !== 'object' || Array.isArray(tasks)) {
+                throw new Error('No se encontró el catálogo de actividades en el archivo.');
+            }
+            // Validar y limpiar
+            const cleaned = {};
+            Object.entries(tasks).forEach(([k, v]) => {
+                if (typeof k === 'string' && k.trim() && Array.isArray(v)) {
+                    const validCriteria = v.filter(c => typeof c === 'string' && subjectInfo.criteriaCodes.includes(c));
+                    if (validCriteria.length > 0) {
+                        cleaned[k.trim().toUpperCase()] = validCriteria;
+                    }
+                }
+            });
+            const count = Object.keys(cleaned).length;
+            if (count === 0) throw new Error('El archivo no contiene actividades válidas.');
+            // Confirmar reemplazo
+            if (Object.keys(RUBRIC_PREDEFINED_TASKS).length > 0) {
+                if (!confirm(`¿Reemplazar el catálogo actual (${Object.keys(RUBRIC_PREDEFINED_TASKS).length} actividades) por el importado (${count} actividades)?`)) return;
+            }
+            RUBRIC_PREDEFINED_TASKS = cleaned;
+            savePredefinedTasks();
+            _predefSelectedTask = null;
+            const applyBtn = document.getElementById('genericPredefinedApplyBtn');
+            if (applyBtn) applyBtn.disabled = true;
+            const search = document.getElementById('genericPredefinedSearch');
+            if (search) search.value = '';
+            generic_renderPredefinedTasks('');
+            alert(`✅ Catálogo importado: ${count} actividades.`);
+        } catch(err) {
+            alert('Error al importar el catálogo: ' + err.message);
+        }
+    });
+}
+
+
+// =============================================================================
+// DESGLOSE DE PONDERACIÓN
+// =============================================================================
+
+function showPondBreakdown(studentKey, actIdx) {
+    const acts = ponderacionState.actividades.filter(a => a.loaded && a.resultados?.length);
+    if (!acts[actIdx]) return;
+    const act = acts[actIdx];
+    const result = act.resultados.find(r => (r.Alumno||'').trim().toLowerCase() === studentKey);
+    const studentName = result ? result.Alumno : studentKey;
+    const modalBody = document.getElementById('pondBreakdownModalBody');
+    if (!modalBody) return;
+
+    const actCriteria = pond_getActivityCriteria(act);
+    // Compute grade from criteria if Calificación is missing
+    let grade = result ? (result['Calificación'] ?? null) : null;
+    if ((grade === null || grade === undefined) && result) {
+        const vals = actCriteria.map(c => parseFloat(result[c])).filter(v => !isNaN(v));
+        grade = vals.length > 0 ? parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2)) : null;
+    }
+    const gradeColor = v => `hsl(${Math.min(10, Math.max(0, v)) * 12}, 80%, 70%)`;
+
+    let html = `<div class="mb-3">
+        <h6 class="fw-bold"><i class="bi bi-person-fill me-1" style="color:#0d6efd;"></i>${escapeHtml(studentName)}</h6>
+        <h6 class="text-muted" style="font-size:0.9rem;"><i class="bi bi-layers-half me-1" style="color:#00bcd4;"></i>${escapeHtml(act.nombre)} <span class="badge bg-info text-dark ms-1">${act.peso}%</span></h6>
+    </div>`;
+
+    if (!result) {
+        html += `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>No se encontraron datos para este alumno en esta actividad.</div>`;
+    } else if (!actCriteria.length) {
+        html += `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>Esta actividad no contiene criterios TEC reconocibles.</div>`;
+    } else {
+        html += `<div class="table-responsive"><table class="table table-bordered table-hover table-sm pond-breakdown-table">
+            <thead class="table-light"><tr><th>Criterio</th><th>Nota</th></tr></thead><tbody>`;
+        actCriteria.forEach(c => {
+            const v = result[c];
+            const fbg = criteriaFamilyBg(c, 'pond');
+            if (v === null || v === undefined) {
+                html += `<tr><td${fbg ? ` style="background-color:${fbg};"`:''}>${c}</td><td class="text-muted">—</td></tr>`;
+            } else {
+                const numV = parseFloat(v);
+                html += `<tr><td${fbg ? ` style="background-color:${fbg};"`:''}>${c}</td><td style="background:${gradeColor(numV)};font-weight:600;">${numV.toFixed(2)}</td></tr>`;
+            }
+        });
+        html += '</tbody></table></div>';
+
+        if (grade !== null && grade !== undefined) {
+            const numG = parseFloat(grade);
+            html += `<div class="mt-3 p-3 rounded-3 text-center" style="background:${gradeColor(numG)}; border:2px solid rgba(0,0,0,0.08);">
+                <strong style="font-size:1.1rem;">Calificación en esta actividad: ${numG.toFixed(2)}</strong>
+            </div>`;
+        }
+    }
+
+    modalBody.innerHTML = html;
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('pondBreakdownModal'));
+    modal.show();
+}
+
+
+function pond_resetAll() {
+    if (!confirm('\u00bfReiniciar todos los datos de ponderaci\u00f3n?')) return;
+    ponderacionState.nombre = '';
+    ponderacionState.curso  = '';
+    ponderacionState.numActividades = 2;
+    ponderacionState.actividades = [];
+    const ni = document.getElementById('pond_nombreInput');
+    const ci = document.getElementById('pond_cursoInput');
+    const na = document.getElementById('pond_numActividadesInput');
+    if (ni) ni.value = '';
+    if (ci) ci.value = '';
+    if (na) na.value = 2;
+    const warn = document.getElementById('pond_configWarning');
+    if (warn) warn.style.display = 'none';
+    safeLSRemove('pond_config_backup');
+    safeLSRemove('pond_import_backup');
+    updateActivityBadge(currentApp);
+    alert('\u2705 Datos de ponderaci\u00f3n reiniciados.');
+}
+
+// --- Gestión Importación (pantalla Import) ---
 let currentApp = 'home';
 
 function hideAllApps() {
-    ['homeScreen','appExamContainer','appTestContainer','appGenericContainer','appInstrumentosContainer','appPonderacionContainer'].forEach(id => document.getElementById(id).classList.remove('active'));
+    ['homeScreen','appExamContainer','appTestContainer','appGenericContainer','appInstrumentosContainer','appPonderacionContainer','appRubricasContainer'].forEach(id => document.getElementById(id).classList.remove('active'));
 }
-function showHome() { hideAllApps(); document.getElementById('homeScreen').classList.add('active'); currentApp='home'; setBodyColor('home'); }
+
+// Actualiza el título dinámico de la pantalla bajo la navbar
+let _currentNavSourceId = null; // id del contenedor origen de los botones actualmente en el slot
+
+// Devuelve el nombre actual de la actividad según la app activa
+function getActivityName(app) {
+    try {
+        if (app === 'exam') return examState.examName || '';
+        if (app === 'test') return testState.examName || '';
+        if (app === 'generic') return genericState.examName || '';
+        if (app === 'instrumentos') return instrumentState.actividad || '';
+        if (app === 'ponderacion') return ponderacionState.nombre || '';
+        if (app === 'rubricas') {
+            // Para rúbricas, incluir el grupo si existe
+            const name = rubricState.evalName || '';
+            const group = rubricState.groupName || '';
+            return name ? (group ? name + ' · ' + group : name) : '';
+        }
+    } catch(e) {}
+    return '';
+}
+
+// Actualiza el badge de nombre de actividad junto al título de la pantalla
+function updateActivityBadge(app) {
+    const badge = document.getElementById('activityNameBadge');
+    if (!badge) return;
+    if (app === 'home' || !app) {
+        badge.style.display = 'none';
+        return;
+    }
+    const name = getActivityName(app);
+    badge.textContent = name || 'Actividad sin nombre';
+    badge.style.display = '';
+    // Color del badge según la app
+    const colorMap = {
+        exam: 'bg-primary',
+        test: 'bg-success',
+        generic: 'bg-warning text-dark',
+        instrumentos: 'bg-purple',
+        ponderacion: 'bg-info text-dark',
+        rubricas: 'bg-danger'
+    };
+    badge.className = 'badge ms-2 fs-6 ' + (colorMap[app] || 'bg-secondary');
+}
+
+function updateScreenTitle(app) {
+    const iconEl = document.getElementById('currentScreenTitleIcon');
+    const textEl = document.getElementById('currentScreenTitleText');
+    const navEl = document.getElementById('currentScreenNav');
+    if (!iconEl || !textEl) return;
+    const titles = {
+        home:         { icon: 'bi-house-door-fill',   text: 'Inicio',                              color: '#0b4b6b' },
+        exam:         { icon: 'bi-pencil-square',     text: 'Examen por preguntas',                color: '#0d6efd' },
+        test:         { icon: 'bi-calculator-fill',   text: 'Examen tipo test',                    color: '#198754' },
+        generic:      { icon: 'bi-check2-circle',     text: 'Actividad por criterios',             color: '#fd7e14' },
+        instrumentos: { icon: 'bi-grid-3x3-gap-fill', text: 'Actividad por instrumentos',          color: '#6f42c1' },
+        ponderacion:  { icon: 'bi-layers-half',       text: 'Ponderación de actividades',          color: '#0dcaf0' },
+        rubricas:     { icon: 'bi-grid-1x2-fill',     text: 'Evaluación de rúbricas',              color: '#f5576c' }
+    };
+    const t = titles[app] || titles.home;
+    iconEl.className = 'bi ' + t.icon;
+    iconEl.style.color = t.color;
+    iconEl.style.fontSize = '1.5rem';
+    textEl.textContent = t.text;
+    textEl.style.color = '#0b4b6b';
+    // Devolver los botones actuales a su contenedor origen
+    if (navEl && _currentNavSourceId) {
+        const prevSource = document.getElementById(_currentNavSourceId);
+        if (prevSource) {
+            while (navEl.firstChild) prevSource.appendChild(navEl.firstChild);
+        }
+        _currentNavSourceId = null;
+    }
+    // Mover los botones de navegación de la app actual al slot bajo la navbar
+    if (navEl) {
+        const navIds = {
+            home: null,
+            exam: 'examNavButtons',
+            test: 'testNavButtons',
+            generic: 'genericNavButtons',
+            instrumentos: 'instNavButtons',
+            ponderacion: 'pondNavButtons',
+            rubricas: 'rubricNavButtons'
+        };
+        const navId = navIds[app];
+        if (navId) {
+            const source = document.getElementById(navId);
+            if (source) {
+                while (source.firstChild) navEl.appendChild(source.firstChild);
+                _currentNavSourceId = navId;
+            }
+        }
+    }
+    // Actualizar el badge de nombre de actividad (oculto en Home)
+    updateActivityBadge(app);
+}
+
+function showHome() { hideAllApps(); document.getElementById('homeScreen').classList.add('active'); currentApp='home'; setBodyColor('home'); updateScreenTitle('home'); }
 
 function showApp(appId) {
     if (!subjectInfo.criteriaCodes.length) {
@@ -4248,19 +6302,37 @@ function showApp(appId) {
     }
     hideAllApps();
     document.getElementById(appId).classList.add('active');
-    const map = {'appExamContainer':'exam','appTestContainer':'test','appGenericContainer':'generic','appInstrumentosContainer':'instrumentos','appPonderacionContainer':'ponderacion'};
+    const map = {'appExamContainer':'exam','appTestContainer':'test','appGenericContainer':'generic','appInstrumentosContainer':'instrumentos','appPonderacionContainer':'ponderacion','appRubricasContainer':'rubricas'};
     currentApp = map[appId] || 'home';
     setBodyColor(currentApp);
+    updateScreenTitle(currentApp);
     if (appId === 'appInstrumentosContainer') showInstrumentosScreen('inst_config');
     if (appId === 'appPonderacionContainer') pond_showScreen('Config');
+    if (appId === 'appRubricasContainer') rubric_showScreen('Setup');
 }
 
 function showAppScreen(prefix, screen) {
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
     document.querySelectorAll(`#app${cap(prefix)}Container .screen`).forEach(s=>s.classList.remove('active'));
     document.getElementById(`${prefix}Screen${cap(screen)}`).classList.add('active');
-    document.querySelectorAll(`#app${cap(prefix)}Container .btn-group .btn`).forEach(b=>b.classList.remove('active'));
-    document.getElementById(`${prefix}Nav${cap(screen)}`).classList.add('active');
+    // Actualizar el botón activo: buscar tanto en el container como en el slot de navegación (#currentScreenNav)
+    document.querySelectorAll(`#app${cap(prefix)}Container .btn-group .btn, #currentScreenNav .btn`).forEach(b=>b.classList.remove('active'));
+    const navBtn = document.getElementById(`${prefix}Nav${cap(screen)}`);
+    if (navBtn) navBtn.classList.add('active');
+    // Para instrumentos y ponderación los IDs no siguen el patrón ${prefix}Nav${Cap}
+    if (prefix === 'inst') {
+        const map = { config: 'inst_config-tab', relacion: 'inst_relacion-tab', eval: 'inst_eval-tab' };
+        const btn = document.getElementById(map[screen]);
+        if (btn) btn.classList.add('active');
+    } else if (prefix === 'pond') {
+        const map = { Config: 'pond_tabConfig', Import: 'pond_tabImport', Results: 'pond_tabResults' };
+        const btn = document.getElementById(map[cap(screen)]);
+        if (btn) btn.classList.add('active');
+    } else if (prefix === 'rubric') {
+        const map = { Setup: 'rubricNavSetup', Eval: 'rubricNavEval', Results: 'rubricNavResults' };
+        const btn = document.getElementById(map[cap(screen)]);
+        if (btn) btn.classList.add('active');
+    }
     if (screen==='grade')   { if(prefix==='exam') renderExamGradeTable(); else if(prefix==='test') renderTestGradeTable(); else if(prefix==='generic') renderGenericGradeTable(); }
     if (screen==='results') renderResultsTable(prefix);
 }
@@ -4268,7 +6340,8 @@ function showAppScreen(prefix, screen) {
 function showInstrumentosScreen(screenId) {
     document.querySelectorAll('#appInstrumentosContainer .tab-pane').forEach(p=>p.classList.remove('show','active'));
     document.getElementById(screenId)?.classList.add('show','active');
-    document.querySelectorAll('#appInstrumentosContainer .btn-group .btn').forEach(b=>b.classList.remove('active'));
+    // Buscar botones tanto en el container como en el slot de navegación
+    document.querySelectorAll('#appInstrumentosContainer .btn-group .btn, #currentScreenNav .btn').forEach(b=>b.classList.remove('active'));
     const tabMap={'inst_config':'inst_config-tab','inst_relacion':'inst_relacion-tab','inst_eval':'inst_eval-tab'};
     document.getElementById(tabMap[screenId])?.classList.add('active');
     if (screenId==='inst_relacion') inst_renderMatrix();
@@ -4276,8 +6349,7 @@ function showInstrumentosScreen(screenId) {
 }
 
 // =============================================================================
-// INICIALIZACIÓN
-// =============================================================================
+
 window.onload = function() {
     [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).map(el => new bootstrap.Tooltip(el));
 
@@ -4355,7 +6427,7 @@ window.onload = function() {
         if(!validateExamCriteria()){ alert('Criterios no asignados correctamente.'); return; }
         showAppScreen('exam','results');
     });
-    document.getElementById('examNameInput').addEventListener('input', e=>{ examState.examName=e.target.value; updateExamConfigWarning(); });
+    document.getElementById('examNameInput').addEventListener('input', e=>{ examState.examName=e.target.value; updateExamConfigWarning(); updateActivityBadge(currentApp); });
     document.getElementById('examCourseInput').addEventListener('input', e=>{ examState.course=e.target.value; updateExamConfigWarning(); });
     document.getElementById('examBtnSetQuestions').addEventListener('click', function() {
         const num=parseInt(document.getElementById('examInputNumQuestions').value, 10)||1;
@@ -4406,7 +6478,7 @@ window.onload = function() {
         if(!testState.globalCriteria.length){ alert('Selecciona al menos un criterio.'); return; }
         showAppScreen('test','results');
     });
-    document.getElementById('testExamTitleInput').addEventListener('input', e=>{ testState.examName=e.target.value; updateTestConfigWarning(); });
+    document.getElementById('testExamTitleInput').addEventListener('input', e=>{ testState.examName=e.target.value; updateTestConfigWarning(); updateActivityBadge(currentApp); });
     document.getElementById('testCourseInput').addEventListener('input', e=>{ testState.course=e.target.value; updateTestConfigWarning(); });
     document.getElementById('testTotalQuestions').addEventListener('input', function() {
         let val=parseInt(this.value, 10)||1; if(val<1) val=1; this.value=val; testState.totalQuestions=val;
@@ -4457,7 +6529,7 @@ window.onload = function() {
         if(!validateGenericCriteria()){ alert('Selecciona al menos un criterio.'); return; }
         showAppScreen('generic','results');
     });
-    document.getElementById('genericExamNameInput').addEventListener('input', e=>{ genericState.examName=e.target.value; updateGenericConfigWarning(); });
+    document.getElementById('genericExamNameInput').addEventListener('input', e=>{ genericState.examName=e.target.value; updateGenericConfigWarning(); updateActivityBadge(currentApp); });
     document.getElementById('genericCourseInput').addEventListener('input', e=>{ genericState.course=e.target.value; updateGenericConfigWarning(); });
     document.getElementById('genericBtnAddStudent').addEventListener('click', function() {
         const input=document.getElementById('genericStudentNameInput'), name=input.value.trim(); if(!name) return;
@@ -4531,7 +6603,7 @@ window.onload = function() {
         }
         showInstrumentosScreen('inst_eval');
     });
-    document.getElementById('inst_actividadInput').addEventListener('input', e=>{ instrumentState.actividad=e.target.value; inst_updateConfigButtonState(); });
+    document.getElementById('inst_actividadInput').addEventListener('input', e=>{ instrumentState.actividad=e.target.value; inst_updateConfigButtonState(); updateActivityBadge(currentApp); });
     document.getElementById('inst_claseInput').addEventListener('input', e=>{ instrumentState.clase=e.target.value; inst_updateConfigButtonState(); });
     document.getElementById('inst_numInstrumentos').addEventListener('change', function() {
         inst_setNumInstruments(parseInt(this.value, 10)||1);
@@ -4692,7 +6764,7 @@ window.onload = function() {
     });
 
     // Config inputs
-    document.getElementById('pond_nombreInput')?.addEventListener('input', function() { ponderacionState.nombre = this.value.trim(); });
+    document.getElementById('pond_nombreInput')?.addEventListener('input', function() { ponderacionState.nombre = this.value.trim(); updateActivityBadge(currentApp); });
     document.getElementById('pond_cursoInput')?.addEventListener('input', function() { ponderacionState.curso = this.value.trim(); });
     document.getElementById('pond_numActividadesInput')?.addEventListener('change', function() {
         let n = parseInt(this.value, 10);
@@ -4809,14 +6881,168 @@ window.onload = function() {
     updateExamConfigWarning();
     updateTestConfigWarning();
     updateGenericConfigWarning();
+
+    // === INIT PREDEFINED TASKS ===
+    loadPredefinedTasks();
+
+    // === INIT RÚBRICAS ===
+    if (!rubric_loadLocal(true)) {
+        rubric_updateHeader();
+        rubric_renderStudentTags();
+        rubric_renderAspects();
+        rubric_renderValues();
+        rubric_renderBulkBar();
+        rubric_renderCoevaluation();
+    }
+
+    // === LISTENERS: RÚBRICAS ===
+    document.getElementById('btnAppRubricas')?.addEventListener('click', () => showApp('appRubricasContainer'));
+    document.querySelector('#cardRubricas')?.addEventListener('click', () => showApp('appRubricasContainer'));
+    document.getElementById('rubricNavSetup')?.addEventListener('click', () => rubric_showScreen('Setup'));
+    document.getElementById('rubricNavEval')?.addEventListener('click', () => rubric_showScreen('Eval'));
+    document.getElementById('rubricNavResults')?.addEventListener('click', () => rubric_showScreen('Results'));
+    document.getElementById('rubricBtnGoEval')?.addEventListener('click', () => { rubric_syncStructures(); rubric_showScreen('Eval'); });
+    document.getElementById('rubricBtnBackSetup')?.addEventListener('click', () => rubric_showScreen('Setup'));
+    document.getElementById('rubricBtnBackEval')?.addEventListener('click', () => rubric_showScreen('Eval'));
+    document.getElementById('rubricBtnCalc')?.addEventListener('click', () => { rubric_calculate(); rubric_renderResults(); rubric_showScreen('Results'); });
+    document.getElementById('rubricEvalNameInput')?.addEventListener('input', e => { rubricState.evalName = e.target.value; rubric_updateHeader(); rubric_saveLocal(); });
+    document.getElementById('rubricGroupNameInput')?.addEventListener('input', e => { rubricState.groupName = e.target.value; rubric_updateHeader(); rubric_saveLocal(); });
+    document.getElementById('rubricStudentNameInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('rubricBtnAddStudent').click(); } });
+    document.getElementById('rubricBtnAddStudent')?.addEventListener('click', () => {
+        const inp = document.getElementById('rubricStudentNameInput');
+        const name = inp.value.trim();
+        if (!name) return;
+        if (rubricState.students.some(s => s.fullName.toLowerCase() === name.toLowerCase())) {
+            showDuplicateMessage('rubricDuplicateMessage', 'Ya existe un alumno con ese nombre.');
+            return;
+        }
+        rubricState.students.push({ fullName: name });
+        rubricState.students.sort((a,b) => a.fullName.localeCompare(b.fullName, 'es', {sensitivity:'base'}));
+        inp.value = '';
+        rubric_renderStudentTags();
+        rubric_renderTeacherTable();
+        rubric_renderCoevaluation();
+        rubric_updateHeader();
+        rubric_saveLocal();
+    });
+    document.getElementById('rubricImportFile')?.addEventListener('change', function() { if (this.files.length) importStudentsFromFile(this.files[0], rubricState, null, () => { rubric_renderStudentTags(); rubric_renderTeacherTable(); rubric_renderCoevaluation(); rubric_updateHeader(); rubric_saveLocal(); }); this.value=''; });
+    document.getElementById('rubricBtnClearStudents')?.addEventListener('click', () => {
+        if (!rubricState.students.length) return;
+        if (!confirm('¿Borrar toda la lista de alumnos?')) return;
+        rubricState.students = [];
+        rubric_renderStudentTags(); rubric_renderTeacherTable(); rubric_renderCoevaluation(); rubric_updateHeader(); rubric_saveLocal();
+    });
+    document.getElementById('rubricAspectNameInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('rubricBtnAddAspect').click(); } });
+    document.getElementById('rubricBtnAddAspect')?.addEventListener('click', () => {
+        const inp = document.getElementById('rubricAspectNameInput');
+        const name = inp.value.trim();
+        if (!name) return;
+        if (rubricState.aspects.includes(name)) { alert('Ese aspecto ya existe.'); return; }
+        rubricState.aspects.push(name);
+        inp.value = '';
+        rubric_renderAspects();
+        rubric_renderTeacherTable();
+        rubric_renderCoevaluation();
+        rubric_renderBulkBar();
+        rubric_saveLocal();
+    });
+    document.getElementById('rubricValueNameInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('rubricBtnAddValue').click(); } });
+    document.getElementById('rubricBtnAddValue')?.addEventListener('click', () => {
+        const inp = document.getElementById('rubricValueNameInput');
+        const name = inp.value.trim();
+        if (!name) return;
+        if (rubricState.values.includes(name)) { alert('Ese nivel ya existe.'); return; }
+        rubricState.values.push(name);
+        inp.value = '';
+        rubric_renderValues();
+        rubric_renderBulkBar();
+        rubric_renderTeacherTable();
+        rubric_renderCoevaluation();
+        rubric_saveLocal();
+    });
+    document.getElementById('rubricTeacherWeight')?.addEventListener('input', e => {
+        rubricState.teacherWeight = parseInt(e.target.value, 10);
+        rubric_updateWeightDisplay();
+        rubric_saveLocal();
+    });
+    document.getElementById('rubricExportConfigBtn')?.addEventListener('click', rubric_exportConfig);
+    document.getElementById('rubricImportConfigBtn')?.addEventListener('click', () => document.getElementById('rubricImportConfigFile').click());
+    document.getElementById('rubricImportConfigFile')?.addEventListener('change', function() { if (this.files.length) rubric_importConfig(this.files[0]); this.value=''; });
+    document.getElementById('rubricSaveToLocalBtn')?.addEventListener('click', rubric_saveLocal);
+    document.getElementById('rubricLoadFromLocalBtn')?.addEventListener('click', () => rubric_loadLocal(false));
+    document.getElementById('rubricResetAllBtn')?.addEventListener('click', rubric_reset);
+    document.getElementById('rubricExportDataBtn')?.addEventListener('click', () => rubric_openExportOptions('excel'));
+    document.getElementById('rubricImportDataBtn')?.addEventListener('click', () => document.getElementById('rubricImportDataFile').click());
+    document.getElementById('rubricImportDataFile')?.addEventListener('change', function() { if (this.files.length) rubric_importData(this.files[0]); this.value=''; });
+    document.getElementById('rubricClearDataBtn')?.addEventListener('click', rubric_clearData);
+    document.getElementById('rubricExportResultsBtn')?.addEventListener('click', () => rubric_openExportOptions('excel'));
+    document.getElementById('rubricExportPdfBtn')?.addEventListener('click', () => rubric_openExportOptions('pdf'));
+    document.getElementById('rubricExportJsonResultsBtn')?.addEventListener('click', () => rubric_openExportOptions('json'));
+    document.getElementById('rubricExpOptConfirm')?.addEventListener('click', rubric_confirmExport);
+    document.getElementById('rubricBulkAllAspects')?.addEventListener('click', () => {
+        const sel = document.getElementById('rubricBulkValue');
+        if (!sel || !sel.value) return;
+        rubricState.students.forEach(s => {
+            if (!rubricState.teacher[s.fullName]) rubricState.teacher[s.fullName] = {};
+            rubricState.aspects.forEach(a => { rubricState.teacher[s.fullName][a] = sel.value; });
+        });
+        rubric_renderTeacherTable();
+        rubric_saveLocal();
+    });
+
+    // === LISTENERS: PREDEFINED TASKS ===
+    document.getElementById('genericBtnPredefinedTasks')?.addEventListener('click', () => {
+        generic_renderPredefinedTasks();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('genericPredefinedTasksModal')).show();
+    });
+    document.getElementById('genericPredefinedSearch')?.addEventListener('input', e => generic_renderPredefinedTasks(e.target.value));
+    document.getElementById('genericPredefinedApplyBtn')?.addEventListener('click', generic_applyPredefinedTask);
+    document.getElementById('genericPredefNewBtn')?.addEventListener('click', () => generic_openEditModal(null));
+    document.getElementById('genericPredefRestoreAllBtn')?.addEventListener('click', generic_restoreAllPredefinedTasks);
+    document.getElementById('genericPredefExportBtn')?.addEventListener('click', generic_exportPredefinedTasks);
+    document.getElementById('genericPredefImportBtn')?.addEventListener('click', () => document.getElementById('genericPredefImportFile').click());
+    document.getElementById('genericPredefImportFile')?.addEventListener('change', function() { if (this.files.length) generic_importPredefinedTasks(this.files[0]); this.value=''; });
+    document.getElementById('genericPredefSelectAll')?.addEventListener('click', () => {
+        document.querySelectorAll('#genericPredefEditCriteriaGrid input[type=checkbox]').forEach(c => c.checked = true);
+        generic_updateEditSummary();
+    });
+    document.getElementById('genericPredefClearAll')?.addEventListener('click', () => {
+        document.querySelectorAll('#genericPredefEditCriteriaGrid input[type=checkbox]').forEach(c => c.checked = false);
+        generic_updateEditSummary();
+    });
+    document.getElementById('genericPredefEditSaveBtn')?.addEventListener('click', generic_saveEditedTask);
+
+    // Delegated listeners for predefined task cards
+    document.addEventListener('click', function(e) {
+        // Predefined task card action buttons
+        const predefBtn = e.target.closest('.predefined-task-action-btn');
+        if (predefBtn) {
+            e.preventDefault();
+            const card = predefBtn.closest('.predefined-task-card');
+            const name = card?.dataset.taskName;
+            if (!name) return;
+            if (predefBtn.classList.contains('edit-btn')) generic_openEditModal(name);
+            else if (predefBtn.classList.contains('delete-btn')) generic_deletePredefinedTask(name);
+            else if (predefBtn.classList.contains('restore-btn')) generic_restorePredefinedTask(name);
+            return;
+        }
+        // Predefined task card click (select)
+        const taskCard = e.target.closest('.predefined-task-card');
+        if (taskCard && !e.target.closest('.predefined-task-action-btn')) {
+            document.querySelectorAll('.predefined-task-card').forEach(c => c.classList.remove('selected'));
+            taskCard.classList.add('selected');
+            _predefSelectedTask = taskCard.dataset.taskName;
+            document.getElementById('genericPredefinedApplyBtn').disabled = false;
+        }
+    });
+
+    // Ponderación reset all
+    document.getElementById('pond_resetAllBtn')?.addEventListener('click', pond_resetAll);
+
     updateSubjectDisplay();
     showHome();
     setBodyColor('home');
 
-    // Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW:', err)));
-    }
 };
 
 </script>
